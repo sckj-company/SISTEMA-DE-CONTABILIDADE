@@ -7,12 +7,14 @@ import { parseAnaliseIA } from '../../utils/analiseIaParser';
 import ConsolidacaoAnualView from './ConsolidacaoAnualView';
 
 const SpinDots = () => (
-  <span className="atbd-spin-dots spin-lg">
-    <span className="spin-dot badge-dot dot-primary"></span>
-    <span className="spin-dot badge-dot dot-primary"></span>
-    <span className="spin-dot badge-dot dot-primary"></span>
-    <span className="spin-dot badge-dot dot-primary"></span>
-  </span>
+  <div className="spin-dots-wrapper">
+    <span className="atbd-spin-dots spin-lg">
+      <span className="spin-dot badge-dot dot-primary"></span>
+      <span className="spin-dot badge-dot dot-primary"></span>
+      <span className="spin-dot badge-dot dot-primary"></span>
+      <span className="spin-dot badge-dot dot-primary"></span>
+    </span>
+  </div>
 );
 
 const ConfrontoView = () => {
@@ -917,12 +919,15 @@ const ConfrontoView = () => {
           {executando && (
             <div className="row mb-25 no-print">
               <div className="col-12">
-                <div className="card card-default text-center py-50" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
+                <div
+                  className="card card-default text-center py-50 d-flex flex-column align-items-center justify-content-center"
+                  style={{ border: '1px solid #edf0f5', borderRadius: 12, minHeight: 220 }}
+                >
                   <SpinDots />
-                  <h5 className="fw-700 color-dark mt-20 mb-5">
+                  <h5 className="fw-700 color-dark mt-20 mb-8" style={{ fontSize: 17 }}>
                     {etapaTexto || 'A confrontar Balancete com o Portal da AGT...'}
                   </h5>
-                  <p className="text-muted mb-0" style={{ fontSize: 13.5 }}>
+                  <p className="text-muted mb-0" style={{ fontSize: 13.5, maxWidth: 650, margin: '0 auto', textAlign: 'center' }}>
                     O motor de inteligência artificial está a validar as contas do PGC, a cruzar com as 56 linhas do Modelo 7 e a apurar conformidades e divergências fiscais.
                   </p>
                 </div>
@@ -1246,10 +1251,10 @@ const ConfrontoView = () => {
                               <th style={{ width: '34%', fontWeight: 700, color: '#495057' }}>
                                 Ponto de Confronto / Rubrica Fiscal
                               </th>
-                              <th style={{ width: '22%', fontWeight: 700, color: '#495057' }}>
+                              <th style={{ width: '22%', fontWeight: 700, color: '#495057', textAlign: 'right' }}>
                                 Contabilidade (Balancete PGC)
                               </th>
-                              <th style={{ width: '22%', fontWeight: 700, color: '#495057' }}>
+                              <th style={{ width: '22%', fontWeight: 700, color: '#495057', textAlign: 'right' }}>
                                 Declaração AGT (Modelo 7)
                               </th>
                               <th style={{ width: '11%', fontWeight: 700, color: '#495057', textAlign: 'center' }}>
@@ -1268,10 +1273,10 @@ const ConfrontoView = () => {
                                   <td style={{ verticalAlign: 'middle', fontWeight: 600 }}>
                                     {item.campo}
                                   </td>
-                                  <td style={{ verticalAlign: 'middle', color: '#272b41', fontWeight: 600 }}>
+                                  <td style={{ verticalAlign: 'middle', color: '#272b41', fontWeight: 600, textAlign: 'right', whiteSpace: 'nowrap' }}>
                                     {item.contabilidade}
                                   </td>
-                                  <td style={{ verticalAlign: 'middle', color: '#272b41', fontWeight: 600 }}>
+                                  <td style={{ verticalAlign: 'middle', color: '#272b41', fontWeight: 600, textAlign: 'right', whiteSpace: 'nowrap' }}>
                                     {item.agt}
                                   </td>
                                   <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
@@ -1280,7 +1285,7 @@ const ConfrontoView = () => {
                                       {isOk ? 'IGUAIS' : 'DIFERENÇA'}
                                     </span>
                                   </td>
-                                  <td style={{ textAlign: 'right', verticalAlign: 'middle', fontWeight: 700, color: isOk ? '#00a854' : '#f5222d' }}>
+                                  <td style={{ textAlign: 'right', verticalAlign: 'middle', fontWeight: 700, color: isOk ? '#00a854' : '#f5222d', whiteSpace: 'nowrap' }}>
                                     {item.diferenca}
                                   </td>
                                 </tr>

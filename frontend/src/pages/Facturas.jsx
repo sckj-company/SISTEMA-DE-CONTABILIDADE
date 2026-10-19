@@ -191,7 +191,7 @@ const Facturas = () => {
   };
 
   return (
-    <div className="container-fluid py-25">
+    <div className="facturas-page py-10">
       {/* 1. TOPO: TÍTULO & IDENTIFICAÇÃO DA EMPRESA */}
       <div className="d-flex flex-wrap justify-content-between align-items-center mb-25 gap-15">
         <div>
@@ -547,10 +547,10 @@ const Facturas = () => {
                     <th className="py-12 px-15">Documento</th>
                     <th className="py-12 px-15">Data</th>
                     <th className="py-12 px-15">Fornecedor / Emitente</th>
-                    <th className="py-12 px-15 text-end">Base Incidência</th>
-                    <th className="py-12 px-15 text-end">IVA (Taxa)</th>
-                    <th className="py-12 px-15 text-end">Retenções</th>
-                    <th className="py-12 px-15 text-end">Total Líquido</th>
+                    <th className="py-12 px-15 text-right">Base Incidência</th>
+                    <th className="py-12 px-15 text-right">IVA (Taxa)</th>
+                    <th className="py-12 px-15 text-right">Retenções</th>
+                    <th className="py-12 px-15 text-right">Total Líquido</th>
                     <th className="py-12 px-15 text-center">Conformidade AGT</th>
                     <th className="py-12 px-15 text-center">Diário PGC</th>
                     <th className="py-12 px-15 text-center">Ações</th>
@@ -609,10 +609,10 @@ const Facturas = () => {
                         </td>
 
                         {/* Base Incidência */}
-                        <td className="px-15 py-12 text-end fw-600">{formatarKz(f.base_incidencia)}</td>
+                        <td className="px-15 py-12 text-right fw-600">{formatarKz(f.base_incidencia)}</td>
 
                         {/* IVA e Taxa */}
-                        <td className="px-15 py-12 text-end">
+                        <td className="px-15 py-12 text-right">
                           <div className="fw-600 text-primary">{formatarKz(f.valor_iva)}</div>
                           <small className="text-muted" style={{ fontSize: 10.5 }}>
                             Taxa: {Number(f.taxa_iva)}% {f.iva_dedutivel ? '(Dedutível)' : '(Não dedutível)'}
@@ -620,7 +620,7 @@ const Facturas = () => {
                         </td>
 
                         {/* Retenções */}
-                        <td className="px-15 py-12 text-end">
+                        <td className="px-15 py-12 text-right">
                           {Number(f.retencao_iva) > 0 || Number(f.retencao_ii) > 0 ? (
                             <div>
                               <span className="fw-600 text-warning">
@@ -637,7 +637,7 @@ const Facturas = () => {
                         </td>
 
                         {/* Total Líquido */}
-                        <td className="px-15 py-12 text-end">
+                        <td className="px-15 py-12 text-right">
                           <span className="fw-700 color-dark">{formatarKz(f.valor_liquido || f.valor_total)}</span>
                         </td>
 

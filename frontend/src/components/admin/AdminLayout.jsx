@@ -81,10 +81,14 @@ const AdminLayout = ({ children, abaAtiva, onMudarAba, estatisticas }) => {
         onClose={() => setConfirmarLogout(false)}
         onConfirm={handleLogout}
         title="Terminar Sessão de Administrador"
-        message="Tem a certeza de que deseja encerrar a sessão de administração global?"
-        confirmText="Sim, Terminar Sessão"
-        cancelText="Cancelar"
-      />
+        subtitle="Confirmação de encerramento de acesso global"
+        confirmLabel="Sim, Terminar Sessão"
+        confirmClass="btn-danger"
+      >
+        <p className="mb-0 text-muted" style={{ fontSize: 13.5 }}>
+          Tem a certeza de que deseja encerrar a sessão de administração global?
+        </p>
+      </ConfirmModal>
     </>
   );
 };

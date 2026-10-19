@@ -3,12 +3,14 @@ import { toast } from 'react-toastify';
 import { consolidacaoService } from '../../services/api';
 
 const SpinDots = () => (
-  <span className="atbd-spin-dots spin-lg">
-    <span className="spin-dot badge-dot dot-primary"></span>
-    <span className="spin-dot badge-dot dot-primary"></span>
-    <span className="spin-dot badge-dot dot-primary"></span>
-    <span className="spin-dot badge-dot dot-primary"></span>
-  </span>
+  <div className="spin-dots-wrapper">
+    <span className="atbd-spin-dots spin-lg">
+      <span className="spin-dot badge-dot dot-primary"></span>
+      <span className="spin-dot badge-dot dot-primary"></span>
+      <span className="spin-dot badge-dot dot-primary"></span>
+      <span className="spin-dot badge-dot dot-primary"></span>
+    </span>
+  </div>
 );
 
 const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {

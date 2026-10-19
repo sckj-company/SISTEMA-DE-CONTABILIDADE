@@ -1,21 +1,3 @@
-"""Leitura completa do Comprovativo de Entrega da Declaração Modelo 7 de IVA (AGT).
-
-O formulário oficial tem 15 quadros e 56 campos numerados. O extractor anterior
-(`pdf_service.extrair_dados_modelo7`) lia 5 campos e tinha três defeitos
-confirmados contra o documento real:
-
-1. `fora_prazo` procurava a string "FORA DO PRAZO" no texto — que é a *etiqueta
-   da checkbox*, impressa sempre. Toda a declaração era marcada como atrasada.
-2. O NIF é impresso em caixas separadas (`5 0 0 2 8 3 0 2 8 0`), pelo que o
-   padrão `\\b5\\d{9}\\b` nunca encontrava nada.
-3. `Nº Declaração`, `Data Recepção`, `Substituição` e `Repartição Fiscal` são
-   legíveis no texto e nunca eram lidos.
-
-Aqui a leitura é genérica: todo o par `<nº campo> <valor Kz>` do quadro 9 é
-capturado, o que cobre os 56 campos sem um regex por campo. As checkboxes são
-lidas pela presença do `X` imediatamente antes da etiqueta — e devolvem `None`
-(desconhecido) quando não é possível decidir, nunca um valor por omissão.
-"""
 import re
 import unicodedata
 from decimal import Decimal, InvalidOperation

@@ -92,25 +92,55 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
         <div className="navbar-right" ref={navRef}>
           <ul className="navbar-right__menu">
             {/* SELETOR RÁPIDO DE EMPRESA (WORKSPACE SWITCHER) */}
-            <li className="mr-15 position-relative">
+            <li className="nav-empresa mr-15 position-relative">
               <button
                 type="button"
-                className="btn btn-xs btn-outline-primary d-flex align-items-center"
+                className="btn-empresa-header btn btn-sm d-flex align-items-center"
                 onClick={() => setOpenMenu(openMenu === 'empresa' ? null : 'empresa')}
                 style={{
+                  background: empresaAtual ? '#f0f4ff' : '#f8f9fb',
+                  border: '1px solid ' + (empresaAtual ? '#c7d2fe' : '#e2e8f0'),
                   borderRadius: 20,
-                  fontSize: 12,
-                  padding: '4px 14px',
-                  fontWeight: 600,
-                  gap: 6,
+                  padding: '5px 14px',
+                  minHeight: 42,
+                  height: 'auto',
+                  gap: 10,
+                  cursor: 'pointer',
+                  flexShrink: 0,
                 }}
                 title={empresaAtual ? `${empresaAtual.nome} (NIF: ${empresaAtual.nif})` : 'Escolha uma empresa'}
               >
-                <i className="la la-building"></i>
-                <span className="fw-700 text-truncate" style={{ maxWidth: 200 }}>
-                  {empresaAtual ? empresaAtual.nome : (empresas.length > 0 ? `${empresas.length} Empresas` : 'Sem Empresa')}
+                <span
+                  className="empresa-avatar-icon"
+                  style={{
+                    width: 26,
+                    height: 26,
+                    minWidth: 26,
+                    minHeight: 26,
+                    borderRadius: '50%',
+                    background: empresaAtual ? '#4338ca' : '#94a3b8',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 12,
+                    flexShrink: 0,
+                  }}
+                >
+                  <i className="la la-building"></i>
                 </span>
-                <i className="la la-angle-down" style={{ fontSize: 10 }}></i>
+                <div className="d-flex flex-column text-left" style={{ lineHeight: 1.25 }}>
+                  <span
+                    className="fw-700 text-truncate"
+                    style={{ fontSize: 12, maxWidth: 280, color: empresaAtual ? '#1e1b4b' : '#64748b', display: 'block' }}
+                  >
+                    {empresaAtual ? empresaAtual.nome : (empresas.length > 0 ? `${empresas.length} Empresas` : 'Sem Empresa')}
+                  </span>
+                  <span className="text-muted" style={{ fontSize: 10.5, display: 'block' }}>
+                    {empresaAtual ? `NIF: ${empresaAtual.nif}` : 'Clique para selecionar'}
+                  </span>
+                </div>
+                <i className="la la-angle-down text-muted ml-4" style={{ fontSize: 11, flexShrink: 0 }}></i>
               </button>
 
               {openMenu === 'empresa' && (

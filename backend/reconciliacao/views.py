@@ -1102,7 +1102,7 @@ def historico_analises_view(request):
     ).filter(
         Q(documento_contabilidade__in=docs_usuario)
         | Q(documento_agt__in=docs_usuario)
-    )
+    ).order_by('-created_at')
     dados = []
     for a in analises:
         dados.append({
@@ -1116,31 +1116,47 @@ def historico_analises_view(request):
                 'nome_arquivo': a.documento_agt.nome_arquivo if a.documento_agt else None,
             },
             'status': a.status,
-            'resultado': a.resultado[:500] + '...' if a.resultado and len(a.resultado) > 500 else a.resultado,
+            'resultado': a.resultado or '',
+            'resumo': a.resultado[:300] + '...' if a.resultado and len(a.resultado) > 300 else (a.resultado or ''),
             'created_at': a.created_at,
         })
     return Response(dados)
 
 
-@api_view(['DELETE'])
-def deletar_analise_view(request, analise_id):
-    if not verificar_permissao(request.user, 'delete_analiseia'):
-        return Response(
-            {'error': 'Sem permissão para eliminar análises.'},
-            status=status.HTTP_403_FORBIDDEN
-        )
-    try:
-        docs_usuario = documentos_acessiveis(request.user)
-        analise = AnaliseIA.objects.filter(pk=analise_id).filter(
-            Q(documento_contabilidade__in=docs_usuario)
-            | Q(documento_agt__in=docs_usuario)
-        ).first()
-        if analise is None:
-            return Response({'error': 'Análise não encontrada'}, status=404)
-        analise.delete()
-        return Response({'success': True})
-    except Exception:
+@api_view(['GET', 'DELETE'])
+def detalhe_analise_view(request, analise_id):
+    docs_usuario = documentos_acessiveis(request.user)
+    analise = AnaliseIA.objects.filter(pk=analise_id).filter(
+        Q(documento_contabilidade__in=docs_usuario)
+        | Q(documento_agt__in=docs_usuario)
+    ).first()
+    if analise is None:
         return Response({'error': 'Análise não encontrada'}, status=404)
+
+    if request.method == 'GET':
+        return Response({
+            'id': analise.id,
+            'status': analise.status,
+            'resultado': analise.resultado or '',
+            'created_at': analise.created_at,
+            'documento_contabilidade': {
+                'id': analise.documento_contabilidade.id if analise.documento_contabilidade else None,
+                'nome_arquivo': analise.documento_contabilidade.nome_arquivo if analise.documento_contabilidade else None,
+            },
+            'documento_agt': {
+                'id': analise.documento_agt.id if analise.documento_agt else None,
+                'nome_arquivo': analise.documento_agt.nome_arquivo if analise.documento_agt else None,
+            },
+        })
+
+    elif request.method == 'DELETE':
+        if not verificar_permissao(request.user, 'delete_analiseia'):
+            return Response(
+                {'error': 'Sem permissão para eliminar análises.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        analise.delete()
+        return Response({'success': True, 'message': 'Análise eliminada com sucesso.'})
 
 
 @api_view(['GET'])

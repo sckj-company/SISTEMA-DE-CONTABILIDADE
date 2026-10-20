@@ -970,14 +970,55 @@ class Factura(models.Model):
     ano = models.IntegerField(null=True, blank=True)
     mes = models.IntegerField(null=True, blank=True)
 
-    # Dados do Terceiro / Fornecedor
+    # Dados do Terceiro / Fornecedor Detalhados
     fornecedor_nome = models.CharField(max_length=200, blank=True, default='')
     fornecedor_nif = models.CharField(max_length=30, blank=True, default='')
     fornecedor_endereco = models.CharField(max_length=255, blank=True, default='')
+    fornecedor_telefone = models.CharField(max_length=100, blank=True, default='')
+    fornecedor_email = models.CharField(max_length=150, blank=True, default='')
+    fornecedor_website = models.CharField(max_length=150, blank=True, default='')
 
-    # Dados do Adquirente / Cliente
+    # Dados do Adquirente / Cliente Detalhados
     cliente_nome = models.CharField(max_length=200, blank=True, default='')
     cliente_nif = models.CharField(max_length=30, blank=True, default='')
+    cliente_endereco = models.CharField(max_length=255, blank=True, default='')
+    cliente_telefone = models.CharField(max_length=100, blank=True, default='')
+    cliente_email = models.CharField(max_length=150, blank=True, default='')
+
+    # Condições Comerciais e Pagamento
+    moeda = models.CharField(max_length=10, default='AOA', blank=True)
+    total_iliquido = models.DecimalField(
+        max_digits=18, decimal_places=2, default=Decimal('0.00'),
+        help_text='Total ilíquido da fatura antes de descontos.'
+    )
+    total_desconto = models.DecimalField(
+        max_digits=18, decimal_places=2, default=Decimal('0.00'),
+        help_text='Total de descontos comerciais concedidos.'
+    )
+    total_extenso = models.CharField(
+        max_length=255, blank=True, default='',
+        help_text='Valor total por extenso constante da fatura.'
+    )
+    forma_pagamento = models.CharField(
+        max_length=100, blank=True, default='',
+        help_text='Forma de pagamento (Numerário, Transferência, TPA, etc.).'
+    )
+    condicoes_pagamento = models.CharField(
+        max_length=150, blank=True, default='',
+        help_text='Condições de pagamento (Pronto Pagamento, 30 dias, etc.).'
+    )
+    dados_bancarios = models.JSONField(
+        default=list, blank=True,
+        help_text='Coordenadas bancárias e IBANs constantes da fatura.'
+    )
+    resumo_impostos = models.JSONField(
+        default=list, blank=True,
+        help_text='Quadro resumo de taxas e incidência de imposto.'
+    )
+    regime_emissor = models.CharField(
+        max_length=100, blank=True, default='',
+        help_text='Regime fiscal do emitente (Geral, Simplificado, etc.).'
+    )
 
     # Valores Financeiros e Fiscais (Kz)
     base_incidencia = models.DecimalField(
@@ -1040,6 +1081,11 @@ class Factura(models.Model):
         default=list,
         blank=True,
         help_text='Lista de alertas detetados pela IA e validações fiscais.'
+    )
+    metadados = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Todos os dados adicionais brutos extraídos pela IA.'
     )
 
     # Classificação Contabilística Sugerida (PGC Angola)

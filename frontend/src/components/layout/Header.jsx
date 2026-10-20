@@ -260,7 +260,9 @@ const Header = ({ onToggleSidebar }) => {
                     </div>
                     <div>
                       <h6>{user.username || user.nome || 'Utilizador'}</h6>
-                      <span>{user.perfil || user.role || 'Sistema IVA'}</span>
+                      <span className="badge badge-light px-6 py-2" style={{ fontSize: 11, fontWeight: 600, color: '#4338ca' }}>
+                        {user.papel || user.perfil || (isAdmin ? 'Administrador' : 'Contabilista')}
+                      </span>
                     </div>
                   </div>
                   <div className="nav-author__options">
@@ -280,40 +282,56 @@ const Header = ({ onToggleSidebar }) => {
                           </a>
                         </li>
                       )}
-                      <li>
-                        <a
-                          href="#perfil"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            navigate('/definicoes');
-                          }}
-                        >
-                          <i className="la la-user"></i> {t('navigation.profile', 'O Meu Perfil')}
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          href="#documentos"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            navigate('/arquivo');
-                          }}
-                        >
-                          <i className="la la-folder-open"></i>{' '}
-                          {t('navigation.documents', 'Arquivo de Documentos')}
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          href="#configuracoes"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            navigate('/definicoes');
-                          }}
-                        >
-                          <i className="la la-cog"></i> {t('navigation.settings', 'Configurações')}
-                        </a>
-                      </li>
+                      {(user.is_operador_facturas || user.papel === 'Operador de Facturação') ? (
+                        <li>
+                          <a
+                            href="#facturas"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              navigate('/facturas');
+                            }}
+                          >
+                            <i className="la la-file-invoice-dollar text-primary"></i> Portal do Scanner (Facturas)
+                          </a>
+                        </li>
+                      ) : (
+                        <>
+                          <li>
+                            <a
+                              href="#perfil"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                navigate('/definicoes');
+                              }}
+                            >
+                              <i className="la la-user"></i> {t('navigation.profile', 'O Meu Perfil')}
+                            </a>
+                          </li>
+                          <li>
+                            <a
+                              href="#documentos"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                navigate('/arquivo');
+                              }}
+                            >
+                              <i className="la la-folder-open"></i>{' '}
+                              {t('navigation.documents', 'Arquivo de Documentos')}
+                            </a>
+                          </li>
+                          <li>
+                            <a
+                              href="#configuracoes"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                navigate('/definicoes');
+                              }}
+                            >
+                              <i className="la la-cog"></i> {t('navigation.settings', 'Configurações')}
+                            </a>
+                          </li>
+                        </>
+                      )}
                     </ul>
                     <a
                       href="#logout"

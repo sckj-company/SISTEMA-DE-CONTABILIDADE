@@ -508,5 +508,22 @@ body.overlayScroll {
   padding-bottom: 30px !important;
 }
 
+/* ==========================================================================
+   Utilitários de Flexbox Gap (Garante espaçamento consistente em botões e blocos)
+   ========================================================================== */
+.gap-2 { gap: 2px !important; }
+.gap-4 { gap: 4px !important; }
+.gap-6 { gap: 6px !important; }
+.gap-8 { gap: 8px !important; }
+.gap-10 { gap: 10px !important; }
+.gap-12 { gap: 12px !important; }
+.gap-14 { gap: 14px !important; }
+.gap-15 { gap: 15px !important; }
+.gap-16 { gap: 16px !important; }
+.gap-18 { gap: 18px !important; }
+.gap-20 { gap: 20px !important; }
+.gap-25 { gap: 25px !important; }
+
+
 
 

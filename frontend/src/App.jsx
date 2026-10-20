@@ -53,9 +53,35 @@ function AdminRoute({ children }) {
   return <Navigate to="/arquivo" replace />;
 }
 
+function ContabilidadeRoute({ children }) {
+  const userStr = localStorage.getItem('user');
+  if (!userStr) {
+    return <Navigate to="/login" replace />;
+  }
+  try {
+    const user = JSON.parse(userStr);
+    if (user.is_operador_facturas || user.papel === 'Operador de Facturação') {
+      toast.info('Área restrita à Contabilidade. Foi redirecionado para o seu Portal de Digitalização de Facturas.', {
+        toastId: 'operador-redirect',
+      });
+      return <Navigate to="/facturas" replace />;
+    }
+  } catch {
+    // fallback
+  }
+  return children;
+}
+
 function RootRoute() {
   const userStr = localStorage.getItem('user');
   if (!userStr) return <Navigate to="/login" replace />;
+  try {
+    const user = JSON.parse(userStr);
+    if (user.is_admin || user.is_superuser || user.is_staff) return <Navigate to="/admin-gestao" replace />;
+    if (user.is_operador_facturas || user.papel === 'Operador de Facturação') return <Navigate to="/facturas" replace />;
+  } catch {
+    // fallback
+  }
   return <Navigate to="/confronto" replace />;
 }
 
@@ -101,13 +127,16 @@ function App() {
             />
             <Route path="/admin" element={<Navigate to="/admin-gestao" replace />} />
 
-            {/* Gestão Contabilística & Fiscal */}
-            <Route path="/arquivo" element={<Pagina><Documentos /></Pagina>} />
-            <Route path="/confronto" element={<Pagina><Confronto /></Pagina>} />
+            {/* Portal de Facturas & Scanner (Acessível a Operadores de Facturação e Contabilistas) */}
             <Route path="/facturas" element={<Pagina><Facturas /></Pagina>} />
-            <Route path="/pgc" element={<Pagina><Pgc /></Pagina>} />
-            <Route path="/legislacao" element={<Pagina><Legislacao /></Pagina>} />
-            <Route path="/definicoes" element={<Pagina><Definicoes /></Pagina>} />
+            <Route path="/scanner-facturas" element={<Navigate to="/facturas" replace />} />
+
+            {/* Gestão Contabilística & Fiscal (Exclusivo para Contabilistas e Administradores) */}
+            <Route path="/confronto" element={<ContabilidadeRoute><Pagina><Confronto /></Pagina></ContabilidadeRoute>} />
+            <Route path="/arquivo" element={<ContabilidadeRoute><Pagina><Documentos /></Pagina></ContabilidadeRoute>} />
+            <Route path="/pgc" element={<ContabilidadeRoute><Pagina><Pgc /></Pagina></ContabilidadeRoute>} />
+            <Route path="/legislacao" element={<ContabilidadeRoute><Pagina><Legislacao /></Pagina></ContabilidadeRoute>} />
+            <Route path="/definicoes" element={<ContabilidadeRoute><Pagina><Definicoes /></Pagina></ContabilidadeRoute>} />
 
             {/* Redirecionamentos de rotas e aliases */}
             <Route path="/faturas" element={<Navigate to="/facturas" replace />} />

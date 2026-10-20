@@ -1313,6 +1313,7 @@ const AdminGestao = () => {
                     <option value="Auditor">{t('admin.users.roleAuditor', 'Auditor')}</option>
                     <option value="Contabilista">{t('admin.users.roleAccountant', 'Contabilista')}</option>
                     <option value="Fiscalista">{t('admin.users.roleTaxSpecialist', 'Fiscalista')}</option>
+                    <option value="Operador de Facturação">Operador de Facturação / Digitalizador</option>
                     <option value="Consulta">{t('admin.users.roleReadOnly', 'Consulta')}</option>
                   </select>
                 </div>
@@ -1382,6 +1383,12 @@ const AdminGestao = () => {
                                     ? '#5f63f2'
                                     : papelExibido === 'Administrador'
                                     ? '#3b82f6'
+                                    : papelExibido === 'Operador de Facturação'
+                                    ? '#0d9488'
+                                    : papelExibido === 'Fiscalista'
+                                    ? '#8b5cf6'
+                                    : papelExibido === 'Contabilista'
+                                    ? '#4f46e5'
                                     : '#64748b',
                                   color: '#fff',
                                   fontSize: 10,
@@ -2995,6 +3002,7 @@ const AdminGestao = () => {
                       <option value="Auditor">{t('admin.users.roleAuditor', 'Auditor')}</option>
                       <option value="Fiscalista">{t('admin.users.roleTaxSpecialist', 'Fiscalista')}</option>
                       <option value="Contabilista">{t('admin.users.roleAccountant', 'Contabilista')}</option>
+                      <option value="Operador de Facturação">Operador de Facturação / Digitalizador (Portal de Scanner & Upload)</option>
                       <option value="Consulta">{t('admin.users.roleReadOnly', 'Consulta')}</option>
                     </select>
                   </div>

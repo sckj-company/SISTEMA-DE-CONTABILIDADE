@@ -224,10 +224,31 @@ class FacturaSerializer(serializers.ModelSerializer):
     empresa_nome = serializers.ReadOnlyField(source='empresa.nome')
     empresa_nif = serializers.ReadOnlyField(source='empresa.nif')
     documento_nome = serializers.ReadOnlyField(source='documento.nome_arquivo')
+    documento_url = serializers.SerializerMethodField()
+    is_imagem = serializers.SerializerMethodField()
     lancamento_numero = serializers.ReadOnlyField(source='lancamento.numero_diario')
+    criado_por_nome = serializers.ReadOnlyField(source='criado_por.username')
 
     class Meta:
         model = Factura
         fields = '__all__'
+
+    def get_documento_url(self, obj):
+        if obj.documento and obj.documento.arquivo:
+            try:
+                request = self.context.get('request')
+                url = obj.documento.arquivo.url
+                if request:
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return None
+        return None
+
+    def get_is_imagem(self, obj):
+        if obj.documento and obj.documento.nome_arquivo:
+            ext = obj.documento.nome_arquivo.lower()
+            return any(ext.endswith(img_ext) for img_ext in ['.png', '.jpg', '.jpeg', '.webp', '.bmp', '.heic'])
+        return False
 
 

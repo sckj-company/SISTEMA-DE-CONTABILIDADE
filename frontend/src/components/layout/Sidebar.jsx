@@ -15,6 +15,22 @@ const Sidebar = ({ collapsed, onNavigate }) => {
     navigate('/login');
   };
 
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : {};
+  const isOperador = Boolean(user.is_operador_facturas || user.papel === 'Operador de Facturação');
+
+  const itensMenu = isOperador
+    ? [
+        {
+          path: '/facturas',
+          icon: 'la la-file-invoice-dollar',
+          textKey: 'navigation.facturas',
+          fallbackText: 'Portal do Scanner (Facturas)',
+          text: 'Portal do Scanner (Facturas)',
+        },
+      ]
+    : mainMenuItems;
+
   return (
     <>
       <aside className="sidebar-wrapper">
@@ -22,9 +38,9 @@ const Sidebar = ({ collapsed, onNavigate }) => {
           <div className="sidebar__menu-group" style={{ padding: '16px 12px' }}>
             <ul className="sidebar_nav">
               <li className="menu-title" style={{ padding: '6px 12px', fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#8c98a4' }}>
-                <span>{t('sidebar.mainSection', 'Menu Principal')}</span>
+                <span>{isOperador ? 'Entrada de Facturas' : t('sidebar.mainSection', 'Menu Principal')}</span>
               </li>
-              {mainMenuItems.map((item) => (
+              {itensMenu.map((item) => (
                 <li key={item.path} style={{ marginBottom: 4 }}>
                   <NavLink
                     to={item.path}

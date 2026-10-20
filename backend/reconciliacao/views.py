@@ -129,9 +129,13 @@ def _inteiro_opcional(valor):
 def login_view(request):
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
-        username = serializer.validated_data['username']
+        username = serializer.validated_data['username'].strip()
         password = serializer.validated_data['password']
         user = authenticate(username=username, password=password)
+        if user is None and '@' in username:
+            user_by_email = User.objects.filter(email__iexact=username).first()
+            if user_by_email:
+                user = authenticate(username=user_by_email.username, password=password)
         if user is not None and user.is_active:
             token, _ = Token.objects.get_or_create(user=user)
             grupos = list(user.groups.values_list('name', flat=True))
@@ -141,6 +145,28 @@ def login_view(request):
                 or any(g in ['Super Admin', 'Administrador', 'Auditor Chefe'] for g in grupos)
             )
             empresas_ids = list(empresas_acessiveis(user).values_list('id', flat=True))
+
+            # Perfis nas empresas vinculadas
+            perfis_vinculos = list(user.acessos_empresas.filter(ativo=True).values_list('perfil_acesso', flat=True))
+            is_operador_facturas = bool(
+                any(g in ['Operador de Facturação', 'Operador de Faturação', 'Digitalizador'] for g in grupos)
+                or ('OPERADOR_FACTURAS' in perfis_vinculos and not is_admin)
+            )
+
+            # Papel descritivo do utilizador
+            if user.is_superuser or 'Super Admin' in grupos:
+                papel = 'Super Admin'
+            elif is_admin:
+                papel = 'Administrador'
+            elif is_operador_facturas:
+                papel = 'Operador de Facturação'
+            elif any(g in ['Contabilista', 'Auditor'] for g in grupos):
+                papel = 'Contabilista'
+            elif 'Fiscalista' in grupos:
+                papel = 'Fiscalista'
+            else:
+                papel = 'Contabilista'
+
             return Response({
                 'success': True,
                 'user': {
@@ -153,6 +179,8 @@ def login_view(request):
                     'is_superuser': user.is_superuser,
                     'is_staff': user.is_staff,
                     'is_admin': is_admin,
+                    'is_operador_facturas': is_operador_facturas,
+                    'papel': papel,
                     'grupos': grupos,
                     'empresas_acesso': empresas_ids,
                 }
@@ -1570,13 +1598,25 @@ def admin_utilizadores_view(request):
             novo_user.is_staff = True
             novo_user.save()
 
+        perfil_emp = 'CONTABILISTA'
+        if papel in ['Super Admin', 'Administrador']:
+            perfil_emp = 'ADMIN'
+        elif papel in ['Operador de Facturação', 'Operador de Faturação', 'Digitalizador']:
+            perfil_emp = 'OPERADOR_FACTURAS'
+        elif papel == 'Fiscalista':
+            perfil_emp = 'FISCALISTA'
+        elif papel == 'Auditor':
+            perfil_emp = 'AUDITOR'
+        elif papel == 'Consulta':
+            perfil_emp = 'CONSULTA'
+
         for emp_id in empresas_ids:
             emp = Empresa.objects.filter(pk=emp_id).first()
             if emp:
                 EmpresaUtilizador.objects.create(
                     empresa=emp,
                     utilizador=novo_user,
-                    perfil_acesso='ADMIN' if papel in ['Super Admin', 'Administrador'] else 'CONTABILISTA',
+                    perfil_acesso=perfil_emp,
                     ativo=True
                 )
 
@@ -1644,14 +1684,26 @@ def admin_utilizador_detalhe_view(request, user_id):
         novas_empresas_ids = [int(i) for i in data.get('empresas_ids', []) if str(i).isdigit()]
         # Remove vínculos antigos
         EmpresaUtilizador.objects.filter(utilizador=alvo).exclude(empresa_id__in=novas_empresas_ids).delete()
+        perfil_emp = 'CONTABILISTA'
+        if papel in ['Super Admin', 'Administrador']:
+            perfil_emp = 'ADMIN'
+        elif papel in ['Operador de Facturação', 'Operador de Faturação', 'Digitalizador']:
+            perfil_emp = 'OPERADOR_FACTURAS'
+        elif papel == 'Fiscalista':
+            perfil_emp = 'FISCALISTA'
+        elif papel == 'Auditor':
+            perfil_emp = 'AUDITOR'
+        elif papel == 'Consulta':
+            perfil_emp = 'CONSULTA'
+
         for emp_id in novas_empresas_ids:
             emp = Empresa.objects.filter(pk=emp_id).first()
             if emp:
-                EmpresaUtilizador.objects.get_or_create(
+                EmpresaUtilizador.objects.update_or_create(
                     empresa=emp,
                     utilizador=alvo,
                     defaults={
-                        'perfil_acesso': 'ADMIN' if papel in ['Super Admin', 'Administrador'] else 'CONTABILISTA',
+                        'perfil_acesso': perfil_emp,
                         'ativo': True
                     }
                 )
@@ -3040,11 +3092,13 @@ def scan_factura_view(request):
             estado='PROCESSADO'
         )
 
+        user_atual = request.user if getattr(request, 'user', None) and request.user.is_authenticated else None
         factura = factura_ai_service.processar_factura_ficheiro(
             arquivo_path=tmp_path,
             nome_arquivo=arquivo.name,
             empresa_id=empresa_obj.id if empresa_obj else None,
-            doc_upload_id=doc_upload.id
+            doc_upload_id=doc_upload.id,
+            user=user_atual
         )
 
         # Se o DocumentoUpload não tinha empresa ou período, atualiza agora
@@ -3054,7 +3108,7 @@ def scan_factura_view(request):
         doc_upload.mes = factura.mes
         doc_upload.save(update_fields=['empresa', 'ano', 'mes'])
 
-        serializer = FacturaSerializer(factura)
+        serializer = FacturaSerializer(factura, context={'request': request})
         return Response({
             'success': True,
             'mensagem': f"Fatura {factura.numero_factura} processada e auditada com sucesso com IA.",
@@ -3149,7 +3203,7 @@ def listar_facturas_view(request):
         if f.lancado_na_contabilidade:
             lancadas += 1
 
-    serializer = FacturaSerializer(facturas_list, many=True)
+    serializer = FacturaSerializer(facturas_list, many=True, context={'request': request})
     return Response({
         'facturas': serializer.data,
         'estatisticas': {
@@ -3176,9 +3230,17 @@ def lancar_factura_contabilidade_view(request, factura_id):
     Converte uma fatura auditada num lançamento oficial em partidas dobradas
     no Diário de Compras do PGC de Angola com 1 clique.
     """
+    user = request.user if getattr(request, 'user', None) and request.user.is_authenticated else None
+    if user and not (user.is_staff or user.is_superuser):
+        grupos = list(user.groups.values_list('name', flat=True))
+        perfis = list(user.acessos_empresas.filter(ativo=True).values_list('perfil_acesso', flat=True))
+        if any(g in ['Operador de Facturação', 'Operador de Faturação', 'Digitalizador'] for g in grupos) or 'OPERADOR_FACTURAS' in perfis:
+            return Response({
+                'error': 'Acesso Reservado: O perfil de Operador de Facturação / Digitalizador tem permissão apenas para digitalizar e enviar facturas. A escrituração no Livro Diário do PGC é da responsabilidade exclusiva da Contabilidade.'
+            }, status=status.HTTP_403_FORBIDDEN)
+
     try:
         factura = Factura.objects.get(pk=factura_id)
-        user = request.user if getattr(request, 'user', None) and request.user.is_authenticated else None
         lancamento, criado, mensagem = factura_ai_service.criar_lancamento_contabilistico_da_factura(factura, user=user)
 
         serializer = FacturaSerializer(factura)

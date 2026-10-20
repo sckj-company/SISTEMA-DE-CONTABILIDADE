@@ -46,8 +46,10 @@ const LoginPage = ({ onLogin }) => {
         onLogin();
         if (userData?.is_admin || userData?.is_superuser || userData?.is_staff) {
           navigate('/admin-gestao');
+        } else if (userData?.is_operador_facturas || userData?.papel === 'Operador de Facturação') {
+          navigate('/facturas');
         } else {
-          navigate('/auditoria');
+          navigate('/confronto');
         }
       }
     } catch (err) {

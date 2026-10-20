@@ -161,6 +161,7 @@ class EmpresaUtilizador(models.Model):
         ('AUDITOR', 'Auditor'),
         ('CONTABILISTA', 'Contabilista'),
         ('FISCALISTA', 'Fiscalista'),
+        ('OPERADOR_FACTURAS', 'Operador de Facturação / Digitalizador'),
         ('ANALISTA', 'Analista'),
         ('CONSULTA', 'Consulta'),
     ]
@@ -1129,6 +1130,14 @@ class Factura(models.Model):
         default=list,
         blank=True,
         help_text='Linhas de produtos e serviços extraídas da fatura.'
+    )
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='facturas_digitalizadas',
+        help_text='Utilizador/Operador que digitalizou e subiu a fatura no sistema.'
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

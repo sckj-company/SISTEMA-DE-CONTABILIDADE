@@ -449,7 +449,7 @@ const ConfrontoView = () => {
       </style>
 
       {/* CABEÇALHO DA PÁGINA COM NAVEGAÇÃO LIMPA */}
-      <div className="row mb-20 no-print">
+      <div className="row mb-20 no-print pt-10">
         <div className="col-12">
           <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
             <div>

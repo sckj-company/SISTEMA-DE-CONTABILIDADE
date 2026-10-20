@@ -496,4 +496,17 @@ body.overlayScroll {
   margin: 0 auto !important;
 }
 
+/* ==========================================================================
+   Espaçamento Superior Confortável entre Header Fixo e Conteúdo das Páginas
+   ========================================================================== */
+.contents {
+  padding-top: 100px !important;
+}
+
+.contents > .container-fluid {
+  padding-top: 15px !important;
+  padding-bottom: 30px !important;
+}
+
+
 

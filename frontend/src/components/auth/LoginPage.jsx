@@ -67,16 +67,18 @@ const LoginPage = ({ onLogin }) => {
     <main className="main-content">
       <div className="login-lang-switch">
         {[
-          { code: 'pt', label: 'PT' },
-          { code: 'en', label: 'EN' },
-          { code: 'zh', label: 'ZH' },
+          { code: 'pt', label: 'PT', flag: '🇦🇴' },
+          { code: 'en', label: 'EN', flag: '🇬🇧' },
+          { code: 'zh', label: '中文', flag: '🇨🇳' },
         ].map((lang) => (
           <button
             key={lang.code}
             type="button"
             className={i18n.language?.substring(0, 2) === lang.code ? 'active' : ''}
             onClick={() => i18n.changeLanguage(lang.code)}
+            title={lang.code === 'zh' ? '中文 (Chinês Simplificado)' : lang.code === 'en' ? 'English' : 'Português'}
           >
+            <span style={{ marginRight: 4 }}>{lang.flag}</span>
             {lang.label}
           </button>
         ))}

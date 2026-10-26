@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 const LANGUAGES = [
-  { code: 'pt', label: 'PT' },
-  { code: 'en', label: 'EN' },
-  { code: 'zh', label: 'ZH' },
+  { code: 'pt', label: 'PT', flag: '🇦🇴' },
+  { code: 'en', label: 'EN', flag: '🇬🇧' },
+  { code: 'zh', label: '中文', flag: '🇨🇳' },
 ];
 
 const LandingPage = () => {
@@ -60,7 +60,9 @@ const LandingPage = () => {
                       }`}
                       style={{ fontSize: 11, padding: '5px 9px', minWidth: 32 }}
                       onClick={() => i18n.changeLanguage(lang.code)}
+                      title={lang.code === 'zh' ? '中文 (Chinês Simplificado)' : lang.code === 'en' ? 'English' : 'Português'}
                     >
+                      <span style={{ marginRight: 3 }}>{lang.flag}</span>
                       {lang.label}
                     </button>
                   ))}

@@ -6,7 +6,7 @@ import { usePeriodo } from '../../context/PeriodoContext';
 const languages = [
   { code: 'pt', label: 'Português', flag: '/angola_flag.png' },
   { code: 'en', label: 'English', flag: '/template/img/eng.png' },
-  { code: 'zh', label: '中文', flag: '/template/img/flag.png' },
+  { code: 'zh', label: '中文 (Chinês)', flag: '/china_flag.png' },
 ];
 
 const AdminHeader = ({ onToggleSidebar, estatisticas }) => {

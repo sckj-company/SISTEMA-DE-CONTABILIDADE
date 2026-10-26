@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 900 600" width="900" height="600">
+  <path fill="#de2910" d="M0 0h900v600H0z"/>
+  <g fill="#ffde00">
+    <path id="s" d="M0-100l22.45 69.1H95.1L36.33 11.8l22.45 69.1L0 38.2l-58.78 42.7 22.45-69.1L-95.1-30.9h72.65z"/>
+    <use xlink:href="#s" transform="translate(150,150) scale(.9)"/>
+    <use xlink:href="#s" transform="translate(300,60) rotate(-120.96) scale(.3)"/>
+    <use xlink:href="#s" transform="translate(360,120) rotate(-98.13) scale(.3)"/>
+    <use xlink:href="#s" transform="translate(360,210) rotate(-74.05) scale(.3)"/>
+    <use xlink:href="#s" transform="translate(300,270) rotate(-51.34) scale(.3)"/>
+  </g>
+</svg>

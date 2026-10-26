@@ -105,7 +105,7 @@ def empresas_acessiveis(user):
 def verificar_permissao(user, codename):
     if not user or not user.is_authenticated:
         return False
-    if user.is_superuser:
+    if user.is_superuser or user.is_staff or user.groups.filter(name__in=['Super Admin', 'Administrador']).exists():
         return True
     return user.has_perm(f'reconciliacao.{codename}')
 
@@ -1011,6 +1011,40 @@ def analisar_documentos_view(request):
 
 
 @api_view(['POST'])
+def traduzir_analise_view(request):
+    """Traduz o texto de um resultado de analise, relatorio de confronto ou parecer tecnico com IA."""
+    texto = request.data.get('texto')
+    idioma_destino = request.data.get('idioma_destino') or request.data.get('idioma') or 'pt'
+    analise_id = request.data.get('analise_id')
+
+    if not texto and analise_id:
+        try:
+            analise = AnaliseIA.objects.get(pk=analise_id)
+            texto = analise.resultado
+        except AnaliseIA.DoesNotExist:
+            return Response({'error': 'Analise nao encontrada'}, status=status.HTTP_404_NOT_FOUND)
+
+    if not texto or not str(texto).strip():
+        return Response({'error': 'Texto a traduzir e obrigatorio'}, status=status.HTTP_400_BAD_REQUEST)
+
+    resultado = pdf_service.traduzir_texto_analise(texto, idioma_destino)
+
+    if resultado.get('success'):
+        return Response({
+            'success': True,
+            'resultado': resultado['resultado'],
+            'idioma': resultado['idioma'],
+            'model': resultado.get('model'),
+        })
+    else:
+        return Response(
+            {'error': resultado.get('error', 'Falha ao traduzir documento')},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+
+@api_view(['POST'])
 def analisar_documento_unico_view(request):
     if not verificar_permissao(request.user, 'add_analiseia'):
         return Response(
@@ -1801,11 +1835,23 @@ def listar_ocorrencias_view(request):
         ocorrencias = ocorrencias.filter(severidade=severidade)
     estado = request.query_params.get('estado')
     if estado:
-        ocorrencias = ocorrencias.filter(estado=estado)
+        estado_norm = MAPA_ESTADOS_OCORRENCIA.get(str(estado).strip().upper(), estado)
+        ocorrencias = ocorrencias.filter(estado=estado_norm)
 
     return Response([
         _serializar_ocorrencia(o) for o in ocorrencias
     ])
+
+
+MAPA_ESTADOS_OCORRENCIA = {
+    'ABERTA': 'ABERTA',
+    'PENDENTE': 'ABERTA',
+    'REVISADA': 'REVISADA',
+    'CONFIRMADA': 'REVISADA',
+    'IGNORADA': 'IGNORADA',
+    'FALSO_POSITIVO': 'IGNORADA',
+    'RESOLVIDA': 'RESOLVIDA',
+}
 
 
 @api_view(['GET', 'PATCH'])
@@ -1825,9 +1871,13 @@ def detalhe_ocorrencia_view(request, ocorrencia_id):
             {'error': 'Sem permissão para rever ocorrências.'},
             status=status.HTTP_403_FORBIDDEN
         )
-    novo_estado = request.data.get('estado')
+    novo_estado_raw = request.data.get('estado')
+    novo_estado = None
+    if novo_estado_raw is not None:
+        novo_estado = MAPA_ESTADOS_OCORRENCIA.get(str(novo_estado_raw).strip().upper(), novo_estado_raw)
+
     estados = [c[0] for c in Ocorrencia.ESTADO_CHOICES]
-    if novo_estado not in estados:
+    if not novo_estado or novo_estado not in estados:
         return Response(
             {'error': f'estado deve ser um de: {", ".join(estados)}'},
             status=status.HTTP_400_BAD_REQUEST

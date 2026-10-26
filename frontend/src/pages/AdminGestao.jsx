@@ -568,13 +568,15 @@ const AdminGestao = () => {
   // ==========================================
   const mudarEstadoOcorrencia = async (occ, novoEstado) => {
     try {
-      await adminService.updateOcorrencia(occ.id, { estado: novoEstado });
-      toast.success(`Ocorrência #${occ.id} marcada como ${novoEstado}.`);
+      const res = await adminService.updateOcorrencia(occ.id, { estado: novoEstado });
+      const estadoAtualizado = res.data?.estado || novoEstado;
+      toast.success(`Ocorrência #${occ.id} marcada como ${estadoAtualizado}.`);
       setOcorrencias((prev) =>
-        prev.map((o) => (o.id === occ.id ? { ...o, estado: novoEstado } : o))
+        prev.map((o) => (o.id === occ.id ? { ...o, estado: estadoAtualizado } : o))
       );
-    } catch {
-      toast.error('Erro ao atualizar estado da ocorrência.');
+    } catch (err) {
+      const detalhe = err?.response?.data?.error || err?.response?.data?.detail || 'Erro ao atualizar estado da ocorrência.';
+      toast.error(detalhe);
     }
   };
 
@@ -687,16 +689,30 @@ const AdminGestao = () => {
     return batePesquisa && bateMotor && bateSev;
   });
 
+  const normalizarEstadoOcorrencia = (est) => {
+    if (!est) return '';
+    const e = String(est).toUpperCase();
+    if (e === 'PENDENTE') return 'ABERTA';
+    if (e === 'CONFIRMADA') return 'REVISADA';
+    if (e === 'FALSO_POSITIVO') return 'IGNORADA';
+    return e;
+  };
+
   const ocorrenciasFiltradas = ocorrencias.filter((o) => {
     const nomeEmpresa = o.empresa_nome || '';
-    const codRegra = o.regra_codigo || '';
+    const codRegra = o.regra_codigo || o.regra?.codigo || '';
+    const regNome = o.regra_nome || o.regra?.nome || '';
+    const recMsg = o.mensagem || o.recomendacao || '';
     const batePesquisa =
       !pesquisaOcorrencia ||
       nomeEmpresa.toLowerCase().includes(pesquisaOcorrencia.toLowerCase()) ||
       codRegra.toLowerCase().includes(pesquisaOcorrencia.toLowerCase()) ||
-      (o.mensagem && o.mensagem.toLowerCase().includes(pesquisaOcorrencia.toLowerCase()));
+      regNome.toLowerCase().includes(pesquisaOcorrencia.toLowerCase()) ||
+      recMsg.toLowerCase().includes(pesquisaOcorrencia.toLowerCase());
     const bateSev = filtroSeveridadeOcorrencia === 'TODOS' || o.severidade === filtroSeveridadeOcorrencia;
-    const bateEst = filtroEstadoOcorrencia === 'TODOS' || o.estado === filtroEstadoOcorrencia;
+    const bateEst =
+      filtroEstadoOcorrencia === 'TODOS' ||
+      normalizarEstadoOcorrencia(o.estado) === normalizarEstadoOcorrencia(filtroEstadoOcorrencia);
     const bateEmp = filtroEmpresaOcorrencia === 'TODOS' || String(o.empresa) === String(filtroEmpresaOcorrencia);
     return batePesquisa && bateSev && bateEst && bateEmp;
   });
@@ -1869,9 +1885,9 @@ const AdminGestao = () => {
                     style={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
                   >
                     <option value="TODOS">Todos os Estados</option>
-                    <option value="PENDENTE">Pendente</option>
-                    <option value="CONFIRMADA">Confirmada</option>
-                    <option value="FALSO_POSITIVO">Falso Positivo</option>
+                    <option value="ABERTA">Aberta / Pendente</option>
+                    <option value="REVISADA">Revisada / Confirmada</option>
+                    <option value="IGNORADA">Ignorada / Falso Positivo</option>
                     <option value="RESOLVIDA">Resolvida</option>
                   </select>
                 </div>
@@ -1942,13 +1958,18 @@ const AdminGestao = () => {
                           <td>
                             <select
                               className="form-control form-control-sm"
-                              value={occ.estado}
+                              value={
+                                occ.estado === 'PENDENTE' ? 'ABERTA' :
+                                occ.estado === 'CONFIRMADA' ? 'REVISADA' :
+                                occ.estado === 'FALSO_POSITIVO' ? 'IGNORADA' :
+                                (occ.estado || 'ABERTA')
+                              }
                               onChange={(e) => mudarEstadoOcorrencia(occ, e.target.value)}
-                              style={{ width: 130, fontSize: 11, borderRadius: 6, fontWeight: 600 }}
+                              style={{ width: 155, fontSize: 11, borderRadius: 6, fontWeight: 600 }}
                             >
-                              <option value="PENDENTE">PENDENTE</option>
-                              <option value="CONFIRMADA">CONFIRMADA</option>
-                              <option value="FALSO_POSITIVO">FALSO POSITIVO</option>
+                              <option value="ABERTA">ABERTA (Pendente)</option>
+                              <option value="REVISADA">REVISADA (Confirmada)</option>
+                              <option value="IGNORADA">IGNORADA (Falso Pos.)</option>
                               <option value="RESOLVIDA">RESOLVIDA</option>
                             </select>
                           </td>

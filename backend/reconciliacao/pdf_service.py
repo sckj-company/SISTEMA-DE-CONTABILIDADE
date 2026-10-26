@@ -842,3 +842,64 @@ def analisar_documento_unico(texto, tipo_documento, idioma='pt'):
             "error": error_msg,
             "detail": str(e)
         }
+
+
+def traduzir_texto_analise(texto, idioma_destino='pt'):
+    """Traduz o relatorio de confronto ou parecer tecnico pericial com IA via Groq.
+    
+    Mantem 100% da estrutura Markdown, numeracoes das secoes (1. RESUMO, 2. DETALHE, etc.),
+    tabelas, quebras de linha, numeros e moedas (Kz).
+    """
+    if not texto or not str(texto).strip():
+        return {
+            "success": True,
+            "resultado": texto,
+            "idioma": idioma_destino,
+        }
+
+    idioma_normalizado = (idioma_destino or 'pt').lower().strip()[:2]
+    if idioma_normalizado not in ('pt', 'en', 'zh'):
+        idioma_normalizado = 'pt'
+
+    nomes_idiomas = {
+        'pt': 'Português',
+        'en': 'English',
+        'zh': '中文 (Simplified Chinese)',
+    }
+    nome_destino = nomes_idiomas.get(idioma_normalizado, 'Português')
+
+    prompt_sistema = (
+        f"You are a certified Angolan tax and accounting expert and translator (CIVA, PGC, AGT).\n"
+        f"Translate the provided tax audit and reconciliation document faithfully and accurately into {nome_destino}.\n"
+        f"MANDATORY INSTRUCTIONS:\n"
+        f"1. PRESERVE THE EXACT STRUCTURE, section numbering, headers, and markdown table layout.\n"
+        f"   For section headers, keep the numbers 1, 2, 3, 4 clearly visible.\n"
+        f"2. Keep all numbers, monetary values, and currencies (e.g. 'Kz', 'AKZ', '%') EXACTLY as written in the source.\n"
+        f"3. Keep account numbers (e.g. 'Conta 3453', 'Conta 3451', 'Conta 4511') and statutory references (e.g. 'Lei n.º 7/19', 'Modelo 7', 'AGT', 'CIVA', 'PGC') intact and recognizable.\n"
+        f"4. For table cells with status (e.g. 'IGUAIS' / 'DIFERENÇA' / 'OK'), translate them accurately (e.g. in English 'CONFORMING' / 'DIVERGENCE', in Chinese '符合' / '差异') while keeping markdown columns aligned.\n"
+        f"5. Return ONLY the translated document text. Do NOT add any preamble, conversational introduction, or commentary."
+    )
+
+    try:
+        client = get_groq_client()
+        messages = [
+            {"role": "system", "content": prompt_sistema},
+            {"role": "user", "content": texto}
+        ]
+        response, model_used = tentar_modelos(client, messages, temperature=0.1, max_tokens=4000)
+        resultado = response.choices[0].message.content
+        logger.info(f"Traducao concluida ({idioma_normalizado}) - Modelo: {model_used} - {len(resultado)} chars")
+        return {
+            "success": True,
+            "resultado": resultado,
+            "idioma": idioma_normalizado,
+            "model": model_used
+        }
+    except Exception as e:
+        logger.error(f"Erro ao traduzir texto com Groq: {e}")
+        return {
+            "success": False,
+            "error": f"Erro na traducao: {str(e)}",
+            "resultado": texto,
+            "idioma": idioma_normalizado
+        }

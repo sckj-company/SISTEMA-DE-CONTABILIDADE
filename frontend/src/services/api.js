@@ -196,6 +196,12 @@ export const analiseService = {
     }),
   getHistorico: () => api.get('/analises/historico/'),
   deleteAnalise: (id) => api.delete(`/analises/historico/${id}/`),
+  traduzir: (texto, idiomaDestino, analiseId) =>
+    api.post('/analises/traduzir/', {
+      texto,
+      idioma_destino: idiomaDestino,
+      analise_id: analiseId,
+    }),
   exportarExcel: (analiseId, payload = {}) => {
     if (analiseId) {
       return api.get(`/analises/${analiseId}/exportar-excel/`, { responseType: 'blob' });

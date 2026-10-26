@@ -28,7 +28,9 @@ const formatarKz = (val) => {
 const formatarDocUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+  const host = typeof window !== 'undefined' && window.location.hostname ? window.location.hostname : '127.0.0.1';
+  const proto = typeof window !== 'undefined' && window.location.protocol ? window.location.protocol : 'http:';
+  return `${proto}//${host}:8000${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
 const Facturas = () => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import { analiseService } from '../../services/api';
 
 /**
  * Parecer Técnico do Auditor com IA & Rasto de Auditoria.
@@ -315,12 +316,17 @@ const ParecerTecnicoIA = ({ parecerData, rastoData, aCarregar, onReanalisar, emp
   const [filtroFase, setFiltroFase] = useState('TODAS');
   const [apenasAlertas, setApenasAlertas] = useState(false);
 
+  // Tradução do Parecer Técnico
+  const [idiomaParecer, setIdiomaParecer] = useState('pt');
+  const [traducoes, setTraducoes] = useState({});
+  const [traduzindo, setTraduzindo] = useState(false);
+
   if (!parecerData && !rastoData && !aCarregar) {
     return null;
   }
 
-  const parecerTexto = parecerData?.parecer?.texto || '';
-  const riscosTexto = parecerData?.riscos?.texto || '';
+  const parecerTexto = traducoes[idiomaParecer]?.parecer || parecerData?.parecer?.texto || '';
+  const riscosTexto = traducoes[idiomaParecer]?.riscos || parecerData?.riscos?.texto || '';
   const modeloUsado = parecerData?.parecer?.modelo || 'Motor PGC/AGT';
   const origem = parecerData?.parecer?.origem || 'DETERMINISTICO';
   const aviso = parecerData?.parecer?.aviso;
@@ -337,6 +343,50 @@ const ParecerTecnicoIA = ({ parecerData, rastoData, aCarregar, onReanalisar, emp
     if (apenasAlertas && p.estado !== 'ALERTA' && p.estado !== 'FALHA') return false;
     return true;
   });
+
+  const handleTraduzirParecer = async (novoIdioma) => {
+    if (novoIdioma === idiomaParecer) return;
+    if (traducoes[novoIdioma]) {
+      setIdiomaParecer(novoIdioma);
+      const label = novoIdioma === 'zh' ? 'Chinês (中文)' : novoIdioma === 'en' ? 'Inglês (English)' : 'Português';
+      toast.success(`Parecer alterado para ${label}.`);
+      return;
+    }
+
+    const textoOrigParecer = parecerData?.parecer?.texto || '';
+    const textoOrigRiscos = parecerData?.riscos?.texto || '';
+    if (!textoOrigParecer && !textoOrigRiscos) {
+      toast.warning('Nenhum texto disponível para traduzir.');
+      return;
+    }
+
+    setTraduzindo(true);
+    const nomeIdioma = novoIdioma === 'zh' ? 'Chinês (中文)' : novoIdioma === 'en' ? 'Inglês (English)' : 'Português';
+    toast.info(`A traduzir parecer para ${nomeIdioma} com Inteligência Artificial...`);
+
+    try {
+      const [resP, resR] = await Promise.all([
+        textoOrigParecer ? analiseService.traduzir(textoOrigParecer, novoIdioma) : Promise.resolve({ data: { resultado: '' } }),
+        textoOrigRiscos ? analiseService.traduzir(textoOrigRiscos, novoIdioma) : Promise.resolve({ data: { resultado: '' } }),
+      ]);
+
+      const novoP = resP.data?.resultado || textoOrigParecer;
+      const novoR = resR.data?.resultado || textoOrigRiscos;
+
+      setTraducoes((prev) => ({
+        ...prev,
+        [novoIdioma]: { parecer: novoP, riscos: novoR },
+        ...(prev['pt'] ? {} : { pt: { parecer: textoOrigParecer, riscos: textoOrigRiscos } }),
+      }));
+      setIdiomaParecer(novoIdioma);
+      toast.success(`Parecer traduzido com sucesso para ${nomeIdioma}!`);
+    } catch (err) {
+      console.error('Erro ao traduzir parecer:', err);
+      toast.error('Erro ao comunicar com a IA para tradução.');
+    } finally {
+      setTraduzindo(false);
+    }
+  };
 
   const copiarParecer = () => {
     const textoLimpo = `${parecerTexto}\n\n---\n\n${riscosTexto}`.replace(/\*\*/g, '').replace(/\*/g, '');
@@ -407,6 +457,48 @@ const ParecerTecnicoIA = ({ parecerData, rastoData, aCarregar, onReanalisar, emp
             <i className={`la ${origem === 'IA' ? 'la-brain' : 'la-calculator'} mr-1`}></i>
             {origem === 'IA' ? `IA: ${modeloUsado}` : 'Motor PGC Factual'}
           </span>
+
+          {/* Tradução do Parecer com IA */}
+          <div className="d-flex align-items-center bg-white p-1 rounded border shadow-xs" style={{ gap: 4 }}>
+            <span className="text-muted fw-600 px-2" style={{ fontSize: 11 }}>
+              <i className="la la-language text-primary mr-1"></i> Traduzir:
+            </span>
+            <button
+              type="button"
+              className={`btn btn-xs ${idiomaParecer === 'pt' ? 'btn-primary' : 'btn-light'}`}
+              onClick={() => handleTraduzirParecer('pt')}
+              disabled={traduzindo}
+              style={{ fontWeight: 700, borderRadius: 6, fontSize: 11, padding: '2px 8px' }}
+              title="Traduzir parecer para Português"
+            >
+              🇦🇴 PT
+            </button>
+            <button
+              type="button"
+              className={`btn btn-xs ${idiomaParecer === 'en' ? 'btn-primary' : 'btn-light'}`}
+              onClick={() => handleTraduzirParecer('en')}
+              disabled={traduzindo}
+              style={{ fontWeight: 700, borderRadius: 6, fontSize: 11, padding: '2px 8px' }}
+              title="Translate audit opinion to English"
+            >
+              🇬🇧 EN
+            </button>
+            <button
+              type="button"
+              className={`btn btn-xs ${idiomaParecer === 'zh' ? 'btn-primary' : 'btn-light'}`}
+              onClick={() => handleTraduzirParecer('zh')}
+              disabled={traduzindo}
+              style={{ fontWeight: 700, borderRadius: 6, fontSize: 11, padding: '2px 8px' }}
+              title="翻译审计意见为中文 (Chinese)"
+            >
+              🇨🇳 中文
+            </button>
+            {traduzindo && (
+              <span className="text-primary px-1" style={{ fontSize: 11 }}>
+                <i className="la la-spinner la-spin"></i>
+              </span>
+            )}
+          </div>
 
           <button
             type="button"

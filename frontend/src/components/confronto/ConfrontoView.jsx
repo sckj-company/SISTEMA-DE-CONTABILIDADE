@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { usePeriodo, usePeriodoDaUrl } from '../../context/PeriodoContext';
 import { empresaService, analiseService, authHeaders, API_BASE } from '../../services/api';
@@ -19,6 +20,8 @@ const SpinDots = () => (
 
 const ConfrontoView = () => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const idiomaSistema = (i18n?.language || 'pt').substring(0, 2);
   const { empresaId, ano, mes, atualizar, escolherSeAusente } = usePeriodo();
   usePeriodoDaUrl();
 
@@ -44,6 +47,12 @@ const ConfrontoView = () => {
   const [resultadoRaw, setResultadoRaw] = useState(null);
   const [analiseId, setAnaliseId] = useState(null);
   const [exportandoExcel, setExportandoExcel] = useState(false);
+
+  // Tradução do Relatório
+  const [idiomaRelatorio, setIdiomaRelatorio] = useState('pt');
+  const [traducoes, setTraducoes] = useState({});
+  const [traduzindo, setTraduzindo] = useState(false);
+  const [visualizacaoTexto, setVisualizacaoTexto] = useState(false);
 
   // Histórico & Abas
   const [historico, setHistorico] = useState([]);
@@ -215,11 +224,15 @@ const ConfrontoView = () => {
 
       // 3. Execução do Confronto com IA
       setEtapaTexto('3/3: Inteligência Artificial a cruzar contas e apurar conformidades fiscais...');
-      const res = await analiseService.analisarDocumentos(finalContabId, finalAgtId, 'pt');
+      const langEnvio = idiomaSistema || 'pt';
+      const res = await analiseService.analisarDocumentos(finalContabId, finalAgtId, langEnvio);
 
       if (res.data?.success) {
-        setResultadoRaw(res.data.resultado);
+        const resultadoFinal = res.data.resultado;
+        setResultadoRaw(resultadoFinal);
         setAnaliseId(res.data.analise_id);
+        setIdiomaRelatorio(langEnvio);
+        setTraducoes({ [langEnvio]: resultadoFinal });
         toast.success('Confronto realizado com sucesso! Veja o relatório abaixo.');
         carregarHistorico();
         carregarDocumentos();
@@ -242,6 +255,49 @@ const ConfrontoView = () => {
     }
   };
 
+  const handleTraduzirRelatorio = async (novoIdioma) => {
+    if (novoIdioma === idiomaRelatorio) return;
+    if (traducoes[novoIdioma]) {
+      setIdiomaRelatorio(novoIdioma);
+      setResultadoRaw(traducoes[novoIdioma]);
+      const label = novoIdioma === 'zh' ? 'Chinês (中文)' : novoIdioma === 'en' ? 'Inglês (English)' : 'Português';
+      toast.success(`Relatório alterado para ${label}.`);
+      return;
+    }
+
+    const textoBase = traducoes['pt'] || resultadoRaw;
+    if (!textoBase) {
+      toast.warning('Nenhum relatório disponível para traduzir.');
+      return;
+    }
+
+    setTraduzindo(true);
+    const nomeIdioma = novoIdioma === 'zh' ? 'Chinês (中文)' : novoIdioma === 'en' ? 'Inglês (English)' : 'Português';
+    toast.info(`A traduzir relatório para ${nomeIdioma} com Inteligência Artificial...`);
+
+    try {
+      const res = await analiseService.traduzir(textoBase, novoIdioma, analiseId);
+      if (res.data?.success && res.data.resultado) {
+        const textoTraduzido = res.data.resultado;
+        setTraducoes((prev) => ({
+          ...prev,
+          [novoIdioma]: textoTraduzido,
+          ...(prev['pt'] ? {} : { pt: textoBase }),
+        }));
+        setIdiomaRelatorio(novoIdioma);
+        setResultadoRaw(textoTraduzido);
+        toast.success(`Relatório traduzido com sucesso para ${nomeIdioma}!`);
+      } else {
+        toast.error(res.data?.error || 'Não foi possível traduzir o relatório.');
+      }
+    } catch (err) {
+      console.error('Erro ao traduzir:', err);
+      toast.error(err.response?.data?.error || 'Erro ao comunicar com a IA para tradução.');
+    } finally {
+      setTraduzindo(false);
+    }
+  };
+
   const parsedData = useMemo(() => {
     if (!resultadoRaw) return null;
     return parseAnaliseIA(resultadoRaw);
@@ -250,6 +306,9 @@ const ConfrontoView = () => {
   const handleLimparNovoConfronto = () => {
     setResultadoRaw(null);
     setAnaliseId(null);
+    setTraducoes({});
+    setIdiomaRelatorio('pt');
+    setVisualizacaoTexto(false);
     setFicheiroContab(null);
     setFicheiroAgt(null);
     setDocContabId('');
@@ -262,6 +321,8 @@ const ConfrontoView = () => {
   const handleCarregarAnaliseHistorico = (item) => {
     setResultadoRaw(item.resultado);
     setAnaliseId(item.id);
+    setIdiomaRelatorio('pt');
+    setTraducoes({ pt: item.resultado });
     if (item.documento_contabilidade?.id) {
       setDocContabId(String(item.documento_contabilidade.id));
     }
@@ -983,6 +1044,60 @@ const ConfrontoView = () => {
                     </div>
 
                     <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
+                      {/* Tradução com IA */}
+                      <div className="d-flex align-items-center bg-white p-1 rounded border shadow-xs" style={{ gap: 4 }}>
+                        <span className="text-muted fw-600 px-2" style={{ fontSize: 12 }}>
+                          <i className="la la-language text-primary mr-1"></i> Traduzir Relatório:
+                        </span>
+                        <button
+                          type="button"
+                          className={`btn btn-xs ${idiomaRelatorio === 'pt' ? 'btn-primary' : 'btn-light'}`}
+                          onClick={() => handleTraduzirRelatorio('pt')}
+                          disabled={traduzindo}
+                          style={{ fontWeight: 700, borderRadius: 6, fontSize: 11.5, padding: '3px 8px' }}
+                          title="Traduzir relatório para Português"
+                        >
+                          🇦🇴 PT
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn btn-xs ${idiomaRelatorio === 'en' ? 'btn-primary' : 'btn-light'}`}
+                          onClick={() => handleTraduzirRelatorio('en')}
+                          disabled={traduzindo}
+                          style={{ fontWeight: 700, borderRadius: 6, fontSize: 11.5, padding: '3px 8px' }}
+                          title="Translate report to English"
+                        >
+                          🇬🇧 EN
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn btn-xs ${idiomaRelatorio === 'zh' ? 'btn-primary' : 'btn-light'}`}
+                          onClick={() => handleTraduzirRelatorio('zh')}
+                          disabled={traduzindo}
+                          style={{ fontWeight: 700, borderRadius: 6, fontSize: 11.5, padding: '3px 8px' }}
+                          title="翻译报告为中文 (Chinese)"
+                        >
+                          🇨🇳 中文
+                        </button>
+                        {traduzindo && (
+                          <span className="text-primary px-1" style={{ fontSize: 12 }}>
+                            <i className="la la-spinner la-spin"></i>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Alternar Painel Visual vs Texto Pericial */}
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${visualizacaoTexto ? 'btn-info text-white' : 'btn-outline-info bg-white'}`}
+                        onClick={() => setVisualizacaoTexto(!visualizacaoTexto)}
+                        style={{ fontWeight: 700, padding: '7px 14px', fontSize: 12.5 }}
+                        title="Alternar entre painel de cartões visuais e texto pericial completo"
+                      >
+                        <i className={`la ${visualizacaoTexto ? 'la-th-large' : 'la-file-alt'} mr-1`}></i>
+                        {visualizacaoTexto ? 'Painel Visual' : 'Texto Completo'}
+                      </button>
+
                       <button
                         type="button"
                         className="btn btn-success btn-sm"
@@ -1015,6 +1130,30 @@ const ConfrontoView = () => {
                   </div>
                 </div>
               </div>
+
+              {/* MODO DE TEXTO PERICIAL COMPLETO */}
+              {visualizacaoTexto && resultadoRaw && (
+                <div className="card card-default mb-25" style={{ border: '1px solid #edf0f5', borderRadius: 10, background: '#ffffff' }}>
+                  <div className="card-header py-12 px-20 bg-light border-bottom d-flex justify-content-between align-items-center">
+                    <strong className="color-dark" style={{ fontSize: 14 }}>
+                      <i className="la la-file-text text-primary mr-5"></i> Relatório Pericial Completo ({idiomaRelatorio === 'zh' ? '中文' : idiomaRelatorio === 'en' ? 'English' : 'Português'})
+                    </strong>
+                    <button
+                      type="button"
+                      className="btn btn-xs btn-outline-secondary"
+                      onClick={() => {
+                        navigator.clipboard.writeText(resultadoRaw);
+                        toast.info('Texto do relatório copiado para a área de transferência.');
+                      }}
+                    >
+                      <i className="la la-copy mr-1"></i> Copiar Texto
+                    </button>
+                  </div>
+                  <div className="card-body p-25" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: 13.5, color: '#272b41', background: '#fdfdfe', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+                    {resultadoRaw}
+                  </div>
+                </div>
+              )}
 
               {/* 1. CARTÕES DE MÉTRICAS / KPIS */}
               <div className="row mb-20" style={{ rowGap: 12 }}>

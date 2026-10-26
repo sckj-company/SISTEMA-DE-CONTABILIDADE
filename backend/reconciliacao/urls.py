@@ -60,6 +60,7 @@ urlpatterns = [
     path('documentos/<int:documento_id>/', views.deletar_documento_view, name='deletar-documento'),
     path('analises/analise-documentos/', views.analisar_documentos_view, name='analisar-documentos'),
     path('analises/analise-documento/', views.analisar_documento_unico_view, name='analisar-documento'),
+    path('analises/traduzir/', views.traduzir_analise_view, name='traduzir-analise'),
     path('analises/historico/', views.historico_analises_view, name='historico-analises'),
     path('analises/<int:analise_id>/', views.detalhe_analise_view, name='detalhe-analise'),
     path('analises/historico/<int:analise_id>/', views.detalhe_analise_view, name='deletar-analise'),

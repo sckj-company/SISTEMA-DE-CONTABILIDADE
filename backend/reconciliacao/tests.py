@@ -1262,6 +1262,22 @@ class OcorrenciaAPITests(TestCase):
         occ.refresh_from_db()
         self.assertEqual(occ.estado, 'REVISADA')
 
+    def test_patch_estado_sinonimos(self):
+        occ = self.criar_ocorrencia(self.emp_a)
+        self.autenticar(self.superuser)
+        # CONFIRMADA -> REVISADA
+        resp = self.client.patch(f'/api/ocorrencias/{occ.id}/', {'estado': 'CONFIRMADA'}, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['estado'], 'REVISADA')
+        # PENDENTE -> ABERTA
+        resp = self.client.patch(f'/api/ocorrencias/{occ.id}/', {'estado': 'PENDENTE'}, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['estado'], 'ABERTA')
+        # FALSO_POSITIVO -> IGNORADA
+        resp = self.client.patch(f'/api/ocorrencias/{occ.id}/', {'estado': 'FALSO_POSITIVO'}, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['estado'], 'IGNORADA')
+
     def test_pacth_estado_sem_permissao_devolve_403(self):
         occ = self.criar_ocorrencia(self.emp_a)
         self.autenticar(self.consulta)

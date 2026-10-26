@@ -82,22 +82,22 @@ export function sanitizarValorTexto(str) {
 export function parseAnaliseIA(texto) {
   if (!texto || typeof texto !== 'string') return null;
 
-  // 1. Extrair Seções Principais (suporta hífens normais, travessões, e formatos variados)
-  const resumoMatch = texto.match(/1\s*[-–.]\s*RESUMO[\s\S]*?(?=2\s*[-–.]\s*DETALHE|$)/i);
-  const detalheMatch = texto.match(/2\s*[-–.]\s*DETALHE[\s\S]*?(?=3\s*[-–.]\s*AN[ÁA]LISE|$)/i);
-  const analiseMatch = texto.match(/3\s*[-–.]\s*AN[ÁA]LISE[\s\S]*?(?=4\s*[-–.]\s*O QUE FAZER|4\s*[-–.]\s*RECOMENDA[ÇC]|$)/i);
-  const recomendacoesMatch = texto.match(/4\s*[-–.]\s*(?:O QUE FAZER|RECOMENDA[ÇC][ÕO]ES)[\s\S]*$/i);
+  // 1. Extrair Seções Principais (suporta PT, EN, ZH e formatos variados)
+  const resumoMatch = texto.match(/(?:1\s*[-–.]\s*(?:RESUMO|SUMMARY|概述|总结|摘要)|GENERAL SUMMARY)[\s\S]*?(?=(?:2\s*[-–.]\s*(?:DETALHE|DETAIL|明细)|FIELD DETAIL)|$)/i);
+  const detalheMatch = texto.match(/(?:2\s*[-–.]\s*(?:DETALHE|DETAIL|明细)|FIELD DETAIL)[\s\S]*?(?=(?:3\s*[-–.]\s*(?:AN[ÁA]LISE|ANALYSIS|分析)|TECHNICAL ANALYSIS)|$)/i);
+  const analiseMatch = texto.match(/(?:3\s*[-–.]\s*(?:AN[ÁA]LISE|ANALYSIS|分析)|TECHNICAL ANALYSIS)[\s\S]*?(?=(?:4\s*[-–.]\s*(?:O QUE FAZER|RECOMENDA[ÇC]|RECOMMENDATION|建议)|FINAL RECOMMENDATIONS)|$)/i);
+  const recomendacoesMatch = texto.match(/(?:4\s*[-–.]\s*(?:O QUE FAZER|RECOMENDA[ÇC][ÕO]ES|RECOMMENDATION|建议)|FINAL RECOMMENDATIONS)[\s\S]*$/i);
 
   const resumoTexto = resumoMatch ? resumoMatch[0] : '';
   const detalheTexto = detalheMatch ? detalheMatch[0] : '';
   const analiseTexto = analiseMatch ? analiseMatch[0] : '';
   const recomendacoesTexto = recomendacoesMatch ? recomendacoesMatch[0] : '';
 
-  // 2. Metadados do Resumo (suporta markdown ** em números e rótulos)
-  const docsMatch = resumoTexto.match(/Documentos confrontados\*?\*?:\s*([^\n\r]+)/i);
-  const totalMatch = resumoTexto.match(/Total de pontos analisados[^:]*:\s*(?:\*\*)?(\d+)(?:\*\*)?/i);
-  const iguaisMatch = resumoTexto.match(/Dados IGUAIS[^:]*:\s*(?:\*\*)?(\d+)(?:\*\*)?/i);
-  const difsMatch = resumoTexto.match(/Dados com DIFER[EÊeê]NCIAS[^:]*:\s*(?:\*\*)?(\d+)(?:\*\*)?/i);
+  // 2. Metadados do Resumo (suporta markdown ** em números e rótulos em PT, EN, ZH)
+  const docsMatch = resumoTexto.match(/(?:Documentos confrontados|Documents compared|对比文件)\*?\*?:\s*([^\n\r]+)/i);
+  const totalMatch = resumoTexto.match(/(?:Total de pontos analisados|Total fields analyzed|Total points analyzed|总分析点数|分析总数)[^:]*:\s*(?:\*\*)?(\d+)(?:\*\*)?/i);
+  const iguaisMatch = resumoTexto.match(/(?:Dados IGUAIS|Conforming fields|Conforming data|相同数据|符合数据)[^:]*:\s*(?:\*\*)?(\d+)(?:\*\*)?/i);
+  const difsMatch = resumoTexto.match(/(?:Dados com DIFER[EÊeê]NCIAS|Divergences found|差异数据|存在差异)[^:]*:\s*(?:\*\*)?(\d+)(?:\*\*)?/i);
 
   const documentosConfrontados = docsMatch
     ? docsMatch[1].replace(/\*\*/g, '').trim()
@@ -113,18 +113,16 @@ export function parseAnaliseIA(texto) {
         linha.includes('|') &&
         !linha.includes('---') &&
         !linha.toLowerCase().includes('nome do campo') &&
+        !linha.toLowerCase().includes('field name') &&
+        !linha.toLowerCase().includes('字段') &&
         !linha.toLowerCase().includes('ponto confrontado')
       ) {
         const partes = linha.split('|').map((p) => p.trim()).filter(Boolean);
         if (partes.length >= 3) {
-          const statusRaw = partes[3] || partes[2] || '';
-          const status = statusRaw.toUpperCase().includes('DIFEREN')
-            ? 'DIFERENÇA'
-            : statusRaw.toUpperCase().includes('IGUAIS') ||
-              statusRaw.toUpperCase().includes('OK') ||
-              statusRaw.toUpperCase().includes('CONFORME')
-            ? 'IGUAIS'
-            : 'INFO';
+          const statusRaw = (partes[3] || partes[2] || '').toUpperCase();
+          const isDif = statusRaw.includes('DIFEREN') || statusRaw.includes('DIVERG') || statusRaw.includes('差异') || statusRaw.includes('ALERTA');
+          const isOk = statusRaw.includes('IGUAIS') || statusRaw.includes('OK') || statusRaw.includes('CONFORME') || statusRaw.includes('CONFORM') || statusRaw.includes('符合') || statusRaw.includes('相同');
+          const status = isDif ? 'DIFERENÇA' : isOk ? 'IGUAIS' : 'INFO';
 
           const campoNome = partes[0].replace(/\*\*/g, '').trim();
           const contab = partes[1] ? partes[1].replace(/\*\*/g, '').trim() : '—';
@@ -171,20 +169,20 @@ export function parseAnaliseIA(texto) {
         let dif = '0,00 Kz';
 
         for (const l of linhasBloco) {
-          const matchContab = l.match(/(?:Contabilidade|Balancete)[^:]*:\s*([^\n\r]+)/i);
+          const matchContab = l.match(/(?:Contabilidade|Balancete|Accounting|会计|财务)[^:]*:\s*([^\n\r]+)/i);
           if (matchContab) contab = matchContab[1].replace(/\*\*/g, '').trim();
 
-          const matchAgt = l.match(/(?:AGT|Modelo\s*7)[^:]*:\s*([^\n\r]+)/i);
+          const matchAgt = l.match(/(?:AGT|Modelo\s*7|税务申报|税务局)[^:]*:\s*([^\n\r]+)/i);
           if (matchAgt) agt = matchAgt[1].replace(/\*\*/g, '').trim();
 
-          const matchStatus = l.match(/Status[^:]*:\s*([^\n\r]+)/i);
+          const matchStatus = l.match(/(?:Status|Estado|状态)[^:]*:\s*([^\n\r]+)/i);
           if (matchStatus) {
             const raw = matchStatus[1].toUpperCase();
-            if (raw.includes('DIFEREN')) status = 'DIFERENÇA';
-            else if (raw.includes('IGUAIS') || raw.includes('OK') || raw.includes('CONFORME')) status = 'IGUAIS';
+            if (raw.includes('DIFEREN') || raw.includes('DIVERG') || raw.includes('差异') || raw.includes('ALERTA')) status = 'DIFERENÇA';
+            else if (raw.includes('IGUAIS') || raw.includes('OK') || raw.includes('CONFORME') || raw.includes('CONFORM') || raw.includes('符合') || raw.includes('相同')) status = 'IGUAIS';
           }
 
-          const matchDif = l.match(/Diferen[çc]a[^:]*:\s*([^\n\r]+)/i);
+          const matchDif = l.match(/(?:Diferen[çc]a|Difference|差异金额|差异)[^:]*:\s*([^\n\r]+)/i);
           if (matchDif) dif = matchDif[1].replace(/\*\*/g, '').trim();
         }
 

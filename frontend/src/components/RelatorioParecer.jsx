@@ -172,49 +172,102 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
 
       {/* DEMONSTRAÇÃO DO APURAMENTO DO IVA (LEI N.º 7/19 - CIVA) */}
       {analiseIAEstruturada?.apuramentoIva && (
-        <div className="mb-25 p-15" style={{ ...boxNeutro, border: '2px solid #5f63f2', background: '#fafbff' }}>
+        <div className="mb-25 p-15" style={{ ...boxNeutro, border: '1px solid #e2e8f0', background: '#ffffff', borderRadius: 8 }}>
           <div className="d-flex justify-content-between align-items-center mb-10 flex-wrap" style={{ gap: 8 }}>
             <div>
-              <strong className="color-dark d-block" style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                ⚖️ Quadro Oficial de Apuramento do IVA (Lei n.º 7/19 — CIVA)
+              <strong className="color-dark d-block" style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.4px', color: '#0f172a' }}>
+                ⚖️ Quadro Oficial de Apuramento do IVA (Lei n.º 7/19 — CIVA e PGC Angolano)
               </strong>
               <span className="text-muted" style={{ fontSize: 11.5 }}>
-                Fórmula Legal Obrigatória: <strong>IVA a Pagar = IVA Liquidado (Vendas) − IVA Dedutível (Compras)</strong>
+                Fórmula Legal Obrigatória: <strong>Apuramento = IVA Liquidado (Vendas) − IVA Dedutível (Compras)</strong>
               </span>
             </div>
-            <span className="badge badge-primary px-8 py-3" style={{ fontSize: 10.5, fontWeight: 700 }}>
+            <span className="badge" style={{ fontSize: 10.5, fontWeight: 600, background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0' }}>
               Art. 19.º CIVA
             </span>
           </div>
 
-          <div className="row" style={{ rowGap: 10 }}>
+          <div className="row" style={{ rowGap: 16 }}>
+            {/* 1. IVA LIQUIDADO */}
             <div className="col-12 col-md-4">
-              <div className="p-10 rounded bg-white" style={{ border: '1px solid #adc6ff' }}>
-                <span className="d-block fw-700" style={{ fontSize: 11, color: '#1d39c4' }}>
+              <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                <span style={{ fontSize: '12.5px', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                  (VENDAS OU SERVIÇOS)
+                </span>
+              </div>
+              <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 16px', background: '#ffffff' }}>
+                <span className="d-block fw-700" style={{ fontSize: 11, color: '#0f172a', marginBottom: '6px' }}>
                   (+) 1. IVA LIQUIDADO
                 </span>
-                <span className="text-muted d-block" style={{ fontSize: 10.5 }}>Contabilidade (Conta 3453): <strong>{analiseIAEstruturada.apuramentoIva.liquidado.contabilidade}</strong></span>
-                <span className="text-muted d-block" style={{ fontSize: 10.5 }}>Modelo 7 (Campo 21): <strong>{analiseIAEstruturada.apuramentoIva.liquidado.agt}</strong></span>
+                <span className="text-muted d-block" style={{ fontSize: 11, marginBottom: '3px' }}>Contabilidade (Conta 34.5.3): <strong>{analiseIAEstruturada.apuramentoIva.liquidado.contabilidade}</strong></span>
+                <span className="text-muted d-block" style={{ fontSize: 11 }}>Modelo 7 (Campo 21/33): <strong>{analiseIAEstruturada.apuramentoIva.liquidado.agt}</strong></span>
               </div>
             </div>
 
+            {/* 2. IVA DEDUTÍVEL */}
             <div className="col-12 col-md-4">
-              <div className="p-10 rounded bg-white" style={{ border: '1px solid #ffd591' }}>
-                <span className="d-block fw-700" style={{ fontSize: 11, color: '#d46b08' }}>
+              <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                <span style={{ fontSize: '12.5px', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                  (COMPRAS OU DESPESAS)
+                </span>
+              </div>
+              <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 16px', background: '#ffffff' }}>
+                <span className="d-block fw-700" style={{ fontSize: 11, color: '#0f172a', marginBottom: '6px' }}>
                   (−) 2. IVA DEDUTÍVEL
                 </span>
-                <span className="text-muted d-block" style={{ fontSize: 10.5 }}>Contabilidade (Conta 3451): <strong>{analiseIAEstruturada.apuramentoIva.dedutivel.contabilidade}</strong></span>
-                <span className="text-muted d-block" style={{ fontSize: 10.5 }}>Modelo 7 (Campo 22): <strong>{analiseIAEstruturada.apuramentoIva.dedutivel.agt}</strong></span>
+                <span className="text-muted d-block" style={{ fontSize: 11, marginBottom: '3px' }}>Contabilidade (Conta 34.5.1/34.5.2): <strong>{analiseIAEstruturada.apuramentoIva.dedutivel.contabilidade}</strong></span>
+                <span className="text-muted d-block" style={{ fontSize: 11 }}>Modelo 7 (Campo 22/32): <strong>{analiseIAEstruturada.apuramentoIva.dedutivel.agt}</strong></span>
               </div>
             </div>
 
+            {/* 3. APURAMENTO DO IVA */}
             <div className="col-12 col-md-4">
-              <div className="p-10 rounded bg-white" style={{ border: '2px solid #5f63f2' }}>
-                <span className="d-block fw-700" style={{ fontSize: 11, color: '#5f63f2' }}>
-                  (=) 3. IVA A PAGAR (APURAMENTO)
+              <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                <span style={{
+                  fontSize: '12.5px',
+                  fontWeight: 800,
+                  color: '#0f172a',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.4px'
+                }}>
+                  APURAMENTO DO IVA
                 </span>
-                <span className="text-muted d-block" style={{ fontSize: 10.5 }}>Contabilidade: <strong>{analiseIAEstruturada.apuramentoIva.pagar.contabilidade}</strong></span>
-                <span className="text-muted d-block" style={{ fontSize: 10.5 }}>Modelo 7 (Campo 27): <strong>{analiseIAEstruturada.apuramentoIva.pagar.agt}</strong></span>
+              </div>
+              <div
+                style={{
+                  border: '1px solid #e2e8f0',
+                  borderTop: `4px solid ${analiseIAEstruturada.apuramentoIva.isRecuperar ? '#10b981' : analiseIAEstruturada.apuramentoIva.isReembolso ? '#3b82f6' : '#ef4444'}`,
+                  borderRadius: '8px',
+                  padding: '14px 16px',
+                  background: '#ffffff'
+                }}
+              >
+                <span
+                  className="d-block fw-700"
+                  style={{
+                    fontSize: 11,
+                    color: '#0f172a',
+                    marginBottom: '6px'
+                  }}
+                >
+                  {analiseIAEstruturada.apuramentoIva.tituloCard3 || '(=) 3. APURAMENTO'}
+                </span>
+                <span className="text-muted d-block" style={{ fontSize: 11, marginBottom: '3px' }}>
+                  Contabilidade ({analiseIAEstruturada.apuramentoIva.rubricaCard3?.split('·')[0]?.trim() || 'Conta 34.5'}): <strong>{analiseIAEstruturada.apuramentoIva.resultadoPrincipal?.contabilidade || analiseIAEstruturada.apuramentoIva.pagar.contabilidade}</strong>
+                </span>
+                <span className="text-muted d-block" style={{ fontSize: 11, marginBottom: '6px' }}>
+                  Modelo 7 ({analiseIAEstruturada.apuramentoIva.rubricaCard3?.split('·')[1]?.trim() || 'AGT'}): <strong>{analiseIAEstruturada.apuramentoIva.resultadoPrincipal?.agt || analiseIAEstruturada.apuramentoIva.pagar.agt}</strong>
+                </span>
+                {analiseIAEstruturada.apuramentoIva.isRecuperar && (
+                  <div style={{ marginTop: '8px', padding: '6px 10px', borderRadius: '6px', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', fontSize: 10.5, lineHeight: 1.4 }}>
+                    🟢 <strong>Não paga IVA:</strong> Saldo credor acumula para o mês seguinte.
+                  </div>
+                )}
+                {analiseIAEstruturada.apuramentoIva.isPagar && (
+                  <div style={{ marginTop: '8px', padding: '6px 10px', borderRadius: '6px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', fontSize: 10.5, lineHeight: 1.4 }}>
+                    🔴 <strong>Imposto a Pagar:</strong> Valor a liquidar ao Estado via DAR.
+                  </div>
+                )}
               </div>
             </div>
           </div>

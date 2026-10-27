@@ -1224,54 +1224,71 @@ const ConfrontoView = () => {
               </div>
 
               {/* QUADRO DE DESTAQUE: APURAMENTO DO IVA (LEI N.º 7/19 - CIVA) */}
-              <div className="card card-default mb-25" style={{ border: '2px solid #5f63f2', borderRadius: 12, background: '#ffffff', overflow: 'hidden', boxShadow: '0 4px 14px rgba(95, 99, 242, 0.08)' }}>
-                <div style={{ background: 'linear-gradient(135deg, #1a3353 0%, #2a4365 100%)', padding: '14px 20px', color: '#fff' }}>
-                  <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 10 }}>
+              <div className="card card-default mb-25" style={{ border: '1px solid #e2e8f0', borderRadius: '12px', background: '#ffffff', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                <div style={{ background: '#ffffff', padding: '18px 24px', borderBottom: '1px solid #f1f5f9' }}>
+                  <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
                     <div>
-                      <div className="d-flex align-items-center" style={{ gap: 8 }}>
-                        <span style={{ fontSize: 18 }}>⚖️</span>
-                        <strong style={{ fontSize: 15, letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+                      <div className="d-flex align-items-center" style={{ gap: 10 }}>
+                        <i className="la la-balance-scale text-primary" style={{ fontSize: 22 }}></i>
+                        <strong className="color-dark" style={{ fontSize: 14.5, letterSpacing: '0.4px', textTransform: 'uppercase', color: '#0f172a' }}>
                           Quadro Oficial de Apuramento do IVA (CIVA — Lei n.º 7/19)
                         </strong>
                       </div>
-                      <div style={{ fontSize: 12, color: '#cbd5e1', marginTop: 2 }}>
-                        Fórmula Legal Obrigatória: <strong>IVA a Pagar = IVA Liquidado (Vendas) − IVA Dedutível (Compras)</strong>
+                      <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+                        Fórmula Legal Obrigatória: <strong>Apuramento = IVA Liquidado (Vendas) − IVA Dedutível (Compras)</strong>
                       </div>
                     </div>
-                    <span className="badge" style={{ backgroundColor: '#5f63f2', color: '#fff', fontSize: 11, padding: '6px 12px', fontWeight: 700 }}>
+                    <span className="badge" style={{ fontSize: 11, padding: '7px 14px', fontWeight: 600, border: '1px solid #e2e8f0', color: '#475569', background: '#f8fafc', borderRadius: '6px' }}>
                       Artigos 19.º e seguintes do CIVA
                     </span>
                   </div>
                 </div>
 
-                <div className="card-body p-20" style={{ background: '#fdfdfe' }}>
-                  <div className="row align-items-center" style={{ rowGap: 16 }}>
+                <div style={{ background: '#ffffff', padding: '24px' }}>
+                  <div className="row" style={{ rowGap: 24 }}>
                     {/* 1. IVA LIQUIDADO */}
-                    <div className="col-12 col-md-4">
-                      <div className="p-16 rounded h-100" style={{ background: '#f0f5ff', border: '1px solid #adc6ff', borderRadius: 10 }}>
-                        <div className="d-flex justify-content-between align-items-center mb-6">
-                          <span className="fw-700 text-uppercase" style={{ fontSize: 11, color: '#1d39c4', letterSpacing: '0.5px' }}>
-                            (+) 1. IVA Liquidado (Vendas)
-                          </span>
-                          <span className="badge badge-primary px-6 py-2" style={{ fontSize: 10 }}>
-                            Conta 3453 · Campo 21
-                          </span>
+                    <div className="col-12 col-md-4 d-flex flex-column">
+                      <div style={{ textAlign: 'center', marginBottom: '16px', paddingTop: '4px' }}>
+                        <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#1e293b', letterSpacing: '0.6px', textTransform: 'uppercase', display: 'inline-block' }}>
+                          (VENDAS OU SERVIÇOS)
+                        </span>
+                      </div>
+                      <div style={{
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '10px',
+                        padding: '24px 20px',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between'
+                      }}>
+                        <div>
+                          <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '14px' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+                              (+) 1. IVA Liquidado
+                            </span>
+                            <span className="badge" style={{ fontSize: '10px', background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', fontWeight: 600, padding: '4px 8px' }}>
+                              Conta 34.5.3 · Campo 21/33
+                            </span>
+                          </div>
+                          <div style={{ marginBottom: '12px' }}>
+                            <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '2px' }}>Contabilidade (Balancete):</span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>
+                              {parsedData.apuramentoIva?.liquidado.contabilidade || '—'}
+                            </div>
+                          </div>
+                          <div style={{ marginBottom: '14px' }}>
+                            <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '2px' }}>Declaração AGT (Modelo 7):</span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>
+                              {parsedData.apuramentoIva?.liquidado.agt || '—'}
+                            </div>
+                          </div>
                         </div>
-                        <div className="mb-4">
-                          <span className="text-muted d-block" style={{ fontSize: 11 }}>Contabilidade (Balancete):</span>
-                          <strong className="color-dark" style={{ fontSize: 16 }}>
-                            {parsedData.apuramentoIva?.liquidado.contabilidade || '—'}
-                          </strong>
-                        </div>
-                        <div className="mb-8">
-                          <span className="text-muted d-block" style={{ fontSize: 11 }}>Declaração AGT (Modelo 7):</span>
-                          <strong className="color-dark" style={{ fontSize: 16 }}>
-                            {parsedData.apuramentoIva?.liquidado.agt || '—'}
-                          </strong>
-                        </div>
-                        <div className="pt-8 border-top d-flex justify-content-between align-items-center">
-                          <span style={{ fontSize: 11, color: '#555' }}>Diferença:</span>
-                          <span className="fw-700" style={{ fontSize: 12, color: parsedData.apuramentoIva?.liquidado.status === 'IGUAIS' ? '#00a854' : '#f5222d' }}>
+                        <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '11.5px', color: '#64748b' }}>Diferença:</span>
+                          <span style={{ fontSize: '12.5px', fontWeight: 700, color: parsedData.apuramentoIva?.liquidado.status === 'IGUAIS' ? '#16a34a' : '#dc2626' }}>
                             {parsedData.apuramentoIva?.liquidado.diferenca || '0,00 Kz'}
                           </span>
                         </div>
@@ -1279,95 +1296,274 @@ const ConfrontoView = () => {
                     </div>
 
                     {/* 2. IVA DEDUTÍVEL */}
-                    <div className="col-12 col-md-4">
-                      <div className="p-16 rounded h-100" style={{ background: '#fff7e6', border: '1px solid #ffd591', borderRadius: 10 }}>
-                        <div className="d-flex justify-content-between align-items-center mb-6">
-                          <span className="fw-700 text-uppercase" style={{ fontSize: 11, color: '#d46b08', letterSpacing: '0.5px' }}>
-                            (−) 2. IVA Dedutível (Compras)
-                          </span>
-                          <span className="badge badge-warning px-6 py-2" style={{ fontSize: 10 }}>
-                            Conta 3451 · Campo 22
-                          </span>
+                    <div className="col-12 col-md-4 d-flex flex-column">
+                      <div style={{ textAlign: 'center', marginBottom: '16px', paddingTop: '4px' }}>
+                        <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#1e293b', letterSpacing: '0.6px', textTransform: 'uppercase', display: 'inline-block' }}>
+                          (COMPRAS OU DESPESAS)
+                        </span>
+                      </div>
+                      <div style={{
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '10px',
+                        padding: '24px 20px',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between'
+                      }}>
+                        <div>
+                          <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '14px' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+                              (−) 2. IVA Dedutível
+                            </span>
+                            <span className="badge" style={{ fontSize: '10px', background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', fontWeight: 600, padding: '4px 8px' }}>
+                              Conta 34.5.1/2 · Campo 22/32
+                            </span>
+                          </div>
+                          <div style={{ marginBottom: '12px' }}>
+                            <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '2px' }}>Contabilidade (Balancete):</span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>
+                              {parsedData.apuramentoIva?.dedutivel.contabilidade || '—'}
+                            </div>
+                          </div>
+                          <div style={{ marginBottom: '14px' }}>
+                            <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '2px' }}>Declaração AGT (Modelo 7):</span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>
+                              {parsedData.apuramentoIva?.dedutivel.agt || '—'}
+                            </div>
+                          </div>
                         </div>
-                        <div className="mb-4">
-                          <span className="text-muted d-block" style={{ fontSize: 11 }}>Contabilidade (Balancete):</span>
-                          <strong className="color-dark" style={{ fontSize: 16 }}>
-                            {parsedData.apuramentoIva?.dedutivel.contabilidade || '—'}
-                          </strong>
-                        </div>
-                        <div className="mb-8">
-                          <span className="text-muted d-block" style={{ fontSize: 11 }}>Declaração AGT (Modelo 7):</span>
-                          <strong className="color-dark" style={{ fontSize: 16 }}>
-                            {parsedData.apuramentoIva?.dedutivel.agt || '—'}
-                          </strong>
-                        </div>
-                        <div className="pt-8 border-top d-flex justify-content-between align-items-center">
-                          <span style={{ fontSize: 11, color: '#555' }}>Diferença:</span>
-                          <span className="fw-700" style={{ fontSize: 12, color: parsedData.apuramentoIva?.dedutivel.status === 'IGUAIS' ? '#00a854' : '#f5222d' }}>
+                        <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '11.5px', color: '#64748b' }}>Diferença:</span>
+                          <span style={{ fontSize: '12.5px', fontWeight: 700, color: parsedData.apuramentoIva?.dedutivel.status === 'IGUAIS' ? '#16a34a' : '#dc2626' }}>
                             {parsedData.apuramentoIva?.dedutivel.diferenca || '0,00 Kz'}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* 3. IVA A PAGAR (APURAMENTO FINAL) */}
-                    <div className="col-12 col-md-4">
+                    {/* 3. APURAMENTO DO IVA (CARD CONFORME - CLEAN PROFESSIONAL) */}
+                    <div className="col-12 col-md-4 d-flex flex-column">
+                      <div style={{ textAlign: 'center', marginBottom: '16px', paddingTop: '4px' }}>
+                        <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.6px', textTransform: 'uppercase', display: 'inline-block' }}>
+                          APURAMENTO DO IVA
+                        </span>
+                      </div>
                       <div
-                        className="p-16 rounded h-100"
                         style={{
-                          background: parsedData.apuramentoIva?.pagar.status === 'IGUAIS' ? '#f6ffed' : '#fff1f0',
-                          border: `2px solid ${parsedData.apuramentoIva?.pagar.status === 'IGUAIS' ? '#b7eb8f' : '#ffa39e'}`,
-                          borderRadius: 10,
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderTop: `4px solid ${parsedData.apuramentoIva?.isRecuperar ? '#10b981' : parsedData.apuramentoIva?.isReembolso ? '#3b82f6' : '#ef4444'}`,
+                          borderRadius: '10px',
+                          padding: '24px 20px',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                          flex: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between'
                         }}
                       >
-                        <div className="d-flex justify-content-between align-items-center mb-6">
-                          <span
-                            className="fw-800 text-uppercase"
-                            style={{
-                              fontSize: 11,
-                              color: parsedData.apuramentoIva?.pagar.status === 'IGUAIS' ? '#389e0d' : '#cf1322',
-                              letterSpacing: '0.5px',
-                            }}
-                          >
-                            (=) 3. IVA a Pagar ao Estado
-                          </span>
-                          <span className="badge badge-success px-6 py-2" style={{ fontSize: 10 }}>
-                            Conta 3456 · Campo 27
-                          </span>
+                        <div>
+                          <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '14px' }}>
+                            <span
+                              style={{
+                                fontSize: '12px',
+                                fontWeight: 800,
+                                color: '#0f172a',
+                                letterSpacing: '0.3px',
+                                textTransform: 'uppercase'
+                              }}
+                            >
+                              {parsedData.apuramentoIva?.tituloCard3 || '(=) 3. Apuramento do IVA'}
+                            </span>
+                            <span
+                              className="badge"
+                              style={{
+                                fontSize: '10px',
+                                fontWeight: 700,
+                                background: parsedData.apuramentoIva?.isRecuperar ? '#ecfdf5' : parsedData.apuramentoIva?.isReembolso ? '#eff6ff' : '#fef2f2',
+                                color: parsedData.apuramentoIva?.isRecuperar ? '#047857' : parsedData.apuramentoIva?.isReembolso ? '#1d4ed8' : '#b91c1c',
+                                border: `1px solid ${parsedData.apuramentoIva?.isRecuperar ? '#a7f3d0' : parsedData.apuramentoIva?.isReembolso ? '#bfdbfe' : '#fecaca'}`,
+                                padding: '4px 8px'
+                              }}
+                            >
+                              {parsedData.apuramentoIva?.rubricaCard3 || 'Conta 34.5'}
+                            </span>
+                          </div>
+                          <div style={{ marginBottom: '12px' }}>
+                            <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                              Contabilidade {parsedData.apuramentoIva?.isRecuperar ? '(Conta 34.5.7.1)' : parsedData.apuramentoIva?.isReembolso ? '(Conta 34.5.8.1)' : '(Conta 34.5.6.1)'}:
+                            </span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>
+                              {parsedData.apuramentoIva?.resultadoPrincipal?.contabilidade || '—'}
+                            </div>
+                          </div>
+                          <div style={{ marginBottom: '14px' }}>
+                            <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                              Declaração AGT {parsedData.apuramentoIva?.isRecuperar ? '(Campo 34/39)' : parsedData.apuramentoIva?.isReembolso ? '(Campo 40)' : '(Campo 37)'}:
+                            </span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>
+                              {parsedData.apuramentoIva?.resultadoPrincipal?.agt || '—'}
+                            </div>
+                          </div>
+
+                          {/* AVISO LEGAL/CONTABILÍSTICO SÓBRIO E ELEGANTE COM PADDING ADEQUADO */}
+                          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px', marginBottom: '14px', fontSize: '11px', color: '#334155', lineHeight: 1.5 }}>
+                            {parsedData.apuramentoIva?.isRecuperar ? (
+                              <>
+                                <strong style={{ color: '#047857' }}>✓ A empresa não paga IVA neste período:</strong> O imposto dedutível supera o liquidado. O crédito apurado <strong>acumula e transita como crédito fiscal para o mês seguinte</strong> (Artigo 19.º do CIVA).
+                              </>
+                            ) : parsedData.apuramentoIva?.isReembolso ? (
+                              <>
+                                <strong style={{ color: '#1d4ed8' }}>ℹ️ Reembolso (Parcial ou Total):</strong> Pedido de devolução de crédito tributário submetido à AGT nos termos do regulamento do CIVA.
+                              </>
+                            ) : (
+                              <>
+                                <strong style={{ color: '#b91c1c' }}>⚠️ Imposto a pagar ao Estado:</strong> Valor apurado a liquidar perante a AGT através de DAR até ao último dia do mês legalmente fixado.
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <div className="mb-4">
-                          <span className="text-muted d-block" style={{ fontSize: 11 }}>Contabilidade (Liquidado − Dedutível):</span>
-                          <strong className="color-dark" style={{ fontSize: 17, color: '#1a3353' }}>
-                            {parsedData.apuramentoIva?.pagar.contabilidade || '—'}
-                          </strong>
-                        </div>
-                        <div className="mb-8">
-                          <span className="text-muted d-block" style={{ fontSize: 11 }}>Declaração AGT (Modelo 7):</span>
-                          <strong className="color-dark" style={{ fontSize: 17, color: '#1a3353' }}>
-                            {parsedData.apuramentoIva?.pagar.agt || '—'}
-                          </strong>
-                        </div>
-                        <div className="pt-8 border-top d-flex justify-content-between align-items-center">
-                          <span style={{ fontSize: 11, color: '#555' }}>Confronto Final:</span>
+
+                        <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '11.5px', color: '#64748b' }}>Confronto Final:</span>
                           <span
                             className="badge"
                             style={{
-                              fontSize: 11,
+                              fontSize: '11px',
                               fontWeight: 700,
-                              backgroundColor: parsedData.apuramentoIva?.pagar.status === 'IGUAIS' ? '#52c41a' : '#f5222d',
-                              color: '#fff',
+                              background: parsedData.apuramentoIva?.resultadoPrincipal?.status === 'IGUAIS' ? '#ecfdf5' : '#fef2f2',
+                              color: parsedData.apuramentoIva?.resultadoPrincipal?.status === 'IGUAIS' ? '#047857' : '#b91c1c',
+                              border: `1px solid ${parsedData.apuramentoIva?.resultadoPrincipal?.status === 'IGUAIS' ? '#a7f3d0' : '#fecaca'}`,
+                              padding: '6px 12px'
                             }}
                           >
-                            {parsedData.apuramentoIva?.pagar.status === 'IGUAIS' ? '✓ IGUAIS (CONFORME)' : `⚠️ DIFERENÇA: ${parsedData.apuramentoIva?.pagar.diferenca}`}
+                            {parsedData.apuramentoIva?.resultadoPrincipal?.status === 'IGUAIS' ? '✓ IGUAIS (CONFORME)' : `⚠️ DIFERENÇA: ${parsedData.apuramentoIva?.resultadoPrincipal?.diferenca}`}
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-14 p-10 rounded text-muted" style={{ background: '#f8fafc', fontSize: 11.5, border: '1px solid #edf0f5', lineHeight: 1.5 }}>
-                    <i className="la la-info-circle text-primary mr-1"></i>
-                    <strong>Nota Fiscal AGT:</strong> O imposto a entregar ao Estado resulta estritamente da dedução do imposto suportado nas aquisições (Conta 3451) ao imposto liquidado nas operações ativas (Conta 3453). Caso o imposto dedutível supere o liquidado, a entidade apura <strong>Crédito Fiscal de IVA (Conta 3455)</strong> a transportar para os períodos seguintes perante a AGT.
+                  {/* OS TRÊS RESULTADOS OFICIAIS DO APURAMENTO DO IVA (PGC ANGOLANO · CONTAS 34.5) - SÓBRIO E CONFORME */}
+                  <div style={{ marginTop: '32px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '22px 22px' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-15 flex-wrap" style={{ gap: 10 }}>
+                      <span className="fw-700 text-uppercase" style={{ fontSize: 12, color: '#334155', letterSpacing: '0.4px' }}>
+                        <i className="la la-book-open text-primary mr-1" style={{ fontSize: 15 }}></i>
+                        Quadro Regulamentar: Os Três Resultados Oficiais do Apuramento (PGC Angolano · Contas 34.5)
+                      </span>
+                      <span className="badge" style={{ fontSize: 10.5, background: '#ffffff', color: '#64748b', border: '1px solid #e2e8f0', fontWeight: 600, padding: '5px 10px' }}>
+                        Art. 19.º CIVA · Lei n.º 7/19
+                      </span>
+                    </div>
+
+                    <div className="row" style={{ rowGap: 14 }}>
+                      {/* Conta 34.5.6.1 */}
+                      <div className="col-12 col-md-4">
+                        <div
+                          style={{
+                            background: '#ffffff',
+                            border: `1px solid ${parsedData.apuramentoIva?.tipoApuramento === 'PAGAR' ? '#fecaca' : '#e2e8f0'}`,
+                            borderLeft: `4px solid ${parsedData.apuramentoIva?.tipoApuramento === 'PAGAR' ? '#ef4444' : '#cbd5e1'}`,
+                            borderRadius: '8px',
+                            padding: '16px 18px',
+                            height: '100%'
+                          }}
+                        >
+                          <div className="d-flex justify-content-between align-items-center mb-8">
+                            <strong style={{ fontSize: 12, color: parsedData.apuramentoIva?.tipoApuramento === 'PAGAR' ? '#b91c1c' : '#475569' }}>
+                              Conta 34.5.6.1
+                            </strong>
+                            {parsedData.apuramentoIva?.tipoApuramento === 'PAGAR' ? (
+                              <span className="badge" style={{ fontSize: 9.5, fontWeight: 700, background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', padding: '3px 8px' }}>
+                                SITUAÇÃO ATIVA
+                              </span>
+                            ) : (
+                              <span className="text-muted" style={{ fontSize: 10.5 }}>Inativa · Campo 37 AGT</span>
+                            )}
+                          </div>
+                          <div className="fw-700 mb-6" style={{ fontSize: 12, color: '#0f172a' }}>
+                            IVA a Pagar de Apuramento
+                          </div>
+                          <div className="text-muted" style={{ fontSize: 11, lineHeight: 1.45 }}>
+                            Aplica-se quando <strong>Liquidado &gt; Dedutível</strong>. Imposto exigível pelo Estado a entregar via DAR.
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Conta 34.5.7.1 */}
+                      <div className="col-12 col-md-4">
+                        <div
+                          style={{
+                            background: '#ffffff',
+                            border: `1px solid ${parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR' ? '#a7f3d0' : '#e2e8f0'}`,
+                            borderLeft: `4px solid ${parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR' ? '#10b981' : '#cbd5e1'}`,
+                            borderRadius: '8px',
+                            padding: '16px 18px',
+                            height: '100%'
+                          }}
+                        >
+                          <div className="d-flex justify-content-between align-items-center mb-8">
+                            <strong style={{ fontSize: 12, color: parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR' ? '#047857' : '#475569' }}>
+                              Conta 34.5.7.1
+                            </strong>
+                            {parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR' ? (
+                              <span className="badge" style={{ fontSize: 9.5, fontWeight: 700, background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 8px' }}>
+                                SITUAÇÃO ATIVA
+                              </span>
+                            ) : (
+                              <span className="text-muted" style={{ fontSize: 10.5 }}>Inativa · Campo 34/39 AGT</span>
+                            )}
+                          </div>
+                          <div className="fw-700 mb-6" style={{ fontSize: 12, color: '#0f172a' }}>
+                            IVA a Recuperar de Apuramentos
+                          </div>
+                          <div className="text-muted" style={{ fontSize: 11, lineHeight: 1.45 }}>
+                            Aplica-se quando <strong>Dedutível &gt; Liquidado</strong>. A empresa <strong>não paga IVA</strong>; o crédito <strong>acumula para o mês seguinte</strong>.
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Conta 34.5.8.1 */}
+                      <div className="col-12 col-md-4">
+                        <div
+                          style={{
+                            background: '#ffffff',
+                            border: `1px solid ${parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO' ? '#bfdbfe' : '#e2e8f0'}`,
+                            borderLeft: `4px solid ${parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO' ? '#3b82f6' : '#cbd5e1'}`,
+                            borderRadius: '8px',
+                            padding: '16px 18px',
+                            height: '100%'
+                          }}
+                        >
+                          <div className="d-flex justify-content-between align-items-center mb-8">
+                            <strong style={{ fontSize: 12, color: parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO' ? '#1d4ed8' : '#475569' }}>
+                              Conta 34.5.8.1
+                            </strong>
+                            {parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO' ? (
+                              <span className="badge" style={{ fontSize: 9.5, fontWeight: 700, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '3px 8px' }}>
+                                SITUAÇÃO ATIVA
+                              </span>
+                            ) : (
+                              <span className="text-muted" style={{ fontSize: 10.5 }}>Inativa · Campo 40 AGT</span>
+                            )}
+                          </div>
+                          <div className="fw-700 mb-6" style={{ fontSize: 12, color: '#0f172a' }}>
+                            IVA Reembolsos Pedidos
+                          </div>
+                          <div className="text-muted" style={{ fontSize: 11, lineHeight: 1.45 }}>
+                            <strong>Reembolso (Parcial ou Total)</strong> solicitado formalmente à AGT para restituição de saldo credor.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '16px', padding: '12px 16px', borderRadius: '8px', background: '#f8fafc', fontSize: '11.5px', color: '#475569', border: '1px solid #edf0f5', lineHeight: 1.55 }}>
+                    <i className="la la-info-circle text-primary mr-1" style={{ fontSize: 13 }}></i>
+                    <strong>Regra Oficial do CIVA (Lei n.º 7/19):</strong> O apuramento do IVA resulta do confronto entre o imposto liquidado nas vendas ou prestações de serviços (Conta 34.5.3) e o imposto dedutível suportado nas compras ou despesas (Conta 34.5.1/34.5.2). Se o imposto liquidado for superior, apura-se imposto a pagar ao Estado (Conta 34.5.6.1). Se o imposto dedutível for superior, a empresa não paga IVA, transitando o saldo como crédito fiscal para dedução nos períodos seguintes (Conta 34.5.7.1) ou solicitando reembolso (Conta 34.5.8.1).
                   </div>
                 </div>
               </div>

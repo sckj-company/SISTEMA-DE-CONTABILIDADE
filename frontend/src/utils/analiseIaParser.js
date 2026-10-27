@@ -28,6 +28,17 @@ export function isLinhaDecorativaOuRuido(str) {
   return false;
 }
 
+export function parseValorKz(str) {
+  if (!str) return 0;
+  const limpo = String(str)
+    .replace(/[^\d,.-]/g, '')
+    .trim();
+  if (!limpo) return 0;
+  const normalizado = limpo.replace(/\./g, '').replace(',', '.');
+  const num = parseFloat(normalizado);
+  return isNaN(num) ? 0 : num;
+}
+
 /**
  * Valida se um título de divergência corresponde a uma rubrica ou conta real
  */
@@ -121,8 +132,8 @@ export function parseAnaliseIA(texto) {
         if (partes.length >= 3) {
           const statusRaw = (partes[3] || partes[2] || '').toUpperCase();
           const isDif = statusRaw.includes('DIFEREN') || statusRaw.includes('DIVERG') || statusRaw.includes('差异') || statusRaw.includes('ALERTA');
-          const isOk = statusRaw.includes('IGUAIS') || statusRaw.includes('OK') || statusRaw.includes('CONFORME') || statusRaw.includes('CONFORM') || statusRaw.includes('符合') || statusRaw.includes('相同');
-          const status = isDif ? 'DIFERENÇA' : isOk ? 'IGUAIS' : 'INFO';
+          const isOk = statusRaw.includes('IGUAL') || statusRaw.includes('IGUAIS') || statusRaw.includes('OK') || statusRaw.includes('CONFORME') || statusRaw.includes('CONFORM') || statusRaw.includes('符合') || statusRaw.includes('相同');
+          let status = isDif ? 'DIFERENÇA' : isOk ? 'IGUAIS' : 'INFO';
 
           const campoNome = partes[0].replace(/\*\*/g, '').trim();
           const contab = partes[1] ? partes[1].replace(/\*\*/g, '').trim() : '—';
@@ -132,6 +143,10 @@ export function parseAnaliseIA(texto) {
             : status === 'IGUAIS'
             ? '0,00 Kz'
             : 'Diferença apurada';
+
+          if (parseValorKz(dif) === 0 && !isDif) {
+            status = 'IGUAIS';
+          }
 
           itensConfronto.push({
             campo: campoNome,
@@ -397,8 +412,11 @@ export function parseAnaliseIA(texto) {
     }
   }
 
-  // 9. Quadro Oficial de Apuramento do IVA (Lei n.º 7/19 - Código do IVA)
-  // Regra Legal Obrigatória: IVA a Pagar = IVA Liquidado (Conta 3453) - IVA Dedutível (Conta 3451)
+  // 9. Quadro Oficial de Apuramento do IVA (Lei n.º 7/19 - Código do IVA e PGC Angolano)
+  // Três Resultados Oficiais do PGC Angolano (Contas 34.5):
+  // 1. Conta 34.5.6.1: IVA a pagar de apuramento (quando Liquidado > Dedutível)
+  // 2. Conta 34.5.7.1: IVA a recuperar de apuramentos (quando Dedutível > Liquidado) — A empresa NÃO paga IVA, acumula p/ mês seguinte
+  // 3. Conta 34.5.8.1: IVA reembolsos pedidos (quando solicitado reembolso à AGT)
   const itemLiquidado = itensConfronto.find((i) =>
     i.campo.toLowerCase().includes('liquidado') ||
     i.campo.toLowerCase().includes('favor do estado')
@@ -408,46 +426,224 @@ export function parseAnaliseIA(texto) {
     i.campo.toLowerCase().includes('suportado') ||
     i.campo.toLowerCase().includes('favor do sujeito passivo')
   );
-  const itemPagar = itensConfronto.find((i) =>
-    (i.campo.toLowerCase().includes('pagar') || i.campo.toLowerCase().includes('apurado')) &&
-    !i.campo.toLowerCase().includes('crédito') &&
-    !i.campo.toLowerCase().includes('recuperar')
-  );
-  const itemRecuperar = itensConfronto.find((i) =>
-    i.campo.toLowerCase().includes('recuperar') ||
-    i.campo.toLowerCase().includes('crédito de iva') ||
-    i.campo.toLowerCase().includes('crédito fiscal')
+
+  // Linha genérica ou explícita de Apuramento do IVA
+  const itemApuramentoGeral = itensConfronto.find((i) =>
+    i.campo.toLowerCase().includes('apuramento')
   );
 
-  const apuramentoIva = (itemLiquidado || itemDedutivel || itemPagar)
+  const textoApuramentoValores = (
+    (itemApuramentoGeral?.contabilidade || '') + ' ' +
+    (itemApuramentoGeral?.agt || '')
+  ).toLowerCase();
+
+  const apuramentoDizPagar = textoApuramentoValores.includes('a pagar') || textoApuramentoValores.includes('pagar');
+  const apuramentoDizRecuperar = textoApuramentoValores.includes('a recuperar') || textoApuramentoValores.includes('recuperar') || textoApuramentoValores.includes('crédito');
+
+  let itemPagar = itensConfronto.find((i) =>
+    (i.campo.toLowerCase().includes('pagar') && !i.campo.toLowerCase().includes('recuperar')) ||
+    i.campo.toLowerCase().includes('34.5.6.1') ||
+    i.campo.toLowerCase().includes('imposto a pagar')
+  );
+  let itemRecuperar = itensConfronto.find((i) =>
+    (i.campo.toLowerCase().includes('recuperar') && !i.campo.toLowerCase().includes('pagar')) ||
+    i.campo.toLowerCase().includes('34.5.7.1') ||
+    i.campo.toLowerCase().includes('crédito fiscal') ||
+    i.campo.toLowerCase().includes('excesso a reportar')
+  );
+  const itemReembolso = itensConfronto.find((i) =>
+    i.campo.toLowerCase().includes('reembolso') ||
+    i.campo.toLowerCase().includes('34.5.8.1')
+  );
+
+  // Se a tabela tiver linha genérica com ambos os termos no título:
+  if (itemApuramentoGeral) {
+    if (apuramentoDizPagar && !itemPagar) itemPagar = itemApuramentoGeral;
+    if (apuramentoDizRecuperar && !itemRecuperar) itemRecuperar = itemApuramentoGeral;
+  }
+
+  // Valores numéricos para determinar dinamicamente a situação legal (CIVA Art. 19.º)
+  const valLiq = Math.max(parseValorKz(itemLiquidado?.agt), parseValorKz(itemLiquidado?.contabilidade));
+  const valDed = Math.max(parseValorKz(itemDedutivel?.agt), parseValorKz(itemDedutivel?.contabilidade));
+  const valRec = Math.max(parseValorKz(itemRecuperar?.agt), parseValorKz(itemRecuperar?.contabilidade));
+  const valPag = Math.max(parseValorKz(itemPagar?.agt), parseValorKz(itemPagar?.contabilidade));
+  const valReemb = Math.max(parseValorKz(itemReembolso?.agt), parseValorKz(itemReembolso?.contabilidade));
+
+  // Verificação nos blocos de texto da análise gerada (Contas 34.5)
+  const matchPagarCiva = texto.match(/Conta\s*34\.5\.6\.1[^\n:]*:\s*([^\n\(\)]+)/i);
+  const matchRecuperarCiva = texto.match(/Conta\s*34\.5\.7\.1[^\n:]*:\s*([^\n\(\)]+)/i);
+  const valCivaPagar = parseValorKz(matchPagarCiva ? matchPagarCiva[1] : null);
+  const valCivaRecuperar = parseValorKz(matchRecuperarCiva ? matchRecuperarCiva[1] : null);
+
+  // Determinação rigorosa da Situação Legal segundo o Código do IVA (Art. 19.º):
+  let tipoApuramento = 'PAGAR';
+  if (valDed > valLiq && valDed > 0) {
+    // 1. IVA Dedutível supera o IVA Liquidado -> A empresa NÃO paga IVA, acumula crédito fiscal
+    tipoApuramento = 'RECUPERAR';
+  } else if (valLiq > valDed && valLiq > 0) {
+    // 2. IVA Liquidado supera o IVA Dedutível -> Imposto exigível pelo Estado a pagar
+    tipoApuramento = 'PAGAR';
+  } else if (valCivaRecuperar > 0 && valCivaPagar === 0) {
+    tipoApuramento = 'RECUPERAR';
+  } else if (valCivaPagar > 0) {
+    tipoApuramento = 'PAGAR';
+  } else if (apuramentoDizRecuperar && !apuramentoDizPagar) {
+    tipoApuramento = 'RECUPERAR';
+  } else if (apuramentoDizPagar) {
+    tipoApuramento = 'PAGAR';
+  } else if (valReemb > 0) {
+    tipoApuramento = 'REEMBOLSO';
+  } else if (valRec > 0 && valPag === 0) {
+    tipoApuramento = 'RECUPERAR';
+  } else {
+    tipoApuramento = 'PAGAR';
+  }
+
+  // Helper para limpar sufixos como (a pagar) ou (a recuperar) dos valores exibidos
+  const limparSufixo = (val) => {
+    if (!val) return '0,00 Kz';
+    return String(val).replace(/\s*\([^\)]*\)/g, '').trim();
+  };
+
+  // Valores matemáticos e apurados oficiais
+  const valorApuradoPagar = valLiq > valDed
+    ? `${(valLiq - valDed).toLocaleString('pt-AO', { minimumFractionDigits: 2 })} Kz`
+    : '0,00 Kz';
+  const valorApuradoRecuperar = valDed > valLiq
+    ? `${(valDed - valLiq).toLocaleString('pt-AO', { minimumFractionDigits: 2 })} Kz`
+    : '0,00 Kz';
+
+  const valorAtivoPagarContab = (itemPagar && limparSufixo(itemPagar.contabilidade) !== '0,00 Kz' && limparSufixo(itemPagar.contabilidade) !== '—')
+    ? limparSufixo(itemPagar.contabilidade)
+    : valorApuradoPagar;
+  const valorAtivoPagarAgt = (itemPagar && limparSufixo(itemPagar.agt) !== '0,00 Kz' && limparSufixo(itemPagar.agt) !== '—')
+    ? limparSufixo(itemPagar.agt)
+    : valorApuradoPagar;
+
+  const valorAtivoRecuperarContab = (itemRecuperar && limparSufixo(itemRecuperar.contabilidade) !== '0,00 Kz' && limparSufixo(itemRecuperar.contabilidade) !== '—')
+    ? limparSufixo(itemRecuperar.contabilidade)
+    : valorApuradoRecuperar;
+  const valorAtivoRecuperarAgt = (itemRecuperar && limparSufixo(itemRecuperar.agt) !== '0,00 Kz' && limparSufixo(itemRecuperar.agt) !== '—')
+    ? limparSufixo(itemRecuperar.agt)
+    : valorApuradoRecuperar;
+
+  const statusPagar = (parseValorKz(valorAtivoPagarContab) === parseValorKz(valorAtivoPagarAgt) || itemPagar?.status === 'IGUAIS')
+    ? 'IGUAIS'
+    : (itemPagar?.status || 'DIFERENÇA');
+
+  const statusRecuperar = (parseValorKz(valorAtivoRecuperarContab) === parseValorKz(valorAtivoRecuperarAgt) || itemRecuperar?.status === 'IGUAIS')
+    ? 'IGUAIS'
+    : (itemRecuperar?.status || 'DIFERENÇA');
+
+  const diferencaPagar = (statusPagar === 'IGUAIS' || parseValorKz(valorAtivoPagarContab) === parseValorKz(valorAtivoPagarAgt))
+    ? '0,00 Kz'
+    : (itemPagar?.diferenca || 'Diferença apurada');
+
+  const diferencaRecuperar = (statusRecuperar === 'IGUAIS' || parseValorKz(valorAtivoRecuperarContab) === parseValorKz(valorAtivoRecuperarAgt))
+    ? '0,00 Kz'
+    : (itemRecuperar?.diferenca || 'Diferença apurada');
+
+  const tresResultadosPGC = [
+    {
+      codigo: '34.5.6.1',
+      nome: 'IVA a pagar de apuramento',
+      regra: 'Quando IVA Liquidado > IVA Dedutível (Campo 37 da AGT)',
+      ativo: tipoApuramento === 'PAGAR',
+      cor: '#ff4d4f',
+      valorContabilidade: tipoApuramento === 'PAGAR' ? valorAtivoPagarContab : '0,00 Kz',
+      valorAgt: tipoApuramento === 'PAGAR' ? valorAtivoPagarAgt : '0,00 Kz',
+      status: tipoApuramento === 'PAGAR' ? statusPagar : 'IGUAIS',
+    },
+    {
+      codigo: '34.5.7.1',
+      nome: 'IVA a recuperar de apuramentos (Crédito Fiscal)',
+      regra: 'Quando IVA Dedutível > IVA Liquidado (Campo 34/39 da AGT) — A empresa não paga IVA, o crédito acumula para o mês seguinte',
+      ativo: tipoApuramento === 'RECUPERAR',
+      cor: '#52c41a',
+      valorContabilidade: tipoApuramento === 'RECUPERAR' ? valorAtivoRecuperarContab : '0,00 Kz',
+      valorAgt: tipoApuramento === 'RECUPERAR' ? valorAtivoRecuperarAgt : '0,00 Kz',
+      status: tipoApuramento === 'RECUPERAR' ? statusRecuperar : 'IGUAIS',
+    },
+    {
+      codigo: '34.5.8.1',
+      nome: 'IVA reembolsos pedidos',
+      regra: 'Reembolso (Parcial ou Total) solicitado à AGT (Campo 40 da AGT)',
+      ativo: tipoApuramento === 'REEMBOLSO',
+      cor: '#1890ff',
+      valorContabilidade: itemReembolso?.contabilidade || '0,00 Kz',
+      valorAgt: itemReembolso?.agt || '0,00 Kz',
+      status: itemReembolso?.status || 'IGUAIS',
+    },
+  ];
+
+  const apuramentoIva = (itemLiquidado || itemDedutivel || itemPagar || itemRecuperar || itemApuramentoGeral)
     ? {
+        tipoApuramento,
+        isRecuperar: tipoApuramento === 'RECUPERAR',
+        isPagar: tipoApuramento === 'PAGAR',
+        isReembolso: tipoApuramento === 'REEMBOLSO',
+        tituloCard3: tipoApuramento === 'RECUPERAR'
+          ? '(=) 3. IVA a Recuperar (Crédito Fiscal)'
+          : tipoApuramento === 'REEMBOLSO'
+          ? '(=) 3. IVA Reembolsos Pedidos'
+          : '(=) 3. IVA a Pagar ao Estado',
+        rubricaCard3: tipoApuramento === 'RECUPERAR'
+          ? 'Conta 34.5.7.1 · Campo 34/39'
+          : tipoApuramento === 'REEMBOLSO'
+          ? 'Conta 34.5.8.1 · Campo 40'
+          : 'Conta 34.5.6.1 · Campo 37',
         liquidado: {
           contabilidade: itemLiquidado?.contabilidade || '0,00 Kz',
           agt: itemLiquidado?.agt || '0,00 Kz',
-          status: itemLiquidado?.status || 'IGUAIS',
+          status: (itemLiquidado?.status === 'IGUAIS' || parseValorKz(itemLiquidado?.contabilidade) === parseValorKz(itemLiquidado?.agt)) ? 'IGUAIS' : (itemLiquidado?.status || 'DIFERENÇA'),
           diferenca: itemLiquidado?.diferenca || '0,00 Kz',
         },
         dedutivel: {
           contabilidade: itemDedutivel?.contabilidade || '0,00 Kz',
           agt: itemDedutivel?.agt || '0,00 Kz',
-          status: itemDedutivel?.status || 'IGUAIS',
+          status: (itemDedutivel?.status === 'IGUAIS' || parseValorKz(itemDedutivel?.contabilidade) === parseValorKz(itemDedutivel?.agt)) ? 'IGUAIS' : (itemDedutivel?.status || 'DIFERENÇA'),
           diferenca: itemDedutivel?.diferenca || '0,00 Kz',
         },
-        pagar: {
-          contabilidade: itemPagar?.contabilidade || '0,00 Kz',
-          agt: itemPagar?.agt || '0,00 Kz',
-          status: itemPagar?.status || 'IGUAIS',
-          diferenca: itemPagar?.diferenca || '0,00 Kz',
-        },
-        recuperar: itemRecuperar
+        resultadoPrincipal: tipoApuramento === 'RECUPERAR'
           ? {
-              contabilidade: itemRecuperar.contabilidade,
-              agt: itemRecuperar.agt,
-              status: itemRecuperar.status,
-              diferenca: itemRecuperar.diferenca,
+              contabilidade: valorAtivoRecuperarContab,
+              agt: valorAtivoRecuperarAgt,
+              status: statusRecuperar,
+              diferenca: diferencaRecuperar,
+            }
+          : tipoApuramento === 'REEMBOLSO'
+          ? (itemReembolso || { contabilidade: '0,00 Kz', agt: '0,00 Kz', status: 'IGUAIS', diferenca: '0,00 Kz' })
+          : {
+              contabilidade: valorAtivoPagarContab,
+              agt: valorAtivoPagarAgt,
+              status: statusPagar,
+              diferenca: diferencaPagar,
+            },
+        pagar: {
+          contabilidade: valorAtivoPagarContab,
+          agt: valorAtivoPagarAgt,
+          status: statusPagar,
+          diferenca: diferencaPagar,
+        },
+        recuperar: {
+          contabilidade: valorAtivoRecuperarContab,
+          agt: valorAtivoRecuperarAgt,
+          status: statusRecuperar,
+          diferenca: diferencaRecuperar,
+        },
+        reembolso: itemReembolso
+          ? {
+              contabilidade: itemReembolso.contabilidade,
+              agt: itemReembolso.agt,
+              status: itemReembolso.status,
+              diferenca: itemReembolso.diferenca,
             }
           : null,
-        formula: 'IVA a Pagar = IVA Liquidado (Vendas) - IVA Dedutível (Compras)',
+        tresResultadosPGC,
+        formula: 'Apuramento do IVA = IVA Liquidado (Vendas ou Serviços) − IVA Dedutível (Compras ou Despesas)',
+        notaLegal: tipoApuramento === 'RECUPERAR'
+          ? 'A empresa NÃO PAGA IVA neste período: O imposto dedutível supera o liquidado. O crédito apurado acumula e transita como crédito fiscal para o mês seguinte (Artigo 19.º do Código do IVA - Lei n.º 7/19).'
+          : 'Imposto a pagar ao Estado: O IVA liquidado supera o dedutível. Valor apurado a liquidar perante a AGT através de DAR até ao último dia do mês legalmente fixado.',
       }
     : null;
 

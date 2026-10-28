@@ -23,7 +23,7 @@
     "madeBy": "Feito por SCKJ"
   },
   "login": {
-    "title": "Entrar",
+    "title": "Iniciar Sessão",
     "subtitle": "Use sua conta para acessar o sistema",
     "emailPlaceholder": "Email ou NIF",
     "passwordPlaceholder": "Senha",

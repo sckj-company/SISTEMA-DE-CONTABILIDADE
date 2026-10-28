@@ -120,10 +120,12 @@ const LoginPage = ({ onLogin }) => {
                       <div className="card border-0">
                         <div className="card-header border-0 pb-md-15 pb-10 pt-md-20 pt-10">
                           <div className="edit-profile__title">
-                            <h6>
-                              {t('login.title')}{' '}
-                              <span className="color-primary">Sistema IVA</span>
-                            </h6>
+                            <h5 className="fw-700 mb-2" style={{ color: '#0f172a' }}>
+                              {t('login.title', 'Iniciar Sessão')}
+                            </h5>
+                            <span className="color-primary fw-600 d-block" style={{ fontSize: '14.5px', lineHeight: 1.4 }}>
+                              {t('login.systemName', 'Sistema de Reconciliação Contabilística e Fiscal')}
+                            </span>
                           </div>
                         </div>
                         <div className="card-body">

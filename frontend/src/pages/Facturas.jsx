@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { facturaService } from '../services/api';
 import { usePeriodo, usePeriodoDaUrl } from '../context/PeriodoContext';
@@ -34,6 +35,7 @@ const formatarDocUrl = (url) => {
 };
 
 const Facturas = () => {
+  const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const cameraInputFallbackRef = useRef(null);
   const videoRef = useRef(null);
@@ -398,10 +400,10 @@ const Facturas = () => {
             </span>
             <div>
               <h4 className="fw-700 color-dark mb-2" style={{ fontSize: 19 }}>
-                Leitor & Scanner de Facturas (IA)
+                {t('facturas.title', 'Leitor & Scanner de Facturas (IA)')}
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13, lineHeight: 1.45 }}>
-                Extração inteligente de dados do fornecedor, conformidade da AGT, apuramento de retenções e integração direta no Livro Diário do PGC.
+                {t('facturas.subtitle', 'Extração inteligente de dados do fornecedor, conformidade da AGT, apuramento de retenções e integração direta no Livro Diário do PGC.')}
               </p>
             </div>
           </div>
@@ -417,7 +419,7 @@ const Facturas = () => {
               style={{ borderRadius: 8, height: 38, padding: '0 16px', margin: '3px 4px' }}
             >
               <i className={`la ${exportando ? 'la-spinner la-spin' : 'la-file-excel'} mr-6`} style={{ fontSize: 16 }}></i>
-              {exportando ? 'A Gerar Mapa...' : 'Exportar Mapa AGT (Excel)'}
+              {exportando ? t('common.loading', 'A Gerar Mapa...') : t('facturas.exportExcel', 'Exportar Mapa AGT (Excel)')}
             </button>
           )}
           <button
@@ -429,7 +431,7 @@ const Facturas = () => {
             title="Tirar fotografia da factura física com a câmara ou webcam"
           >
             <i className="la la-camera mr-6" style={{ fontSize: 16 }}></i>
-            Tirar Foto (Câmara)
+            {t('facturas.takePhoto', 'Tirar Foto (Câmara)')}
           </button>
           <button
             type="button"
@@ -439,7 +441,7 @@ const Facturas = () => {
             style={{ borderRadius: 8, height: 38, padding: '0 16px', margin: '3px 4px' }}
           >
             <i className={`la ${scanning ? 'la-spinner la-spin' : 'la-upload'} mr-6`} style={{ fontSize: 16 }}></i>
-            {scanning ? 'A Analisar...' : 'Carregar Ficheiro (PDF/Foto)'}
+            {scanning ? t('common.loading', 'A Analisar...') : t('facturas.newInvoice', 'Carregar Ficheiro (PDF/Foto)')}
           </button>
           <input
             type="file"
@@ -556,7 +558,7 @@ const Facturas = () => {
               <div className="card-body p-15 d-flex align-items-center justify-content-between">
                 <div>
                   <span className="text-muted fw-600" style={{ fontSize: 11.5 }}>
-                    TOTAL FACTURAS
+                    {t('facturas.totalInvoices', 'TOTAL FACTURAS')}
                   </span>
                   <h4 className="fw-700 mb-0 mt-4 color-dark">{estatisticas.total_contagem}</h4>
                   <small className="text-muted" style={{ fontSize: 11 }}>
@@ -587,7 +589,7 @@ const Facturas = () => {
               <div className="card-body p-15 d-flex align-items-center justify-content-between">
                 <div>
                   <span className="text-muted fw-600" style={{ fontSize: 11.5 }}>
-                    BASE DE INCIDÊNCIA
+                    {t('facturas.baseAmount', 'BASE DE INCIDÊNCIA')}
                   </span>
                   <h4 className="fw-700 mb-0 mt-4 text-primary">{formatarKz(estatisticas.total_base)}</h4>
                   <small className="text-muted" style={{ fontSize: 11 }}>
@@ -618,7 +620,7 @@ const Facturas = () => {
               <div className="card-body p-15 d-flex align-items-center justify-content-between">
                 <div>
                   <span className="text-muted fw-600" style={{ fontSize: 11.5 }}>
-                    IVA SUPORTADO / DEDUTÍVEL
+                    {t('facturas.vatSupported', 'IVA SUPORTADO / DEDUTÍVEL')}
                   </span>
                   <h4 className="fw-700 mb-0 mt-4 text-success">{formatarKz(estatisticas.total_iva_dedutivel)}</h4>
                   <small className="text-muted" style={{ fontSize: 11 }}>
@@ -691,7 +693,7 @@ const Facturas = () => {
                 <input
                   type="text"
                   className="form-control border-left-0"
-                  placeholder="Pesquisar por fornecedor, NIF ou n.º fatura..."
+                  placeholder={t('facturas.searchPlaceholder', 'Pesquisar por fornecedor, NIF ou n.º fatura...')}
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
                   style={{ borderRadius: '0 8px 8px 0', height: 38 }}
@@ -706,11 +708,16 @@ const Facturas = () => {
                 onChange={(e) => setFiltroMes(e.target.value)}
                 style={{ height: 38, borderRadius: 8 }}
               >
-                {MESES.map((m) => (
-                  <option key={m.valor} value={m.valor}>
-                    {m.nome}
-                  </option>
-                ))}
+                {MESES.map((m) => {
+                  const nomeMes = m.valor === 'todos'
+                    ? t('facturas.allMonths', 'Todos os Meses')
+                    : t(`months.${['january','february','march','april','may','june','july','august','september','october','november','december'][parseInt(m.valor, 10) - 1]}`, m.nome);
+                  return (
+                    <option key={m.valor} value={m.valor}>
+                      {nomeMes}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -776,16 +783,16 @@ const Facturas = () => {
               <table className="table table-hover align-middle mb-0" style={{ fontSize: 12.5 }}>
                 <thead className="table-light">
                   <tr>
-                    <th className="py-12 px-15">Documento</th>
-                    <th className="py-12 px-15">Data</th>
-                    <th className="py-12 px-15">Fornecedor / Emitente</th>
-                    <th className="py-12 px-15 text-right">Base Incidência</th>
-                    <th className="py-12 px-15 text-right">IVA (Taxa)</th>
+                    <th className="py-12 px-15">{t('facturas.invoiceNumber', 'Documento')}</th>
+                    <th className="py-12 px-15">{t('facturas.issueDate', 'Data')}</th>
+                    <th className="py-12 px-15">{t('facturas.supplier', 'Fornecedor / Emitente')}</th>
+                    <th className="py-12 px-15 text-right">{t('facturas.baseAmount', 'Base Incidência')}</th>
+                    <th className="py-12 px-15 text-right">{t('facturas.vatAmount', 'IVA (Taxa)')}</th>
                     <th className="py-12 px-15 text-right">Retenções</th>
-                    <th className="py-12 px-15 text-right">Total Líquido</th>
+                    <th className="py-12 px-15 text-right">{t('facturas.total', 'Total Líquido')}</th>
                     <th className="py-12 px-15 text-center">Conformidade AGT</th>
                     <th className="py-12 px-15 text-center">Diário PGC</th>
-                    <th className="py-12 px-15 text-center">Ações</th>
+                    <th className="py-12 px-15 text-center">{t('facturas.actions', 'Ações')}</th>
                   </tr>
                 </thead>
                 <tbody>

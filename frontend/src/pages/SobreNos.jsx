@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 const SobreNos = () => {
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const handleVoltarLogin = () => {
     navigate('/login');
@@ -31,10 +31,10 @@ const SobreNos = () => {
             />
             <div>
               <span className="fw-700 text-dark d-block" style={{ fontSize: 15, lineHeight: 1.2 }}>
-                SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA
+                {t('about.companyName', 'SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA')}
               </span>
               <small className="text-muted" style={{ fontSize: 12 }}>
-                Tecnologia & Governança Contabilística e Fiscal
+                {t('about.companySubtitle', 'Tecnologia & Governança Contabilística e Fiscal')}
               </small>
             </div>
           </div>
@@ -66,7 +66,7 @@ const SobreNos = () => {
               style={{ borderRadius: 6, fontSize: 13.5, fontWeight: 600 }}
             >
               <i className="la la-sign-in-alt fs-16"></i>
-              Aceder ao Sistema
+              {t('about.accessSystem', 'Aceder ao Sistema')}
             </button>
           </div>
         </div>
@@ -88,16 +88,16 @@ const SobreNos = () => {
                   border: '1px solid #e2e8f0',
                 }}
               >
-                SCKJ • LUANDA, ANGOLA
+                {t('about.heroBadge', 'SCKJ • LUANDA, ANGOLA')}
               </span>
               <h1 className="fw-700 text-dark mb-3" style={{ fontSize: '2.4rem', lineHeight: 1.25 }}>
-                Sistema de Reconciliação Contabilística e Fiscal
+                {t('about.title', 'Sistema de Reconciliação Contabilística e Fiscal')}
               </h1>
               <p
                 className="text-muted mx-auto mb-4"
                 style={{ fontSize: '1.1rem', lineHeight: 1.7, maxWidth: 740 }}
               >
-                Desenvolvido pela <strong>SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA</strong> para garantir rigor na conciliação entre o Plano Geral de Contabilidade (PGC), o Código do IVA (CIVA - Lei n.º 7/19) e as declarações Modelo 7 submetidas à Administração Geral Tributária (AGT).
+                {t('about.heroDescription', 'Desenvolvido pela SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA para garantir rigor na conciliação entre o Plano Geral de Contabilidade (PGC), o Código do IVA (CIVA - Lei n.º 7/19) e as declarações Modelo 7 submetidas à Administração Geral Tributária (AGT).')}
               </p>
 
               <div className="d-flex justify-content-center gap-2 flex-wrap">
@@ -106,21 +106,21 @@ const SobreNos = () => {
                   className="btn btn-outline-secondary px-3 py-2"
                   style={{ borderRadius: 6, fontSize: 13.5, fontWeight: 500 }}
                 >
-                  <i className="la la-building mr-1"></i> Sobre a Empresa
+                  <i className="la la-building mr-1"></i> {t('about.aboutCompany', 'Sobre a Empresa')}
                 </a>
                 <a
                   href="#o-sistema"
                   className="btn btn-outline-secondary px-3 py-2"
                   style={{ borderRadius: 6, fontSize: 13.5, fontWeight: 500 }}
                 >
-                  <i className="la la-cogs mr-1"></i> Módulos do Sistema
+                  <i className="la la-cogs mr-1"></i> {t('about.systemModules', 'Módulos do Sistema')}
                 </a>
                 <a
                   href="#suporte"
                   className="btn btn-primary px-3 py-2"
                   style={{ borderRadius: 6, fontSize: 13.5, fontWeight: 600 }}
                 >
-                  <i className="la la-headset mr-1"></i> Suporte & Contactos
+                  <i className="la la-headset mr-1"></i> {t('about.supportAndContacts', 'Suporte & Contactos')}
                 </a>
               </div>
             </div>
@@ -134,37 +134,37 @@ const SobreNos = () => {
           <div className="row align-items-center">
             <div className="col-lg-6 mb-4 mb-lg-0">
               <span className="text-muted fw-600 text-uppercase" style={{ fontSize: 12, letterSpacing: '0.5px' }}>
-                A Empresa Criadora
+                {t('about.theCreatorCompany', 'A Empresa Criadora')}
               </span>
               <h2 className="fw-700 mt-1 mb-3 text-dark" style={{ fontSize: '1.85rem' }}>
-                SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA
+                {t('about.companyName', 'SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA')}
               </h2>
               <p className="text-muted" style={{ lineHeight: 1.8, fontSize: 14.5 }}>
-                A <strong>SCKJ</strong> é uma sociedade empresarial angolana vocacionada para a consultoria contábil, auditoria fiscal digital e engenharia de software aplicada à gestão corporativa.
+                {t('about.companyBio1', 'A SCKJ é uma sociedade empresarial angolana vocacionada para a consultoria contábil, auditoria fiscal digital e engenharia de software aplicada à gestão corporativa.')}
               </p>
               <p className="text-muted" style={{ lineHeight: 1.8, fontSize: 14.5 }}>
-                O nosso propósito é dotar contabilistas, peritos fiscais e equipas de auditoria de soluções modernas que eliminem divergências entre as contas da classe 34 (Estado e Outros Entes Públicos) e as obrigações declarativas oficiais da AGT em Angola.
+                {t('about.companyBio2', 'O nosso propósito é dotar contabilistas, peritos fiscais e equipas de auditoria de soluções modernas que eliminem divergências entre as contas da classe 34 (Estado e Outros Entes Públicos) e as obrigações declarativas oficiais da AGT em Angola.')}
               </p>
 
               {/* Ficha Cadastral Limpa */}
               <div className="card border p-3 mt-4" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
-                <h6 className="fw-700 text-dark mb-3" style={{ fontSize: 14 }}>Dados Institucionais:</h6>
+                <h6 className="fw-700 text-dark mb-3" style={{ fontSize: 14 }}>{t('about.institutionalData', 'Dados Institucionais:')}</h6>
                 <ul className="list-unstyled mb-0 d-flex flex-column gap-2" style={{ fontSize: 13.5 }}>
                   <li className="d-flex justify-content-between border-bottom pb-2">
-                    <span className="text-muted">Razão Social:</span>
+                    <span className="text-muted">{t('about.corporateName', 'Razão Social:')}</span>
                     <strong className="text-dark">SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA</strong>
                   </li>
                   <li className="d-flex justify-content-between border-bottom pb-2">
-                    <span className="text-muted">NIF:</span>
+                    <span className="text-muted">{t('about.taxId', 'NIF:')}</span>
                     <strong className="text-dark">5002830280</strong>
                   </li>
                   <li className="d-flex justify-content-between border-bottom pb-2">
-                    <span className="text-muted">País / Cidade:</span>
-                    <strong className="text-dark">Luanda, República de Angola</strong>
+                    <span className="text-muted">{t('about.location', 'País / Cidade:')}</span>
+                    <strong className="text-dark">{t('about.locationVal', 'Luanda, República de Angola')}</strong>
                   </li>
                   <li className="d-flex justify-content-between">
-                    <span className="text-muted">Especialidade:</span>
-                    <strong className="text-dark">Sistemas Contabilísticos, Auditoria Fiscal & IA</strong>
+                    <span className="text-muted">{t('about.specialty', 'Especialidade:')}</span>
+                    <strong className="text-dark">{t('about.specialtyVal', 'Sistemas Contabilísticos, Auditoria Fiscal & IA')}</strong>
                   </li>
                 </ul>
               </div>
@@ -174,36 +174,36 @@ const SobreNos = () => {
               <div className="row g-3">
                 <div className="col-sm-6">
                   <div className="card border p-3 h-100" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
-                    <h6 className="fw-700 text-dark mb-2">Conformidade Legal</h6>
+                    <h6 className="fw-700 text-dark mb-2">{t('about.legalCompliance', 'Conformidade Legal')}</h6>
                     <p className="text-muted mb-0" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                      Alinhamento integral com a Lei n.º 7/19 (CIVA), retenções na fonte de 6,5% e Plano Geral de Contabilidade (PGC).
+                      {t('about.legalComplianceDesc', 'Alinhamento integral com a Lei n.º 7/19 (CIVA), retenções na fonte de 6,5% e Plano Geral de Contabilidade (PGC).')}
                     </p>
                   </div>
                 </div>
 
                 <div className="col-sm-6">
                   <div className="card border p-3 h-100" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
-                    <h6 className="fw-700 text-dark mb-2">Reconciliação Exata</h6>
+                    <h6 className="fw-700 text-dark mb-2">{t('about.exactReconciliation', 'Reconciliação Exata')}</h6>
                     <p className="text-muted mb-0" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                      Cruzamento automatizado entre Balancetes de Verificação e os campos 1 a 61 do Modelo 7 da AGT.
+                      {t('about.exactReconciliationDesc', 'Cruzamento automatizado entre Balancetes de Verificação e os campos 1 a 61 do Modelo 7 da AGT.')}
                     </p>
                   </div>
                 </div>
 
                 <div className="col-sm-6">
                   <div className="card border p-3 h-100" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
-                    <h6 className="fw-700 text-dark mb-2">Scanner & OCR</h6>
+                    <h6 className="fw-700 text-dark mb-2">{t('about.scannerOcr', 'Scanner & OCR')}</h6>
                     <p className="text-muted mb-0" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                      Leitura óptica de facturas de fornecedores em PDF/imagem com validação de QR Code fiscal e certificação AGT.
+                      {t('about.scannerOcrDesc', 'Leitura óptica de facturas de fornecedores em PDF/imagem com validação de QR Code fiscal e certificação AGT.')}
                     </p>
                   </div>
                 </div>
 
                 <div className="col-sm-6">
                   <div className="card border p-3 h-100" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
-                    <h6 className="fw-700 text-dark mb-2">Multi-Empresa</h6>
+                    <h6 className="fw-700 text-dark mb-2">{t('about.multiCompany', 'Multi-Empresa')}</h6>
                     <p className="text-muted mb-0" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                      Ambiente seguro para gabinetes de contabilidade e grupos empresariais gerirem várias empresas de forma independente.
+                      {t('about.multiCompanyDesc', 'Ambiente seguro para gabinetes de contabilidade e grupos empresariais gerirem várias empresas de forma independente.')}
                     </p>
                   </div>
                 </div>
@@ -218,13 +218,13 @@ const SobreNos = () => {
         <div className="container py-3">
           <div className="text-center mb-4">
             <span className="text-muted fw-600 text-uppercase" style={{ fontSize: 12, letterSpacing: '0.5px' }}>
-              Arquitectura do Sistema
+              {t('about.archTitle', 'Arquitectura do Sistema')}
             </span>
             <h2 className="fw-700 mt-1 text-dark" style={{ fontSize: '1.85rem' }}>
-              Módulos Principais
+              {t('about.mainModules', 'Módulos Principais')}
             </h2>
             <p className="text-muted" style={{ fontSize: 14 }}>
-              Processamento seguro e estruturado para auditoria fiscal contínua.
+              {t('about.archDesc', 'Processamento seguro e estruturado para auditoria fiscal contínua.')}
             </p>
           </div>
 
@@ -232,11 +232,11 @@ const SobreNos = () => {
             <div className="col-md-4">
               <div className="card border p-4 h-100" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
                 <span className="text-muted fw-600 d-block mb-1" style={{ fontSize: 12 }}>
-                  MÓDULO 01
+                  {t('about.mod1', 'MÓDULO 01')}
                 </span>
-                <h5 className="fw-700 text-dark mb-2" style={{ fontSize: 16 }}>Reconciliação Balancete vs Modelo 7</h5>
+                <h5 className="fw-700 text-dark mb-2" style={{ fontSize: 16 }}>{t('about.mod1Title', 'Reconciliação Balancete vs Modelo 7')}</h5>
                 <p className="text-muted mb-0" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                  Comparação sistemática das contas 34.5.3 (IVA Liquidado), 34.5.2 (IVA Dedutível) e 34.5.5 (IVA Apurado) contra as declarações Modelo 7 submetidas à AGT.
+                  {t('about.mod1Desc', 'Comparação sistemática das contas 34.5.3 (IVA Liquidado), 34.5.2 (IVA Dedutível) e 34.5.5 (IVA Apurado) contra as declarações Modelo 7 submetidas à AGT.')}
                 </p>
               </div>
             </div>
@@ -244,11 +244,11 @@ const SobreNos = () => {
             <div className="col-md-4">
               <div className="card border p-4 h-100" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
                 <span className="text-muted fw-600 d-block mb-1" style={{ fontSize: 12 }}>
-                  MÓDULO 02
+                  {t('about.mod2', 'MÓDULO 02')}
                 </span>
-                <h5 className="fw-700 text-dark mb-2" style={{ fontSize: 16 }}>Scanner e OCR de Facturas</h5>
+                <h5 className="fw-700 text-dark mb-2" style={{ fontSize: 16 }}>{t('about.mod2Title', 'Scanner e OCR de Facturas')}</h5>
                 <p className="text-muted mb-0" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                  Digitalização inteligente de facturas, extracção de dados fiscais (NIF, linhas, taxas, IVA dedutível/não dedutível) e arquivo digital auditável.
+                  {t('about.mod2Desc', 'Digitalização inteligente de facturas, extracção de dados fiscais (NIF, linhas, taxas, IVA dedutível/não dedutível) e arquivo digital auditável.')}
                 </p>
               </div>
             </div>
@@ -256,11 +256,11 @@ const SobreNos = () => {
             <div className="col-md-4">
               <div className="card border p-4 h-100" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
                 <span className="text-muted fw-600 d-block mb-1" style={{ fontSize: 12 }}>
-                  MÓDULO 03
+                  {t('about.mod3', 'MÓDULO 03')}
                 </span>
-                <h5 className="fw-700 text-dark mb-2" style={{ fontSize: 16 }}>15 Motores de Auditoria Fiscal</h5>
+                <h5 className="fw-700 text-dark mb-2" style={{ fontSize: 16 }}>{t('about.mod3Title', '15 Motores de Auditoria Fiscal')}</h5>
                 <p className="text-muted mb-0" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                  Análise de retenções na fonte de 6,5%, estornos, cativações, notas de crédito e relatórios executivos prontos para impressão ou exportação.
+                  {t('about.mod3Desc', 'Análise de retenções na fonte de 6,5%, estornos, cativações, notas de crédito e relatórios executivos prontos para impressão ou exportação.')}
                 </p>
               </div>
             </div>
@@ -273,13 +273,13 @@ const SobreNos = () => {
         <div className="container py-3">
           <div className="text-center mb-4">
             <span className="text-muted fw-600 text-uppercase" style={{ fontSize: 12, letterSpacing: '0.5px' }}>
-              Atendimento e Assistência
+              {t('about.supportSection', 'Atendimento e Assistência')}
             </span>
             <h2 className="fw-700 mt-1 text-dark" style={{ fontSize: '1.85rem' }}>
-              Suporte Técnico & Contactos Oficiais
+              {t('about.supportTitle', 'Suporte Técnico & Contactos Oficiais')}
             </h2>
             <p className="text-muted" style={{ fontSize: 14 }}>
-              Canais diretos para operadores de facturação, contabilistas e administradores do sistema.
+              {t('about.supportDesc', 'Canais diretos para operadores de facturação, contabilistas e administradores do sistema.')}
             </p>
           </div>
 
@@ -288,9 +288,9 @@ const SobreNos = () => {
             <div className="col-lg-4 col-md-6">
               <div className="card border p-4 h-100 d-flex flex-column justify-content-between" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
                 <div>
-                  <h6 className="fw-700 text-dark mb-2" style={{ fontSize: 15 }}>Suporte Técnico da Plataforma</h6>
+                  <h6 className="fw-700 text-dark mb-2" style={{ fontSize: 15 }}>{t('about.techSupportTitle', 'Suporte Técnico da Plataforma')}</h6>
                   <p className="text-muted mb-3" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                    Dúvidas sobre o funcionamento do software, criação de utilizadores, importação de documentos e redefinição de acessos.
+                    {t('about.techSupportDesc', 'Dúvidas sobre o funcionamento do software, criação de utilizadores, importação de documentos e redefinição de acessos.')}
                   </p>
                 </div>
                 <div>
@@ -309,9 +309,9 @@ const SobreNos = () => {
             <div className="col-lg-4 col-md-6">
               <div className="card border p-4 h-100 d-flex flex-column justify-content-between" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
                 <div>
-                  <h6 className="fw-700 text-dark mb-2" style={{ fontSize: 15 }}>Gabinete de Auditoria Fiscal</h6>
+                  <h6 className="fw-700 text-dark mb-2" style={{ fontSize: 15 }}>{t('about.fiscalOfficeTitle', 'Gabinete de Auditoria Fiscal')}</h6>
                   <p className="text-muted mb-3" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                    Esclarecimento de divergências contabilísticas, normas do CIVA (Lei n.º 7/19) e validação de relatórios para a AGT.
+                    {t('about.fiscalOfficeDesc', 'Esclarecimento de divergências contabilísticas, normas do CIVA (Lei n.º 7/19) e validação de relatórios para a AGT.')}
                   </p>
                 </div>
                 <div>
@@ -330,9 +330,9 @@ const SobreNos = () => {
             <div className="col-lg-4 col-md-6">
               <div className="card border p-4 h-100 d-flex flex-column justify-content-between" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
                 <div>
-                  <h6 className="fw-700 text-dark mb-2" style={{ fontSize: 15 }}>Administração & Atendimento Geral</h6>
+                  <h6 className="fw-700 text-dark mb-2" style={{ fontSize: 15 }}>{t('about.adminOfficeTitle', 'Administração & Atendimento Geral')}</h6>
                   <p className="text-muted mb-3" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                    Contacto institucional com a direção da SCKJ, contratos corporativos, licenciamento e novas empresas.
+                    {t('about.adminOfficeDesc', 'Contacto institucional com a direção da SCKJ, contratos corporativos, licenciamento e novas empresas.')}
                   </p>
                 </div>
                 <div>
@@ -341,7 +341,7 @@ const SobreNos = () => {
                     className="btn btn-outline-secondary w-100 text-dark fw-500 py-2"
                     style={{ borderRadius: 6, fontSize: 13.5 }}
                   >
-                    <i className="la la-envelope mr-1"></i> Contactar Direção
+                    <i className="la la-envelope mr-1"></i> {t('about.contactAdminBtn', 'Contactar Direção')}
                   </a>
                 </div>
               </div>
@@ -352,13 +352,13 @@ const SobreNos = () => {
           <div className="card border p-4 mt-4" style={{ borderRadius: 8, borderColor: '#e2e8f0', background: '#ffffff' }}>
             <div className="row text-center text-md-start align-items-center">
               <div className="col-md-4 mb-3 mb-md-0">
-                <span className="text-muted d-block" style={{ fontSize: 12 }}>HORÁRIO DE FUNCIONAMENTO</span>
-                <strong className="text-dark" style={{ fontSize: 14 }}>Segunda a Sexta: 08:00 – 17:30 (GMT+1)</strong>
+                <span className="text-muted d-block" style={{ fontSize: 12 }}>{t('about.hoursTitle', 'HORÁRIO DE FUNCIONAMENTO')}</span>
+                <strong className="text-dark" style={{ fontSize: 14 }}>{t('about.hoursVal', 'Segunda a Sexta: 08:00 – 17:30 (GMT+1)')}</strong>
               </div>
 
               <div className="col-md-4 mb-3 mb-md-0">
-                <span className="text-muted d-block" style={{ fontSize: 12 }}>LOCALIZAÇÃO</span>
-                <strong className="text-dark" style={{ fontSize: 14 }}>Luanda, República de Angola</strong>
+                <span className="text-muted d-block" style={{ fontSize: 12 }}>{t('about.locationTitle', 'LOCALIZAÇÃO')}</span>
+                <strong className="text-dark" style={{ fontSize: 14 }}>{t('about.locationVal', 'Luanda, República de Angola')}</strong>
               </div>
 
               <div className="col-md-4 text-center text-md-end">
@@ -367,7 +367,7 @@ const SobreNos = () => {
                   className="btn btn-primary px-4 py-2 fw-600"
                   style={{ borderRadius: 6, fontSize: 13.5 }}
                 >
-                  <i className="la la-arrow-left mr-1"></i> Voltar ao Login
+                  <i className="la la-arrow-left mr-1"></i> {t('about.backToLogin', 'Voltar ao Login')}
                 </button>
               </div>
             </div>
@@ -379,10 +379,10 @@ const SobreNos = () => {
       <footer style={{ background: '#ffffff', color: '#64748b', padding: '25px 0', borderTop: '1px solid #e2e8f0' }}>
         <div className="container text-center">
           <p className="mb-1 text-muted" style={{ fontSize: 13 }}>
-            © 2026 <strong>SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA</strong> • NIF: 5002830280 • Todos os direitos reservados.
+            {t('about.copyright', '© 2026 SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA • NIF: 5002830280 • Todos os direitos reservados.')}
           </p>
           <small className="text-muted" style={{ fontSize: 12 }}>
-            Sistema de Reconciliação Contabilística e Fiscal • Luanda, Angola
+            {t('about.title', 'Sistema de Reconciliação Contabilística e Fiscal')} • {t('about.locationVal', 'Luanda, República de Angola')}
           </small>
         </div>
       </footer>

@@ -12,6 +12,7 @@ import Pgc from './pages/Pgc';
 import Legislacao from './pages/Legislacao';
 import Definicoes from './pages/Definicoes';
 import AdminGestao from './pages/AdminGestao';
+import SobreNos from './pages/SobreNos';
 import { PeriodoProvider } from './context/PeriodoContext';
 import { adminService } from './services/api';
 
@@ -113,6 +114,9 @@ function App() {
           <Routes>
             <Route path="/" element={<RootRoute />} />
             <Route path="/login" element={<LoginPage onLogin={() => {}} />} />
+            <Route path="/sobre" element={<SobreNos />} />
+            <Route path="/sobre-nos" element={<Navigate to="/sobre" replace />} />
+            <Route path="/suporte" element={<Navigate to="/sobre#suporte" replace />} />
 
             {/* Área Administrativa Master Multi-Empresa com Template Próprio */}
             <Route

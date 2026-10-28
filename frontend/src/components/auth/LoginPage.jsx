@@ -112,153 +112,206 @@ const LoginPage = ({ onLogin }) => {
               </div>
             </div>
 
-            <div className="col-xl-8 col-lg-7 col-md-7 col-sm-8">
-              <div className="signUp-admin-right signIn-admin-right p-md-40 p-10">
-                <div className="row justify-content-center">
-                  <div className="col-xl-7 col-lg-8 col-md-12">
-                    <div className="edit-profile mt-md-25 mt-0">
-                      <div className="card border-0">
-                        <div className="card-header border-0 pb-md-15 pb-10 pt-md-20 pt-10">
-                          <div className="edit-profile__title">
-                            <h5 className="fw-700 mb-2" style={{ color: '#0f172a' }}>
-                              {t('login.title', 'Iniciar Sessão')}
-                            </h5>
-                            <span className="color-primary fw-600 d-block" style={{ fontSize: '14.5px', lineHeight: 1.4 }}>
-                              {t('login.systemName', 'Sistema de Reconciliação Contabilística e Fiscal')}
-                            </span>
-                          </div>
+            <div className="col-xl-8 col-lg-7 col-md-7 col-sm-8 d-flex flex-column justify-content-center align-items-center py-4" style={{ minHeight: '100vh' }}>
+              <div className="signUp-admin-right signIn-admin-right w-100 p-0 d-flex flex-column align-items-center justify-content-center" style={{ maxWidth: 520, marginTop: 15 }}>
+                <div className="w-100">
+                  <div className="edit-profile">
+                    <div
+                      className="card border-0"
+                      style={{
+                        borderRadius: 16,
+                        boxShadow: '0 10px 35px -5px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.85)',
+                        background: '#ffffff',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div className="card-header border-0 pb-md-15 pb-10 pt-md-25 pt-20 text-center">
+                        <div className="edit-profile__title w-100">
+                          <h4 className="fw-700 mb-2" style={{ color: '#0f172a' }}>
+                            {t('login.title', 'Iniciar Sessão')}
+                          </h4>
+                          <span className="color-primary fw-600 d-block" style={{ fontSize: '14.5px', lineHeight: 1.4 }}>
+                            {t('login.systemName', 'Sistema de Reconciliação Contabilística e Fiscal')}
+                          </span>
                         </div>
-                        <div className="card-body">
-                          <div className="edit-profile__body">
-                            <p className="text-muted mb-20" style={{ fontSize: 13.5 }}>
-                              {t('login.subtitle')}
-                            </p>
+                      </div>
+                      <div className="card-body pt-0">
+                        <div className="edit-profile__body">
+                          <p className="text-muted mb-25 text-center" style={{ fontSize: 13.5 }}>
+                            {t('login.subtitle', 'Use a sua conta para aceder ao sistema')}
+                          </p>
 
-                            {error && (
-                              <div className="alert alert-danger" role="alert">
-                                {error}
-                              </div>
-                            )}
+                          {error && (
+                            <div className="alert alert-danger" role="alert">
+                              {error}
+                            </div>
+                          )}
 
-                            <form onSubmit={handleSubmit} noValidate>
-                              <div className="form-group mb-20">
-                                <label htmlFor="username">{t('login.emailPlaceholder')}</label>
+                          <form onSubmit={handleSubmit} noValidate>
+                            <div className="form-group mb-20">
+                              <label htmlFor="username" className="fw-500 mb-1">{t('login.emailPlaceholder')}</label>
+                              <input
+                                type="text"
+                                className="form-control"
+                                id="username"
+                                name="username"
+                                placeholder={t('login.emailPlaceholder')}
+                                value={formData.username}
+                                onChange={handleChange}
+                                required
+                                autoComplete="username"
+                                style={{ borderRadius: 8, height: 46 }}
+                              />
+                            </div>
+
+                            <div className="form-group mb-15">
+                              <label htmlFor="password-field" className="fw-500 mb-1">
+                                {t('login.passwordPlaceholder')}
+                              </label>
+                              <div className="position-relative">
                                 <input
-                                  type="text"
+                                  id="password-field"
+                                  type={showPassword ? 'text' : 'password'}
                                   className="form-control"
-                                  id="username"
-                                  name="username"
-                                  placeholder={t('login.emailPlaceholder')}
-                                  value={formData.username}
+                                  name="password"
+                                  placeholder={t('login.passwordPlaceholder')}
+                                  value={formData.password}
                                   onChange={handleChange}
                                   required
-                                  autoComplete="username"
+                                  autoComplete="current-password"
+                                  style={{ borderRadius: 8, height: 46 }}
                                 />
+                                <i
+                                  className={`la la-fw ${
+                                    showPassword ? 'la-eye-slash' : 'la-eye'
+                                  } text-light fs-16 field-icon toggle-password2`}
+                                  style={{ cursor: 'pointer', top: '50%', transform: 'translateY(-50%)' }}
+                                  onClick={() => setShowPassword((prev) => !prev)}
+                                ></i>
                               </div>
+                            </div>
 
-                              <div className="form-group mb-15">
-                                <label htmlFor="password-field">
-                                  {t('login.passwordPlaceholder')}
+                            <div className="signUp-condition signIn-condition d-flex justify-content-between align-items-center mb-20">
+                              <div className="checkbox-theme-default custom-checkbox">
+                                <input
+                                  className="checkbox"
+                                  type="checkbox"
+                                  id="check-remember"
+                                  checked={rememberMe}
+                                  onChange={(e) => setRememberMe(e.target.checked)}
+                                />
+                                <label htmlFor="check-remember">
+                                  <span className="checkbox-text">{t('login.rememberMe')}</span>
                                 </label>
-                                <div className="position-relative">
-                                  <input
-                                    id="password-field"
-                                    type={showPassword ? 'text' : 'password'}
-                                    className="form-control"
-                                    name="password"
-                                    placeholder={t('login.passwordPlaceholder')}
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
-                                    autoComplete="current-password"
-                                  />
-                                  <i
-                                    className={`la la-fw ${
-                                      showPassword ? 'la-eye-slash' : 'la-eye'
-                                    } text-light fs-16 field-icon toggle-password2`}
-                                    style={{ cursor: 'pointer' }}
-                                    onClick={() => setShowPassword((prev) => !prev)}
-                                  ></i>
-                                </div>
                               </div>
-
-                              <div className="signUp-condition signIn-condition">
-                                <div className="checkbox-theme-default custom-checkbox">
-                                  <input
-                                    className="checkbox"
-                                    type="checkbox"
-                                    id="check-remember"
-                                    checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
-                                  />
-                                  <label htmlFor="check-remember">
-                                    <span className="checkbox-text">{t('login.rememberMe')}</span>
-                                  </label>
-                                </div>
-                                <a
-                                  href="#forget"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    toast.info(
-                                      'Contacte o suporte da SCKJ para redefinir as suas credenciais.'
-                                    );
-                                  }}
-                                >
-                                  {t('login.forgotPassword')}
-                                </a>
-                              </div>
-
-                              <div className="button-group d-flex pt-1 justify-content-md-start justify-content-center">
-                                <button
-                                  type="submit"
-                                  className="btn btn-primary btn-default btn-squared text-capitalize lh-normal px-50 py-15 signIn-createBtn"
-                                  disabled={loading}
-                                >
-                                  {loading ? (
-                                    <>
-                                      <i className="la la-spinner fa-spin mr-10"></i>
-                                      {t('login.submitting')}
-                                    </>
-                                  ) : (
-                                    t('login.submit')
-                                  )}
-                                </button>
-                              </div>
-                            </form>
-
-                            <p className="text-center mt-25 mb-0 text-muted" style={{ fontSize: 13 }}>
-                              {t('login.noAccount')}{' '}
                               <a
-                                href="#admin"
-                                className="color-primary"
+                                href="#forget"
+                                className="fs-13 text-primary"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   toast.info(
-                                    'Por favor contacte o Administrador da sua organização.'
+                                    'Contacte o suporte da SCKJ para redefinir as suas credenciais.'
                                   );
                                 }}
                               >
-                                {t('login.contactAdmin')}
+                                {t('login.forgotPassword')}
                               </a>
-                            </p>
+                            </div>
+
+                            <div className="button-group d-flex pt-1 justify-content-center">
+                              <button
+                                type="submit"
+                                className="btn btn-primary btn-default btn-squared text-capitalize lh-normal w-100 py-12 signIn-createBtn"
+                                disabled={loading}
+                                style={{ borderRadius: 8, fontSize: 15, fontWeight: 600 }}
+                              >
+                                {loading ? (
+                                  <>
+                                    <i className="la la-spinner fa-spin mr-10"></i>
+                                    {t('login.submitting')}
+                                  </>
+                                ) : (
+                                  t('login.submit')
+                                )}
+                              </button>
+                            </div>
+                          </form>
+
+                          <p className="text-center mt-25 mb-0 text-muted" style={{ fontSize: 13 }}>
+                            {t('login.noAccount')}{' '}
+                            <a
+                              href="#admin"
+                              className="color-primary fw-600"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                toast.info(
+                                  'Por favor contacte o Administrador da sua organização ou o Suporte Técnico da SCKJ.'
+                                );
+                              }}
+                            >
+                              {t('login.contactAdmin')}
+                            </a>
+                          </p>
+
+                          {/* Links Oficiais: Sobre Nós e Suporte Técnico */}
+                          <div className="pt-20 mt-25 border-top text-center">
+                            <div className="d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                              <a
+                                href="/sobre"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-outline-light text-dark fw-600 fs-13 px-3 py-2 rounded-pill shadow-xs d-inline-flex align-items-center"
+                                style={{ border: '1px solid #e2e8f0', background: '#f8fafc', transition: 'all 0.2s' }}
+                                title="Conheça a história e estrutura da SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA"
+                              >
+                                <i className="la la-building mr-1 text-primary fs-16"></i>
+                                {t('login.aboutUs', 'Sobre a SCKJ')}
+                              </a>
+                              <a
+                                href="/sobre#suporte"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-outline-light text-dark fw-600 fs-13 px-3 py-2 rounded-pill shadow-xs d-inline-flex align-items-center"
+                                style={{ border: '1px solid #e2e8f0', background: '#f8fafc', transition: 'all 0.2s' }}
+                                title="Canais Oficiais de Suporte Técnico e Atendimento"
+                              >
+                                <i className="la la-headset mr-1 text-success fs-16"></i>
+                                {t('login.techSupport', 'Suporte Técnico')}
+                              </a>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
+
+                  {/* Rodapé institucional logo abaixo do cartão */}
+                  <div className="text-center mt-25 mb-10">
+                    <p className="text-muted mb-1" style={{ fontSize: 12.5 }}>
+                      © 2026 <strong>SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA</strong> • NIF: 5002830280
+                    </p>
+                    <div className="d-flex justify-content-center align-items-center gap-3">
+                      <a
+                        href="/sobre"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary fs-12 fw-500"
+                      >
+                        Apresentação da Empresa
+                      </a>
+                      <span className="text-muted fs-12">•</span>
+                      <a
+                        href="/sobre#suporte"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary fs-12 fw-500"
+                      >
+                        Canais de Atendimento
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="row">
-            <div className="col-12">
-              <p
-                className="text-center text-muted mt-30 mb-20"
-                style={{ fontSize: 12.5 }}
-              >
-                {t('login.footer')}
-              </p>
             </div>
           </div>
         </div>

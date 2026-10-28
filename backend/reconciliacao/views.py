@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.http import HttpResponse
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view, action, permission_classes
+from rest_framework.decorators import api_view, action, permission_classes, authentication_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -126,6 +126,8 @@ def _inteiro_opcional(valor):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
+@authentication_classes([])
 def login_view(request):
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():

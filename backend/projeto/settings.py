@@ -55,11 +55,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'projeto.wsgi.application'
 
-db_url = config('DATABASE_URL', default='').strip()
+db_url = config('DATABASE_URL', default='').strip().strip('\'"')
 if db_url:
-    DATABASES = {
-        'default': dj_database_url.parse(db_url, conn_max_age=600)
-    }
+    try:
+        parsed_db = dj_database_url.parse(db_url, conn_max_age=600)
+        if parsed_db and parsed_db.get('ENGINE'):
+            DATABASES = {'default': parsed_db}
+        else:
+            raise ValueError('Configuração de base de dados vazia')
+    except Exception as _e:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 else:
     DATABASES = {
         'default': {

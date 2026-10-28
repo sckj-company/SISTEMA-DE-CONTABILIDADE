@@ -57,6 +57,7 @@ export const mainMenuItems = [
     text: 'Empresas & Clientes',
     icon: 'la la-building',
     path: '/admin-gestao?aba=empresas',
+    adminOnly: true,
   },
   {
     key: 'definicoes',

@@ -11,12 +11,15 @@ const Sidebar = ({ collapsed, onNavigate }) => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('periodoAuditoria');
+    window.dispatchEvent(new Event('auth-changed'));
     setConfirmarLogout(false);
     navigate('/login');
   };
 
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : {};
+  const isAdmin = Boolean(user.is_admin || user.is_superuser || user.is_staff);
   const isOperador = Boolean(user.is_operador_facturas || user.papel === 'Operador de Facturação');
 
   const itensMenu = isOperador
@@ -29,7 +32,7 @@ const Sidebar = ({ collapsed, onNavigate }) => {
           text: 'Portal do Scanner (Facturas)',
         },
       ]
-    : mainMenuItems;
+    : mainMenuItems.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <>

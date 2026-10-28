@@ -227,42 +227,60 @@ const Configuracoes = () => {
             </div>
 
             <div className="d-flex align-items-center" style={{ gap: 10 }}>
-              <select
-                className="form-control form-control-sm"
-                value={empresaId}
-                onChange={(e) => atualizar({ empresaId: e.target.value })}
-                style={{ minWidth: 240, height: 38, fontWeight: 600, fontSize: 13 }}
-              >
-                {empresas.length === 0 ? (
-                  <option value="">Nenhuma empresa cadastrada</option>
-                ) : (
-                  empresas.map((emp) => (
-                    <option key={emp.id} value={String(emp.id)}>
-                      {emp.nome} ({emp.nif})
-                    </option>
-                  ))
-                )}
-              </select>
-              <button
-                type="button"
-                className="btn btn-sm btn-primary d-flex align-items-center"
-                onClick={() => navigate('/admin-gestao?aba=empresas&novaEmpresa=1')}
-                style={{
-                  height: 38,
-                  borderRadius: 8,
-                  fontWeight: 700,
-                  backgroundColor: '#5f63f2',
-                  borderColor: '#5f63f2',
-                  padding: '0 14px',
-                  gap: 6,
-                  whiteSpace: 'nowrap',
-                  fontSize: 13,
-                }}
-                title="Cadastrar Nova Empresa"
-              >
-                <i className="la la-plus" style={{ fontSize: 15 }}></i>
-                <span>Nova Empresa</span>
-              </button>
+              {isAdmin ? (
+                <>
+                  <select
+                    className="form-control form-control-sm"
+                    value={empresaId}
+                    onChange={(e) => atualizar({ empresaId: e.target.value })}
+                    style={{ minWidth: 240, height: 38, fontWeight: 600, fontSize: 13 }}
+                  >
+                    {empresas.length === 0 ? (
+                      <option value="">Nenhuma empresa cadastrada</option>
+                    ) : (
+                      empresas.map((emp) => (
+                        <option key={emp.id} value={String(emp.id)}>
+                          {emp.nome} ({emp.nif})
+                        </option>
+                      ))
+                    )}
+                  </select>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-primary d-flex align-items-center"
+                    onClick={() => navigate('/admin-gestao?aba=empresas&novaEmpresa=1')}
+                    style={{
+                      height: 38,
+                      borderRadius: 8,
+                      fontWeight: 700,
+                      backgroundColor: '#5f63f2',
+                      borderColor: '#5f63f2',
+                      padding: '0 14px',
+                      gap: 6,
+                      whiteSpace: 'nowrap',
+                      fontSize: 13,
+                    }}
+                    title="Cadastrar Nova Empresa"
+                  >
+                    <i className="la la-plus" style={{ fontSize: 15 }}></i>
+                    <span>Nova Empresa</span>
+                  </button>
+                </>
+              ) : (
+                <div
+                  className="badge px-12 py-8 fw-700 color-dark d-flex align-items-center"
+                  style={{
+                    backgroundColor: '#f0f4ff',
+                    border: '1px solid #c7d2fe',
+                    borderRadius: 8,
+                    fontSize: 12.5,
+                    gap: 6,
+                  }}
+                >
+                  <i className="la la-shield-alt text-primary" style={{ fontSize: 14 }}></i>
+                  <span>Empresa: <strong>{empresaSelecionada?.nome || 'Minha Empresa'}</strong></span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -442,14 +460,16 @@ const Configuracoes = () => {
                     Dados oficiais registados para efeitos fiscais e contabilísticos em Angola.
                   </span>
                 </div>
-                <button
-                  type="button"
-                  className="btn btn-xs btn-outline-primary d-flex align-items-center"
-                  onClick={() => navigate('/admin-gestao?aba=empresas')}
-                  style={{ borderRadius: 6, fontWeight: 600, padding: '6px 12px', fontSize: 12 }}
-                >
-                  <i className="la la-edit mr-1"></i> Gerir / Editar Cadastro
-                </button>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    className="btn btn-xs btn-outline-primary d-flex align-items-center"
+                    onClick={() => navigate('/admin-gestao?aba=empresas')}
+                    style={{ borderRadius: 6, fontWeight: 600, padding: '6px 12px', fontSize: 12 }}
+                  >
+                    <i className="la la-edit mr-1"></i> Gerir / Editar Cadastro
+                  </button>
+                )}
               </div>
 
               <div className="card-body p-20">

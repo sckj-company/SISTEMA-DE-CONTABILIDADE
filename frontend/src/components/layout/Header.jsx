@@ -46,6 +46,8 @@ const Header = ({ onToggleSidebar }) => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('periodoAuditoria');
+    window.dispatchEvent(new Event('auth-changed'));
     navigate('/login');
   };
 
@@ -74,105 +76,116 @@ const Header = ({ onToggleSidebar }) => {
         <div className="navbar-right" ref={navRef}>
           <ul className="navbar-right__menu">
             {/* EMPRESA ATIVA IDENTIFICADA NO TOPO */}
-            <li className="nav-empresa mr-15">
-              <div className={`dropdown-custom ${openMenu === 'empresa' ? 'show' : ''}`}>
-                <button
-                  type="button"
-                  className="btn-empresa-header btn btn-sm d-flex align-items-center"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setOpenMenu(openMenu === 'empresa' ? null : 'empresa');
-                  }}
-                  style={{
-                    background: empresaAtual ? '#f0f4ff' : '#f8f9fb',
-                    border: '1px solid ' + (empresaAtual ? '#c7d2fe' : '#e2e8f0'),
-                    borderRadius: 20,
-                    padding: '5px 14px',
-                    minHeight: 42,
-                    height: 'auto',
-                    gap: 10,
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                  }}
-                  title={empresaAtual ? `${empresaAtual.nome} (NIF: ${empresaAtual.nif})` : 'Nenhuma empresa selecionada'}
-                >
-                  <span
-                    className="empresa-avatar-icon"
-                    style={{
-                      width: 26,
-                      height: 26,
-                      minWidth: 26,
-                      minHeight: 26,
-                      borderRadius: '50%',
-                      background: empresaAtual ? '#4338ca' : '#94a3b8',
-                      color: '#fff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 12,
-                      flexShrink: 0,
-                    }}
-                  >
-                    <i className="la la-building"></i>
-                  </span>
-                  <div className="d-flex flex-column text-left" style={{ lineHeight: 1.25 }}>
-                    <span
-                      className="fw-700 text-truncate"
-                      style={{ fontSize: 12, maxWidth: 300, color: empresaAtual ? '#1e1b4b' : '#64748b', display: 'block' }}
-                    >
-                      {empresaAtual ? empresaAtual.nome : 'Sem Empresa Ativa'}
-                    </span>
-                    <span className="text-muted" style={{ fontSize: 10.5, display: 'block' }}>
-                      {empresaAtual ? `NIF: ${empresaAtual.nif}` : 'Clique para selecionar'}
-                    </span>
-                  </div>
-                  <i className="la la-angle-down text-muted ml-4" style={{ fontSize: 11, flexShrink: 0 }}></i>
-                </button>
+            {(() => {
+              const empresaExibida = empresaAtual || (empresas && empresas.length > 0 ? empresas[0] : null);
+              const podeTrocarEmpresa = Boolean(isAdmin && empresas && empresas.length > 1);
 
-                {empresas && empresas.length > 0 && (
-                  <div
-                    className="dropdown-wrapper dropdown-wrapper--medium p-10"
-                    style={{
-                      minWidth: 280,
-                      maxHeight: 340,
-                      overflowY: 'auto',
-                      right: 0,
-                      left: 'auto',
-                    }}
-                  >
-                    <div className="dropdown-header px-10 py-5 text-muted fw-700" style={{ fontSize: 11 }}>
-                      EMPRESAS DISPONÍVEIS ({empresas.length})
-                    </div>
-                    {empresas.map((emp) => {
-                      const ativa = String(emp.id) === String(empresaAtual?.id);
-                      return (
-                        <a
-                          key={emp.id}
-                          href="#select-empresa"
-                          className={`dropdown-item px-10 py-8 d-flex align-items-center justify-content-between rounded mb-2 ${
-                            ativa ? 'bg-primary-lighten text-primary fw-700' : ''
-                          }`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (atualizar) atualizar({ empresaId: String(emp.id) });
-                            setOpenMenu(null);
-                          }}
-                          style={{ gap: 8, fontSize: 12 }}
+              return (
+                <li className="nav-empresa mr-15">
+                  <div className={`dropdown-custom ${openMenu === 'empresa' ? 'show' : ''}`}>
+                    <button
+                      type="button"
+                      className="btn-empresa-header btn btn-sm d-flex align-items-center"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (podeTrocarEmpresa) {
+                          setOpenMenu(openMenu === 'empresa' ? null : 'empresa');
+                        }
+                      }}
+                      style={{
+                        background: empresaExibida ? '#f0f4ff' : '#f8f9fb',
+                        border: '1px solid ' + (empresaExibida ? '#c7d2fe' : '#e2e8f0'),
+                        borderRadius: 20,
+                        padding: '5px 14px',
+                        minHeight: 42,
+                        height: 'auto',
+                        gap: 10,
+                        cursor: podeTrocarEmpresa ? 'pointer' : 'default',
+                        flexShrink: 0,
+                      }}
+                      title={empresaExibida ? `${empresaExibida.nome} (NIF: ${empresaExibida.nif})` : 'Nenhuma empresa selecionada'}
+                    >
+                      <span
+                        className="empresa-avatar-icon"
+                        style={{
+                          width: 26,
+                          height: 26,
+                          minWidth: 26,
+                          minHeight: 26,
+                          borderRadius: '50%',
+                          background: empresaExibida ? '#4338ca' : '#94a3b8',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 12,
+                          flexShrink: 0,
+                        }}
+                      >
+                        <i className="la la-building"></i>
+                      </span>
+                      <div className="d-flex flex-column text-left" style={{ lineHeight: 1.25 }}>
+                        <span
+                          className="fw-700 text-truncate"
+                          style={{ fontSize: 12, maxWidth: 300, color: empresaExibida ? '#1e1b4b' : '#64748b', display: 'block' }}
                         >
-                          <div className="d-flex flex-column text-truncate">
-                            <span className="text-truncate">{emp.nome}</span>
-                            <small className="text-muted" style={{ fontSize: 10.5 }}>
-                              NIF: {emp.nif} {emp.provincia ? `• ${emp.provincia}` : ''}
-                            </small>
-                          </div>
-                          {ativa && <i className="la la-check text-primary fw-700" style={{ fontSize: 15 }}></i>}
-                        </a>
-                      );
-                    })}
+                          {empresaExibida ? empresaExibida.nome : 'Sem Empresa Ativa'}
+                        </span>
+                        <span className="text-muted" style={{ fontSize: 10.5, display: 'block' }}>
+                          {empresaExibida ? `NIF: ${empresaExibida.nif}` : (podeTrocarEmpresa ? 'Clique para selecionar' : 'Aguardando atribuição')}
+                        </span>
+                      </div>
+                      {podeTrocarEmpresa && (
+                        <i className="la la-angle-down text-muted ml-4" style={{ fontSize: 11, flexShrink: 0 }}></i>
+                      )}
+                    </button>
+
+                    {podeTrocarEmpresa && (
+                      <div
+                        className="dropdown-wrapper dropdown-wrapper--medium p-10"
+                        style={{
+                          minWidth: 280,
+                          maxHeight: 340,
+                          overflowY: 'auto',
+                          right: 0,
+                          left: 'auto',
+                        }}
+                      >
+                        <div className="dropdown-header px-10 py-5 text-muted fw-700" style={{ fontSize: 11 }}>
+                          EMPRESAS DISPONÍVEIS ({empresas.length})
+                        </div>
+                        {empresas.map((emp) => {
+                          const ativa = String(emp.id) === String(empresaExibida?.id);
+                          return (
+                            <a
+                              key={emp.id}
+                              href="#select-empresa"
+                              className={`dropdown-item px-10 py-8 d-flex align-items-center justify-content-between rounded mb-2 ${
+                                ativa ? 'bg-primary-lighten text-primary fw-700' : ''
+                              }`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (atualizar) atualizar({ empresaId: String(emp.id) });
+                                setOpenMenu(null);
+                              }}
+                              style={{ gap: 8, fontSize: 12 }}
+                            >
+                              <div className="d-flex flex-column text-truncate">
+                                <span className="text-truncate">{emp.nome}</span>
+                                <small className="text-muted" style={{ fontSize: 10.5 }}>
+                                  NIF: {emp.nif} {emp.provincia ? `• ${emp.provincia}` : ''}
+                                </small>
+                              </div>
+                              {ativa && <i className="la la-check text-primary fw-700" style={{ fontSize: 15 }}></i>}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </li>
+                </li>
+              );
+            })()}
 
             {isAdmin && (
               <li className="d-none d-md-inline-block mr-15">

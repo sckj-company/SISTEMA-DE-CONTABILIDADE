@@ -42,6 +42,7 @@ const LoginPage = ({ onLogin }) => {
         } else {
           localStorage.removeItem('rememberedUser');
         }
+        window.dispatchEvent(new Event('auth-changed'));
         toast.success(t('login.success'));
         onLogin();
         if (userData?.is_admin || userData?.is_superuser || userData?.is_staff) {

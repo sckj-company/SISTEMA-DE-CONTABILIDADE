@@ -25,6 +25,9 @@ const ConfrontoView = () => {
   const { empresaId, ano, mes, atualizar, escolherSeAusente } = usePeriodo();
   usePeriodoDaUrl();
 
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const isAdmin = Boolean(currentUser.is_admin || currentUser.is_superuser || currentUser.is_staff);
+
   const [empresas, setEmpresas] = useState([]);
   const [documentos, setDocumentos] = useState([]);
   const [, setCarregandoDocs] = useState(false);
@@ -673,31 +676,46 @@ const ConfrontoView = () => {
                     {/* SELETOR DE EMPRESA ATIVA */}
                     <div className="d-flex align-items-center" style={{ gap: 8 }}>
                       <span className="text-muted fw-600" style={{ fontSize: 12 }}>EMPRESA:</span>
-                      <select
-                        className="form-control form-control-sm"
-                        value={empresaId}
-                        onChange={(e) => atualizar({ empresaId: e.target.value })}
-                        style={{ height: 34, fontSize: 12.5, fontWeight: 700, minWidth: 200 }}
-                      >
-                        {empresas.length === 0 ? (
-                          <option value="">Sem empresas cadastradas (+)</option>
-                        ) : (
-                          empresas.map((emp) => (
-                            <option key={emp.id} value={String(emp.id)}>
-                              {emp.nome} ({emp.nif})
-                            </option>
-                          ))
-                        )}
-                      </select>
-                      <button
-                        type="button"
-                        className="btn btn-xs btn-outline-primary d-flex align-items-center justify-content-center"
-                        onClick={() => navigate('/admin-gestao?aba=empresas&novaEmpresa=1')}
-                        style={{ height: 34, width: 34, borderRadius: 6, padding: 0 }}
-                        title="Cadastrar Nova Empresa"
-                      >
-                        <i className="la la-plus" style={{ fontSize: 16 }}></i>
-                      </button>
+                      {isAdmin ? (
+                        <>
+                          <select
+                            className="form-control form-control-sm"
+                            value={empresaId}
+                            onChange={(e) => atualizar({ empresaId: e.target.value })}
+                            style={{ height: 34, fontSize: 12.5, fontWeight: 700, minWidth: 200 }}
+                          >
+                            {empresas.length === 0 ? (
+                              <option value="">Sem empresas cadastradas (+)</option>
+                            ) : (
+                              empresas.map((emp) => (
+                                <option key={emp.id} value={String(emp.id)}>
+                                  {emp.nome} ({emp.nif})
+                                </option>
+                              ))
+                            )}
+                          </select>
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-outline-primary d-flex align-items-center justify-content-center"
+                            onClick={() => navigate('/admin-gestao?aba=empresas&novaEmpresa=1')}
+                            style={{ height: 34, width: 34, borderRadius: 6, padding: 0 }}
+                            title="Cadastrar Nova Empresa"
+                          >
+                            <i className="la la-plus" style={{ fontSize: 16 }}></i>
+                          </button>
+                        </>
+                      ) : (
+                        <div
+                          className="px-12 py-6 bg-white rounded border fw-700 color-dark text-truncate d-flex align-items-center"
+                          style={{ height: 34, fontSize: 12.5, maxWidth: 300 }}
+                          title={empresas.find((e) => String(e.id) === String(empresaId))?.nome || 'Minha Empresa'}
+                        >
+                          <i className="la la-building mr-1 text-primary"></i>
+                          <span className="text-truncate">
+                            {empresas.find((e) => String(e.id) === String(empresaId))?.nome || 'Minha Empresa'}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

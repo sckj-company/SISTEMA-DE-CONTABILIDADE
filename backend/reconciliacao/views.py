@@ -114,11 +114,9 @@ def verificar_permissao(user, codename):
 
     # Carregar documentos (balancetes, facturas, extractos, declarações)
     if codename in ('add_documentoupload', 'change_documentoupload', 'view_documentoupload'):
-        if any(p in ('ADMIN', 'AUDITOR', 'CONTABILISTA', 'FISCALISTA', 'OPERADOR_FACTURAS', 'ANALISTA') for p in perfis):
+        if any(p in ('ADMIN', 'CONTABILISTA', 'OPERADOR_FACTURAS', 'FISCALISTA') for p in perfis):
             return True
-        if any(g in ('Contabilista', 'Operador de Facturação', 'Operador de Faturação', 'Auditor', 'Fiscalista') for g in grupos):
-            return True
-        if user.acessos_empresas.filter(ativo=True).exists():
+        if any(g in ('Contabilista', 'Operador de Facturação', 'Operador de Faturação', 'Fiscalista') for g in grupos):
             return True
 
     # Eliminar documentos
@@ -383,6 +381,11 @@ class ReconciliacaoViewSet(viewsets.ModelViewSet):
         serializer = ReconciliacaoExecutarSerializer(data=request.data)
         if serializer.is_valid():
             empresa_id = serializer.validated_data['empresa_id']
+            if not empresas_acessiveis(request.user).filter(pk=empresa_id).exists():
+                return Response(
+                    {'error': 'Empresa não encontrada ou sem permissão de acesso.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
             ano = serializer.validated_data['ano']
             mes = serializer.validated_data['mes']
             resultado = self._executar_reconciliacao(empresa_id, ano, mes)
@@ -563,9 +566,20 @@ def upload_documento_view(request):
     empresa_recem_criada = False
     mensagem_cadastro = ''
 
-    # Se a empresa não foi especificada OU a empresa informada já não existe (ex: foi eliminada):
-    # inspeciona o documento para identificar e pré-cadastrar automaticamente!
+    is_admin_user = bool(
+        request.user.is_superuser
+        or request.user.is_staff
+        or request.user.groups.filter(name__in=['Super Admin', 'Administrador']).exists()
+    )
+
+    # Se a empresa não foi especificada OU a empresa informada já não existe:
     if empresa is None:
+        # Se utilizador não for admin e tiver apenas 1 empresa vinculada, associa diretamente a ela
+        if not is_admin_user:
+            empresa = empresas_acessiveis(request.user).first()
+            if empresa:
+                empresa_id = empresa.id
+
         import tempfile
         import os
         extensao = ('.' + arquivo.name.rsplit('.', 1)[-1].lower() if '.' in arquivo.name else '')
@@ -579,9 +593,9 @@ def upload_documento_view(request):
             dados_cad = auto_cadastro_service.extrair_dados_empresa_do_texto(texto_up, arquivo.name)
             if dados_cad.get('nif') or dados_cad.get('nome'):
                 emp_auto, criada, msg = auto_cadastro_service.obter_ou_cadastrar_empresa_automatica(
-                    dados_cad, user=request.user, auto_criar=True
+                    dados_cad, user=request.user, auto_criar=is_admin_user
                 )
-                if emp_auto:
+                if emp_auto and (is_admin_user or empresas_acessiveis(request.user).filter(pk=emp_auto.id).exists()):
                     empresa = emp_auto
                     empresa_id = emp_auto.id
                     empresa_recem_criada = criada
@@ -961,6 +975,11 @@ def analisar_documentos_view(request):
         doc_agt = docs_usuario.filter(pk=doc_agt_id).first()
         if doc_contab is None or doc_agt is None:
             raise DocumentoUpload.DoesNotExist
+        if doc_contab.empresa_id != doc_agt.empresa_id:
+            return Response(
+                {'error': 'Os documentos selecionados pertencem a empresas distintas.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         logger.info(f"Documentos encontrados: contab={doc_contab.nome_arquivo}, agt={doc_agt.nome_arquivo}")
     except DocumentoUpload.DoesNotExist:
         logger.error(f"Documento não encontrado: contab_id={doc_contab_id}, agt_id={doc_agt_id}")
@@ -3169,8 +3188,12 @@ def scan_factura_view(request):
         tmp_path = tmp.name
 
     try:
+        user_atual = request.user if getattr(request, 'user', None) and request.user.is_authenticated else None
         empresa_obj = None
-        if empresa_id:
+        if user_atual and not (user_atual.is_superuser or user_atual.is_staff):
+            acessiveis = empresas_acessiveis(user_atual)
+            empresa_obj = acessiveis.filter(pk=empresa_id).first() if empresa_id else acessiveis.first()
+        elif empresa_id:
             empresa_obj = Empresa.objects.filter(pk=empresa_id).first()
 
         # Arquivar também em DocumentoUpload
@@ -3238,6 +3261,8 @@ def listar_facturas_view(request):
     busca = request.query_params.get('search', '').strip()
 
     qs = Factura.objects.select_related('empresa', 'documento', 'lancamento').all()
+    if request.user.is_authenticated and not (request.user.is_superuser or request.user.is_staff):
+        qs = qs.filter(empresa__in=empresas_acessiveis(request.user))
 
     if empresa_id:
         qs = qs.filter(empresa_id=empresa_id)

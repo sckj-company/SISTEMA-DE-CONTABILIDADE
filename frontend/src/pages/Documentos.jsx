@@ -83,6 +83,9 @@ const Documentos = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const isAdmin = Boolean(currentUser.is_admin || currentUser.is_superuser || currentUser.is_staff);
+
   // Pastas e Filtros
   const [pastaAtiva, setPastaAtiva] = useState('TODOS');
   const [termoBusca, setTermoBusca] = useState('');
@@ -532,24 +535,22 @@ const Documentos = () => {
             </div>
 
             <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
-              <div>
-                <select
-                  className="form-control form-control-sm"
-                  value={empresaId}
-                  onChange={(e) => atualizar({ empresaId: e.target.value })}
-                  style={{ minWidth: 200, height: 36, fontWeight: 600, fontSize: 12.5 }}
-                >
-                  {empresas.length === 0 ? (
-                    <option value="">Nenhuma empresa cadastrada</option>
-                  ) : (
-                    empresas.map((emp) => (
+              {isAdmin && empresas.length > 1 && (
+                <div>
+                  <select
+                    className="form-control form-control-sm"
+                    value={empresaId}
+                    onChange={(e) => atualizar({ empresaId: e.target.value })}
+                    style={{ minWidth: 200, height: 36, fontWeight: 600, fontSize: 12.5 }}
+                  >
+                    {empresas.map((emp) => (
                       <option key={emp.id} value={String(emp.id)}>
                         {emp.nome} ({emp.nif})
                       </option>
-                    ))
-                  )}
-                </select>
-              </div>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div>
                 <select
@@ -766,18 +767,30 @@ const Documentos = () => {
                     <label className="text-muted fw-600 mb-2" style={{ fontSize: 11.5 }}>
                       EMPRESA ASSOCIADA
                     </label>
-                    <select
-                      className="form-control form-control-sm"
-                      value={empresaId || ''}
-                      onChange={(e) => atualizar({ empresaId: e.target.value })}
-                    >
-                      <option value="">✨ Deteção Automática (Extrair do Documento)</option>
-                      {empresas.map((emp) => (
-                        <option key={emp.id} value={String(emp.id)}>
-                          {emp.nome} ({emp.nif})
-                        </option>
-                      ))}
-                    </select>
+                    {isAdmin && empresas.length > 1 ? (
+                      <select
+                        className="form-control form-control-sm"
+                        value={empresaId || ''}
+                        onChange={(e) => atualizar({ empresaId: e.target.value })}
+                      >
+                        <option value="">✨ Deteção Automática (Extrair do Documento)</option>
+                        {empresas.map((emp) => (
+                          <option key={emp.id} value={String(emp.id)}>
+                            {emp.nome} ({emp.nif})
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div
+                        className="form-control form-control-sm bg-light fw-600 text-truncate d-flex align-items-center"
+                        style={{ height: 34, fontSize: 12.5 }}
+                      >
+                        <i className="la la-building text-primary mr-1"></i>
+                        <span className="text-truncate">
+                          {empresaAtual?.nome || 'Empresa Vinculada'} (NIF: {empresaAtual?.nif || '---'})
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="col-12 col-md-4">

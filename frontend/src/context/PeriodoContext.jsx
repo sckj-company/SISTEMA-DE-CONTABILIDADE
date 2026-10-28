@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { empresaService } from '../services/api';
 
 const CHAVE = 'periodoAuditoria';
@@ -13,6 +13,7 @@ const predefinido = () => ({
 });
 
 export const PeriodoProvider = ({ children }) => {
+  const location = useLocation();
   const [periodo, setPeriodo] = useState(() => {
     const base = predefinido();
     try {
@@ -31,7 +32,11 @@ export const PeriodoProvider = ({ children }) => {
 
   const carregarEmpresas = useCallback(async () => {
     const user = localStorage.getItem('user');
-    if (!user) return [];
+    if (!user) {
+      setEmpresas([]);
+      setPeriodo(predefinido());
+      return [];
+    }
     setCarregandoEmpresas(true);
     try {
       const res = await empresaService.getAll();
@@ -40,9 +45,10 @@ export const PeriodoProvider = ({ children }) => {
       if (lista.length > 0) {
         setPeriodo((atual) => {
           const existe = lista.some((e) => String(e.id) === String(atual.empresaId));
-          if (!existe) {
+          if (!existe || !atual.empresaId) {
             const sckj = lista.find((e) => e.nif === '5002830280');
-            return { ...atual, empresaId: String(sckj ? sckj.id : lista[0].id) };
+            const novaId = String(sckj ? sckj.id : lista[0].id);
+            return { ...atual, empresaId: novaId };
           }
           return atual;
         });
@@ -60,7 +66,26 @@ export const PeriodoProvider = ({ children }) => {
 
   useEffect(() => {
     carregarEmpresas();
+
+    const handleAuth = () => {
+      carregarEmpresas();
+    };
+
+    window.addEventListener('storage', handleAuth);
+    window.addEventListener('auth-changed', handleAuth);
+    return () => {
+      window.removeEventListener('storage', handleAuth);
+      window.removeEventListener('auth-changed', handleAuth);
+    };
   }, [carregarEmpresas]);
+
+  // Se o utilizador estiver autenticado mas a lista de empresas ainda estiver vazia, tenta recarregar ao navegar
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (user && empresas.length === 0 && !carregandoEmpresas) {
+      carregarEmpresas();
+    }
+  }, [location.pathname, empresas.length, carregandoEmpresas, carregarEmpresas]);
 
   useEffect(() => {
     try {
@@ -70,9 +95,38 @@ export const PeriodoProvider = ({ children }) => {
     }
   }, [periodo]);
 
+  // Empresa ativa calculada: se houver empresas, garante resolução instantânea
+  const empresaAtual = React.useMemo(() => {
+    if (!empresas || empresas.length === 0) return null;
+    const match = empresas.find((e) => String(e.id) === String(periodo.empresaId));
+    if (match) return match;
+    const sckj = empresas.find((e) => e.nif === '5002830280');
+    return sckj || empresas[0];
+  }, [empresas, periodo.empresaId]);
+
+  // Sincroniza o ID no período sempre que a empresa ativa for determinada
+  useEffect(() => {
+    if (empresaAtual && String(empresaAtual.id) !== String(periodo.empresaId)) {
+      setPeriodo((atual) => ({ ...atual, empresaId: String(empresaAtual.id) }));
+    }
+  }, [empresaAtual, periodo.empresaId]);
+
   const atualizar = useCallback((parcial) => {
-    setPeriodo((atual) => ({ ...atual, ...parcial }));
-  }, []);
+    setPeriodo((atual) => {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const isAdmin = Boolean(user.is_admin || user.is_superuser || user.is_staff);
+      const novo = { ...atual, ...parcial };
+
+      // Se não for administrador, impede a troca para empresas fora da lista atribuída
+      if (parcial.empresaId && !isAdmin && empresas.length > 0) {
+        const pertence = empresas.some((e) => String(e.id) === String(parcial.empresaId));
+        if (!pertence) {
+          novo.empresaId = String(empresas[0].id);
+        }
+      }
+      return novo;
+    });
+  }, [empresas]);
 
   const escolherSeAusente = useCallback((parcial) => {
     setPeriodo((atual) => {
@@ -87,8 +141,6 @@ export const PeriodoProvider = ({ children }) => {
       return novo;
     });
   }, []);
-
-  const empresaAtual = empresas.find((e) => String(e.id) === String(periodo.empresaId)) || null;
 
   const valor = React.useMemo(
     () => ({

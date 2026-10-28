@@ -15,7 +15,7 @@ def seed_users(apps, schema_editor):
             'nome': 'SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA',
             'regime_iva': 'Geral',
             'email': 'suporte@sckj.co.ao',
-            'cidade': 'Luanda',
+            'provincia': 'Luanda',
         }
     )
 

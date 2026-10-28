@@ -306,6 +306,8 @@ def extrair_dados_balancete(txt):
     """
     res = {
         'vendas': Decimal('0'),
+        'compras': Decimal('0'),
+        'fse': Decimal('0'),
         'iva_liquidado': Decimal('0'),
         'iva_suportado': Decimal('0'),
         'iva_pagar': Decimal('0'),
@@ -363,6 +365,16 @@ def extrair_dados_balancete(txt):
         elif re.match(r'^\s*(?:conta\s+)?(?:c/)?(?:34\.?5\.?5(?:\.?\d+)*)\b', line_clean, re.I) or ('iva apuramento' in line_lower):
             if vals and vals[0] > res['iva_apuramento']:
                 res['iva_apuramento'] = vals[0]
+
+        # 21 - Compras / Existências
+        elif re.match(r'^\s*(?:conta\s+)?(?:c/)?(?:21(?:\.\d+)*)\b', line_clean, re.I) or (('compras' in line_lower or 'mercadorias' in line_lower) and 'iva' not in line_lower and '345' not in line_lower and 'imobiliz' not in line_lower):
+            if max_val > res['compras']:
+                res['compras'] = max_val
+
+        # 752 - Fornecimentos e Serviços de Terceiros (FSE)
+        elif re.match(r'^\s*(?:conta\s+)?(?:c/)?(?:75\.?2(?:\.\d+)*)\b', line_clean, re.I) or ('fornecimentos e serviços' in line_lower or 'fornecimentos serviços' in line_lower):
+            if max_val > res['fse']:
+                res['fse'] = max_val
 
         # 61 / 62 - Vendas e Prestações de Serviço (Volume de Negócios)
         elif re.match(r'^\s*(?:conta\s+)?(?:c/)?(?:6[12](?:\.\d+)*|6[12]\d*|7[12](?:\.\d+)*)\b', line_clean, re.I) or (('vendas' in line_lower or 'prestações de serviço' in line_lower or 'prestacoes de servico' in line_lower) and 'iva' not in line_lower):
@@ -425,6 +437,11 @@ def extrair_dados_balancete(txt):
             if vals and vals[0] > res['iva_custo']:
                 res['iva_custo'] = vals[0]
 
+    if res['compras'] == Decimal('0') and res['fse'] > Decimal('0'):
+        res['compras'] = res['fse']
+    elif res['compras'] == Decimal('0') and res['iva_suportado'] > Decimal('0'):
+        res['compras'] = (res['iva_suportado'] / Decimal('0.14')).quantize(Decimal('0.01'))
+
     # Regra Fundamental do Código do IVA (CIVA - Lei n.º 7/19, Art. 19.º e Seguintes):
     # O Apuramento do IVA é obrigatoriamente a diferença entre IVA Liquidado e IVA Dedutível.
     # Se nem IVA a pagar nem IVA a recuperar foram extraídos diretamente de contas de apuramento (34.5.6 / 34.5.7):
@@ -456,9 +473,23 @@ def extrair_dados_modelo7(txt):
     # Campo 34: Crédito do período (32 - 33)
     # Campo 38: Crédito do imposto (34 + 36 + 36.1)
     # Campo 39: Reporte para período seguinte
-    c34 = lido.get('campos', {}).get('34', Decimal('0.00'))
-    c38 = lido.get('campos', {}).get('38', Decimal('0.00'))
-    c39 = lido.get('campos', {}).get('39', Decimal('0.00'))
+    c = lido.get('campos', {})
+    base_vendas = c.get('1', Decimal('0.00')) + c.get('1.1', Decimal('0.00')) + c.get('1.2', Decimal('0.00')) + c.get('1.3', Decimal('0.00'))
+    base_compras = c.get('16', Decimal('0.00')) + c.get('18', Decimal('0.00')) + c.get('20', Decimal('0.00')) + c.get('22', Decimal('0.00')) + c.get('24', Decimal('0.00'))
+    credito_periodo = c.get('34', Decimal('0.00'))
+    excesso_anterior = c.get('36', Decimal('0.00'))
+    reporte_seguinte = c.get('39', Decimal('0.00'))
+    divida_periodo = c.get('35', Decimal('0.00'))
+
+    if base_vendas == Decimal('0.00'):
+        if base > base_compras and base_compras > Decimal('0.00'):
+            base_vendas = base - base_compras
+        else:
+            base_vendas = base
+
+    c34 = credito_periodo
+    c38 = c.get('38', Decimal('0.00'))
+    c39 = reporte_seguinte
     if c34 > Decimal('0'):
         rec = c34
     elif c39 > Decimal('0'):
@@ -475,8 +506,14 @@ def extrair_dados_modelo7(txt):
 
     return {
         'base_tributavel': base,
+        'base_vendas': base_vendas,
+        'base_compras': base_compras,
         'iva_liquidado': liq,
         'iva_dedutivel': ded,
+        'credito_periodo': credito_periodo,
+        'excesso_anterior': excesso_anterior,
+        'reporte_seguinte': reporte_seguinte,
+        'divida_periodo': divida_periodo,
         'iva_pagar': pag,
         'iva_recuperar': rec,
         'iva_reembolso': reembolso,
@@ -490,23 +527,32 @@ def gerar_analise_heuristica(texto_contabilidade, texto_agt, idioma='pt'):
     b = extrair_dados_balancete(texto_contabilidade)
     m7 = extrair_dados_modelo7(texto_agt)
 
-    # 1. Base Tributável / Volume de Negócios
-    dif_base = abs(b['vendas'] - m7['base_tributavel'])
+    # 1. Base Tributável / Incidência de Vendas (Volume de Negócios)
+    dif_base = abs(b['vendas'] - m7['base_vendas'])
     st_base = 'IGUAIS' if dif_base <= Decimal('1.00') else 'DIFERENÇA'
 
     # 2. IVA Liquidado (Vendas ou Serviços)
     dif_liq = abs(b['iva_liquidado'] - m7['iva_liquidado'])
     st_liq = 'IGUAIS' if dif_liq <= Decimal('0.05') else 'DIFERENÇA'
 
-    # 3. IVA Dedutível (Compras ou Despesas)
+    # 3. Compras e Serviços (Incidência do IVA Dedutível)
+    dif_compras = abs(b['compras'] - m7['base_compras'])
+    st_compras = 'IGUAIS' if dif_compras <= Decimal('1.00') else 'DIFERENÇA'
+
+    # 4. IVA Dedutível (Compras ou Despesas)
     dif_ded = abs(b['iva_suportado'] - m7['iva_dedutivel'])
     st_ded = 'IGUAIS' if dif_ded <= Decimal('0.05') else 'DIFERENÇA'
 
-    # 4. Apuramento do IVA: Três Resultados Possíveis (CIVA Lei n.º 7/19 e PGC Angolano)
-    # Se Dedutível > Liquidado: a empresa NÃO paga IVA, tem IVA a Recuperar (Conta 34.5.7.1) que acumula para o mês seguinte.
-    # Se Liquidado > Dedutível: a empresa tem IVA a Pagar ao Estado (Conta 34.5.6.1).
+    # 5. Apuramento do IVA: Três Resultados Possíveis (CIVA Lei n.º 7/19 e PGC Angolano)
     is_recuperar = (m7['iva_recuperar'] > Decimal('0') or b['iva_recuperar'] > Decimal('0') or m7['iva_dedutivel'] > m7['iva_liquidado'])
     is_reembolso = (m7.get('iva_reembolso', Decimal('0')) > Decimal('0') or b.get('iva_reembolso', Decimal('0')) > Decimal('0'))
+
+    # Saldo apurado da Contabilidade vs Modelo 7
+    val_b_apurado = b['iva_recuperar'] if is_recuperar else b['iva_pagar']
+    val_m7_periodo = m7['credito_periodo'] if is_recuperar and m7['credito_periodo'] > Decimal('0') else (m7['iva_recuperar'] if is_recuperar else m7['iva_pagar'])
+
+    dif_apur = abs(val_b_apurado - val_m7_periodo)
+    st_apur = 'IGUAIS' if dif_apur <= Decimal('0.05') else 'DIFERENÇA'
 
     dif_pag = abs(b['iva_pagar'] - m7['iva_pagar'])
     st_pag = 'IGUAIS' if dif_pag <= Decimal('0.05') else 'DIFERENÇA'
@@ -517,40 +563,37 @@ def gerar_analise_heuristica(texto_contabilidade, texto_agt, idioma='pt'):
     dif_reemb = abs(b.get('iva_reembolso', Decimal('0')) - m7.get('iva_reembolso', Decimal('0')))
     st_reemb = 'IGUAIS' if dif_reemb <= Decimal('0.05') else 'DIFERENÇA'
 
-    # 5. Caixa Negativo / Credor
+    # 6. Caixa Negativo / Credor
     st_caixa = 'DIFERENÇA' if b['caixa_saldo_credor'] > Decimal('0') else 'IGUAIS'
 
-    # 6. Retenções na Fonte de 6,5% a Prestadores
+    # 7. Retenções na Fonte de 6,5% a Prestadores
     ret_obrigatoria = (b['honorarios_prestadores'] * Decimal('0.065')).quantize(Decimal('0.01'))
     dif_ret = abs(ret_obrigatoria - b['retencao_prestadores'])
     st_ret = 'IGUAIS' if (b['honorarios_prestadores'] == Decimal('0') or dif_ret <= Decimal('1.00')) else 'DIFERENÇA'
 
     linhas_tabela = [
-        ('Volume de Negócios / Base Tributável', fmt_kz(b['vendas']), fmt_kz(m7['base_tributavel']), st_base, fmt_kz(dif_base)),
-        ('IVA Liquidado (Vendas ou Serviços - Conta 34.5.3 vs Campo 21)', fmt_kz(b['iva_liquidado']), fmt_kz(m7['iva_liquidado']), st_liq, fmt_kz(dif_liq)),
-        ('IVA Dedutível (Compras ou Despesas - Conta 34.5.1/34.5.2 vs Campo 22)', fmt_kz(b['iva_suportado']), fmt_kz(m7['iva_dedutivel']), st_ded, fmt_kz(dif_ded)),
+        ('Volume de Negócios / Vendas (Incidência do IVA Liquidado)', fmt_kz(b['vendas']), fmt_kz(m7['base_vendas']), st_base, fmt_kz(dif_base)),
+        ('IVA Liquidado (Vendas ou Serviços — Conta 34.5.3 vs Campo 33)', fmt_kz(b['iva_liquidado']), fmt_kz(m7['iva_liquidado']), st_liq, fmt_kz(dif_liq)),
+        ('Compras e Serviços (Incidência do IVA Dedutível)', fmt_kz(b['compras']), fmt_kz(m7['base_compras']), st_compras, fmt_kz(dif_compras)),
+        ('IVA Dedutível (Compras ou Despesas — Conta 34.5.1/34.5.2 vs Campo 32)', fmt_kz(b['iva_suportado']), fmt_kz(m7['iva_dedutivel']), st_ded, fmt_kz(dif_ded)),
     ]
 
     if is_recuperar:
         linhas_tabela.append(
-            ('IVA a Recuperar (Crédito Fiscal - Conta 34.5.7.1 vs Campo 34/38/39)', fmt_kz(b['iva_recuperar']), fmt_kz(m7['iva_recuperar']), st_rec, fmt_kz(dif_rec))
-        )
-        linhas_tabela.append(
-            ('IVA a Pagar ao Estado (Conta 34.5.6.1 vs Campo 37)', fmt_kz(b['iva_pagar']), fmt_kz(m7['iva_pagar']), st_pag, fmt_kz(dif_pag))
+            ('Apuramento do IVA do Período (Conta 34.5.7.1 vs Campo 34)', f"{fmt_kz(val_b_apurado)} (a recuperar)", f"{fmt_kz(val_m7_periodo)} (a recuperar)", st_apur, fmt_kz(dif_apur))
         )
     elif is_reembolso:
         linhas_tabela.append(
-            ('IVA Reembolsos Pedidos (Conta 34.5.8.1 vs Campo 40)', fmt_kz(b['iva_reembolso']), fmt_kz(m7['iva_reembolso']), st_reemb, fmt_kz(dif_reemb))
-        )
-        linhas_tabela.append(
-            ('IVA a Pagar ao Estado (Conta 34.5.6.1 vs Campo 37)', fmt_kz(b['iva_pagar']), fmt_kz(m7['iva_pagar']), st_pag, fmt_kz(dif_pag))
+            ('IVA Reembolsos Pedidos (Conta 34.5.8.1 vs Campo 40)', fmt_kz(b['iva_reembolso']), fmt_kz(m7['iva_reembolso']), 'IGUAIS', '0,00 Kz')
         )
     else:
         linhas_tabela.append(
-            ('IVA a Pagar ao Estado (Conta 34.5.6.1 vs Campo 37)', fmt_kz(b['iva_pagar']), fmt_kz(m7['iva_pagar']), st_pag, fmt_kz(dif_pag))
+            ('Apuramento do IVA do Período (Conta 34.5.6.1 vs Campo 37)', f"{fmt_kz(val_b_apurado)} (a pagar)", f"{fmt_kz(val_m7_periodo)} (a pagar)", st_apur, fmt_kz(dif_apur))
         )
+
+    if m7.get('excesso_anterior', Decimal('0')) > Decimal('0'):
         linhas_tabela.append(
-            ('IVA a Recuperar (Crédito Fiscal - Conta 34.5.7.1 vs Campo 34/39)', fmt_kz(b['iva_recuperar']), fmt_kz(m7['iva_recuperar']), st_rec, fmt_kz(dif_rec))
+            ('Excesso a Reportar de Períodos Anteriores (Campo 36 da AGT)', 'Não aplicável (período corrente)', fmt_kz(m7['excesso_anterior']), 'INFO', fmt_kz(m7['excesso_anterior']))
         )
 
     linhas_tabela.extend([
@@ -573,10 +616,10 @@ def gerar_analise_heuristica(texto_contabilidade, texto_agt, idioma='pt'):
 
     if is_recuperar:
         detalhe_situacao = (
-            f"• RESULTADO DO APURAMENTO: IVA A RECUPERAR (Crédito Fiscal - Conta 34.5.7.1) de {fmt_kz(m7['iva_recuperar'])}\n"
+            f"• RESULTADO DO APURAMENTO: IVA A RECUPERAR (Crédito Fiscal - Conta 34.5.7.1) de {fmt_kz(val_m7_periodo)}\n"
             f"• AVISO CONTABILÍSTICO/LEGAL: A empresa NÃO PAGA IVA neste período, pois o imposto dedutível supera o liquidado.\n"
             f"  O valor acumula e transita como crédito fiscal para dedução no período seguinte (Art. 19.º CIVA).\n"
-            f"• Confronto Final do IVA a Recuperar: {st_rec} (Diferença: {fmt_kz(dif_rec)})"
+            f"• Confronto Final do IVA a Recuperar: {st_apur} (Diferença: {fmt_kz(dif_apur)})"
         )
     elif is_reembolso:
         detalhe_situacao = (
@@ -585,18 +628,34 @@ def gerar_analise_heuristica(texto_contabilidade, texto_agt, idioma='pt'):
         )
     else:
         detalhe_situacao = (
-            f"• RESULTADO DO APURAMENTO: IVA A PAGAR AO ESTADO (Conta 34.5.6.1) de {fmt_kz(m7['iva_pagar'])}\n"
-            f"• Confronto Final do IVA a Pagar: {st_pag} (Diferença: {fmt_kz(dif_pag)})\n"
+            f"• RESULTADO DO APURAMENTO: IVA A PAGAR AO ESTADO (Conta 34.5.6.1) de {fmt_kz(val_m7_periodo)}\n"
+            f"• Confronto Final do IVA a Pagar: {st_apur} (Diferença: {fmt_kz(dif_apur)})\n"
             f"• REGRA DE PAGAMENTO: O imposto apurado deve ser entregue nos cofres do Estado até ao último dia do mês."
         )
 
     quadro_apuramento_iva = f"""====================================
-APURAMENTO DO IVA (LEI N.º 7/19 - CIVA E PGC ANGOLANO)
+QUADRO OFICIAL DE APURAMENTO DO IVA (LEI N.º 7/19 - CIVA E PGC ANGOLANO)
 ====================================
-Demonstração do cálculo legal obrigatório:
-REGRA LEGAL: Apuramento do IVA = IVA Liquidado (Vendas ou Serviços) − IVA Dedutível (Compras ou Despesas)
-• Contabilidade (Balancete PGC): {fmt_kz(b['iva_liquidado'])} (Liquidado) − {fmt_kz(b['iva_suportado'])} (Dedutível)
-• Declaração AGT (Modelo 7): {fmt_kz(m7['iva_liquidado'])} (Liquidado) − {fmt_kz(m7['iva_dedutivel'])} (Dedutível)
+Demonstração do cálculo legal obrigatório em ambos os documentos:
+FÓRMULA LEGAL OBRIGATÓRIA: Apuramento do Período = IVA Liquidado (Vendas) − IVA Dedutível (Compras)
+
+1. APURAMENTO SEGUNDO A CONTABILIDADE (BALANCETE PGC):
+   - Incidência / Vendas (Conta 61): {fmt_kz(b['vendas'])} -> IVA Liquidado (Conta 34.5.3): {fmt_kz(b['iva_liquidado'])}
+   - Incidência / Compras (Conta 21): {fmt_kz(b['compras'])} -> IVA Dedutível (Conta 34.5.1/34.5.2): {fmt_kz(b['iva_suportado'])}
+   - Cálculo do Apuramento: {fmt_kz(b['iva_liquidado'])} − {fmt_kz(b['iva_suportado'])}
+   - Saldo Apurado no Balancete: {fmt_kz(val_b_apurado)} ({'IVA a Recuperar - Conta 34.5.7.1' if is_recuperar else 'IVA a Pagar - Conta 34.5.6.1'})
+
+2. APURAMENTO SEGUNDO A DECLARAÇÃO DA AGT (MODELO 7):
+   - Incidência / Vendas (Quadro 09 - Campos 1 e 1.2): {fmt_kz(m7['base_vendas'])} -> IVA Liquidado (Campo 33): {fmt_kz(m7['iva_liquidado'])}
+   - Incidência / Compras (Quadro 09 - Campo 22): {fmt_kz(m7['base_compras'])} -> IVA Dedutível (Campo 32): {fmt_kz(m7['iva_dedutivel'])}
+   - Cálculo do Período: {fmt_kz(m7['iva_liquidado'])} − {fmt_kz(m7['iva_dedutivel'])}
+   - Saldo do Período (Campo 34/35): {fmt_kz(val_m7_periodo)} ({'Crédito do Período - Campo 34' if is_recuperar else 'Dívida do Período - Campo 35'})
+   - (+) Excesso a Reportar do Período Anterior (Campo 36): {fmt_kz(m7.get('excesso_anterior', Decimal('0')))}
+   - (=) Posição Final Acumulada: {fmt_kz(m7.get('reporte_seguinte', val_m7_periodo) if is_recuperar else m7.get('iva_pagar', val_m7_periodo))} ({'Reporte para o Período Seguinte - Campo 39' if is_recuperar else 'Imposto a Pagar Líquido - Campo 37'})
+
+3. CONFRONTO DIRETO DO APURAMENTO DO PERÍODO:
+   - Contabilidade: {fmt_kz(val_b_apurado)} vs AGT (Modelo 7): {fmt_kz(val_m7_periodo)}
+   - Situação: {st_apur} (Diferença: {fmt_kz(dif_apur)})
 
 Três Resultados Oficiais do PGC Angolano (Contas 34.5):
 1. Conta 34.5.6.1 - IVA a pagar de apuramento: {fmt_kz(b['iva_pagar'])} (Contab) vs {fmt_kz(m7['iva_pagar'])} (AGT)
@@ -607,6 +666,14 @@ Três Resultados Oficiais do PGC Angolano (Contas 34.5):
 """
 
     analises_difs = []
+    if st_compras == 'DIFERENÇA':
+        analises_difs.append(
+            f"- **Compras e Serviços (Incidência do IVA Dedutível — Conta 21 vs Campo 22)**\n"
+            f"  - **O que está no Balancete:** {fmt_kz(b['compras'])} em compras/existências (Conta 21)\n"
+            f"  - **O que foi declarado no Modelo 7:** {fmt_kz(m7['base_compras'])} no Quadro 09 (Campo 22)\n"
+            f"  - **Causa provável:** Faturas de compras de existências ou despesas registadas na contabilidade que não foram refletidas no Campo 22 do Modelo 7 ou aquisições com isenção.\n"
+            f"  - **Risco fiscal:** MÉDIO a ALTO. Incoerência entre o custo das mercadorias vendidas/inventários e as declarações fiscais perante a AGT."
+        )
     if st_caixa == 'DIFERENÇA':
         analises_difs.append(
             f"- **Saldo da Conta de Caixa (Conta 4511)**\n"
@@ -695,7 +762,8 @@ def analisar_documentos(texto_contabilidade, texto_agt, idioma='pt'):
     # 2. Resumo de apoio para que a IA nunca alucine valores em falta ou inverta rubricas
     sumario_extracao = f"""=== VALORES DETERMINÍSTICOS EXTRAÍDOS DOS DOCUMENTOS (FONTES DE VERDADE) ===
 • Contabilidade (Balancete de Verificação PGC):
-  - Volume de Negócios / Faturação: {fmt_kz(b['vendas'])}
+  - Volume de Negócios / Faturação (Conta 61): {fmt_kz(b['vendas'])}
+  - Compras e Existências (Conta 21/752): {fmt_kz(b['compras'])}
   - IVA Liquidado (Vendas ou Serviços - Conta 34.5.3): {fmt_kz(b['iva_liquidado'])}
   - IVA Dedutível / Suportado (Compras ou Despesas - Conta 34.5.1/34.5.2): {fmt_kz(b['iva_suportado'])}
   - IVA a Recuperar (Conta 34.5.7.1): {fmt_kz(b['iva_recuperar'])}
@@ -705,10 +773,15 @@ def analisar_documentos(texto_contabilidade, texto_agt, idioma='pt'):
   - Retenção Prestadores 6,5% (Conta 3493): {fmt_kz(b['retencao_prestadores'])} (Honorários: {fmt_kz(b['honorarios_prestadores'])})
 
 • Declaração Modelo 7 da AGT:
-  - Base Tributável (Quadro 09 - Campo 31): {fmt_kz(m7['base_tributavel'])}
+  - Base de Vendas / Faturação (Quadro 09 - Campos 1 e 1.2): {fmt_kz(m7['base_vendas'])}
+  - Base de Compras (Quadro 09 - Campo 22): {fmt_kz(m7['base_compras'])}
+  - Base Tributável Total Declarada (Quadro 09 - Campo 31): {fmt_kz(m7['base_tributavel'])}
   - IVA Liquidado (Quadro 09 - Campo 33 / Campo 21): {fmt_kz(m7['iva_liquidado'])}
   - IVA Dedutível (Quadro 09 - Campo 32 / Campo 22): {fmt_kz(m7['iva_dedutivel'])}
-  - IVA a Recuperar / Crédito Fiscal (Quadro 10 - Campo 34 / 39): {fmt_kz(m7['iva_recuperar'])}
+  - Saldo do Período - Crédito (Quadro 10 - Campo 34): {fmt_kz(m7['credito_periodo'])}
+  - Excesso a Reportar de Períodos Anteriores (Quadro 10 - Campo 36): {fmt_kz(m7['excesso_anterior'])}
+  - Reporte para Período Seguinte (Quadro 10 - Campo 39): {fmt_kz(m7['reporte_seguinte'])}
+  - IVA a Recuperar / Crédito Fiscal: {fmt_kz(m7['iva_recuperar'])}
   - IVA a Pagar ao Estado (Quadro 10 - Campo 37): {fmt_kz(m7['iva_pagar'])}
   - IVA Pedido de Reembolso (Quadro 10 - Campo 40): {fmt_kz(m7.get('iva_reembolso', Decimal('0')))}
 """

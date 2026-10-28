@@ -153,4 +153,77 @@ describe('analiseIaParser - Sanitização e Robustez de Markdown', () => {
     expect(resultado.diferencasDetalhadas[0].riscos[0]).toContain('Risco elevado');
     expect(resultado.pontosIguais).toHaveLength(1);
   });
+
+  test('Cenário Completo Balancete vs Modelo 7: Deve extrair Incidências e Apuramento de Ambos os Documentos', () => {
+    const textoCompleto = `
+====================================
+1. RESUMO DO CONFRONTO (BALANCETE vs MODELO 7)
+====================================
+- Documentos confrontados: Balancete de Verificação e Declaração Modelo 7
+- Total de pontos analisados: 5
+- Dados IGUAIS (Conformes): 3
+- Dados com DIFERENCAS: 2
+
+====================================
+2. DETALHE DOS DADOS: IGUAIS vs DIFERENCAS
+====================================
+| Nome do Campo | Contabilidade (Balancete) | AGT (Modelo 7) | Status | Diferença Apurada |
+|---|---|---|---|---|
+| Volume de Negócios / Vendas (Incidência do IVA Liquidado) | 280.859.727,67 Kz | 280.859.727,67 Kz | IGUAIS | 0,00 Kz |
+| IVA Liquidado (Vendas ou Serviços — Conta 34.5.3 vs Campo 33) | 16.878.091,78 Kz | 16.878.091,78 Kz | IGUAIS | 0,00 Kz |
+| Compras e Serviços (Incidência do IVA Dedutível) | 285.973.012,61 Kz | 189.238.764,29 Kz | DIFERENÇA | 96.734.248,32 Kz |
+| IVA Dedutível (Compras ou Despesas — Conta 34.5.1/34.5.2 vs Campo 32) | 19.801.638,96 Kz | 26.493.427,00 Kz | DIFERENÇA | 6.691.788,04 Kz |
+| Apuramento do IVA do Período (Conta 34.5.7.1 vs Campo 34) | 9.615.335,22 Kz (a recuperar) | 9.615.335,22 Kz (a recuperar) | IGUAIS | 0,00 Kz |
+
+====================================
+QUADRO OFICIAL DE APURAMENTO DO IVA (LEI N.º 7/19 - CIVA E PGC ANGOLANO)
+====================================
+Demonstração do cálculo legal obrigatório em ambos os documentos:
+FÓRMULA LEGAL OBRIGATÓRIA: Apuramento do Período = IVA Liquidado (Vendas) − IVA Dedutível (Compras)
+
+1. APURAMENTO SEGUNDO A CONTABILIDADE (BALANCETE PGC):
+   - Incidência / Vendas (Conta 61): 280.859.727,67 Kz -> IVA Liquidado (Conta 34.5.3): 16.878.091,78 Kz
+   - Incidência / Compras (Conta 21): 285.973.012,61 Kz -> IVA Dedutível (Conta 34.5.1/34.5.2): 19.801.638,96 Kz
+   - Cálculo do Apuramento: 16.878.091,78 Kz − 19.801.638,96 Kz
+   - Saldo Apurado no Balancete: 9.615.335,22 Kz (IVA a Recuperar - Conta 34.5.7.1)
+
+2. APURAMENTO SEGUNDO A DECLARAÇÃO DA AGT (MODELO 7):
+   - Incidência / Vendas (Quadro 09 - Campos 1 e 1.2): 280.859.727,67 Kz -> IVA Liquidado (Campo 33): 16.878.091,78 Kz
+   - Incidência / Compras (Quadro 09 - Campo 22): 189.238.764,29 Kz -> IVA Dedutível (Campo 32): 26.493.427,00 Kz
+   - Cálculo do Período: 16.878.091,78 Kz − 26.493.427,00 Kz
+   - Saldo do Período (Campo 34/35): 9.615.335,22 Kz (Crédito do Período - Campo 34)
+   - (+) Excesso a Reportar do Período Anterior (Campo 36): 1.727.293,00 Kz
+   - (=) Posição Final Acumulada: 11.342.628,22 Kz (Reporte para o Período Seguinte - Campo 39)
+
+3. CONFRONTO DIRETO DO APURAMENTO DO PERÍODO:
+   - Contabilidade: 9.615.335,22 Kz vs AGT (Modelo 7): 9.615.335,22 Kz
+   - Situação: IGUAIS (Diferença: 0,00 Kz)
+`;
+
+    const res = parseAnaliseIA(textoCompleto);
+    expect(res.apuramentoIva).not.toBeNull();
+    expect(res.apuramentoIva.isRecuperar).toBe(true);
+
+    // Incidência de Vendas
+    expect(res.apuramentoIva.incidenciaVendas.contabilidade).toContain('280.859.727,67');
+    expect(res.apuramentoIva.incidenciaVendas.agt).toContain('280.859.727,67');
+    expect(res.apuramentoIva.incidenciaVendas.status).toBe('IGUAIS');
+
+    // Incidência de Compras
+    expect(res.apuramentoIva.incidenciaCompras.contabilidade).toContain('285.973.012,61');
+    expect(res.apuramentoIva.incidenciaCompras.agt).toContain('189.238.764,29');
+    expect(res.apuramentoIva.incidenciaCompras.status).toBe('DIFERENÇA');
+
+    // Apuramento Contabilidade
+    expect(res.apuramentoIva.apuramentoContabilidade.conta).toBe('Conta 34.5.7.1');
+    expect(res.apuramentoIva.apuramentoContabilidade.saldo).toContain('9.615.335,22');
+
+    // Apuramento AGT
+    expect(res.apuramentoIva.apuramentoAgt.saldoPeriodo).toContain('9.615.335,22');
+    expect(res.apuramentoIva.apuramentoAgt.excessoAnterior).toContain('1.727.293,00');
+    expect(res.apuramentoIva.apuramentoAgt.posicaoFinal).toContain('11.342.628,22');
+
+    // Confronto Periodo
+    expect(res.apuramentoIva.confrontoPeriodo.status).toBe('IGUAIS');
+  });
 });

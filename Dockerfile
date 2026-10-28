@@ -1,0 +1,32 @@
+# Dockerfile na raiz do repositório para deploy do backend no Render
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /app
+
+# Dependências do sistema (build-essential, libpq-dev para Postgres, etc.)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalação dos pacotes Python a partir da pasta backend
+COPY backend/requirements.txt /app/
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Cópia do código-fonte do backend
+COPY backend/ /app/
+
+# Diretório para ficheiros estáticos e media
+RUN mkdir -p /app/staticfiles /app/media
+
+# Porta exposta (Render usa $PORT, padrão 8000 ou 10000)
+EXPOSE 8000
+
+# Script de entrada para migrações e inicialização do Gunicorn
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn projeto.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120"]

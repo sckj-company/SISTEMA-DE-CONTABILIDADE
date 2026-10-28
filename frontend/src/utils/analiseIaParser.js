@@ -31,12 +31,18 @@ export function isLinhaDecorativaOuRuido(str) {
 export function parseValorKz(str) {
   if (!str) return 0;
   const limpo = String(str)
+    .replace(/\u00a0/g, ' ')
     .replace(/[^\d,.-]/g, '')
     .trim();
   if (!limpo) return 0;
   const normalizado = limpo.replace(/\./g, '').replace(',', '.');
   const num = parseFloat(normalizado);
   return isNaN(num) ? 0 : num;
+}
+
+export function formatKz(num) {
+  const val = typeof num === 'number' ? num : parseValorKz(num);
+  return `${val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kz`;
 }
 
 /**
@@ -418,13 +424,43 @@ export function parseAnaliseIA(texto) {
   // 2. Conta 34.5.7.1: IVA a recuperar de apuramentos (quando Dedutível > Liquidado) — A empresa NÃO paga IVA, acumula p/ mês seguinte
   // 3. Conta 34.5.8.1: IVA reembolsos pedidos (quando solicitado reembolso à AGT)
   const itemLiquidado = itensConfronto.find((i) =>
-    i.campo.toLowerCase().includes('liquidado') ||
-    i.campo.toLowerCase().includes('favor do estado')
+    (i.campo.toLowerCase().includes('liquidado') || i.campo.toLowerCase().includes('favor do estado')) &&
+    !i.campo.toLowerCase().includes('incidência') &&
+    !i.campo.toLowerCase().includes('incidencia') &&
+    !i.campo.toLowerCase().includes('volume de negócios') &&
+    !i.campo.toLowerCase().includes('volume de negocios')
   );
   const itemDedutivel = itensConfronto.find((i) =>
-    i.campo.toLowerCase().includes('dedut') ||
-    i.campo.toLowerCase().includes('suportado') ||
-    i.campo.toLowerCase().includes('favor do sujeito passivo')
+    (i.campo.toLowerCase().includes('dedut') ||
+     i.campo.toLowerCase().includes('suportado') ||
+     i.campo.toLowerCase().includes('favor do sujeito passivo')) &&
+    !i.campo.toLowerCase().includes('incidência') &&
+    !i.campo.toLowerCase().includes('incidencia') &&
+    !i.campo.toLowerCase().includes('compras e serviços')
+  );
+
+  const itemBaseVendas = itensConfronto.find((i) =>
+    (i.campo.toLowerCase().includes('vendas') ||
+     i.campo.toLowerCase().includes('volume de negócios') ||
+     i.campo.toLowerCase().includes('base tributável') ||
+     i.campo.toLowerCase().includes('incidência do iva liquidado')) &&
+    !i.campo.toLowerCase().includes('iva liquidado') &&
+    !i.campo.toLowerCase().includes('conta 34')
+  );
+
+  const itemBaseCompras = itensConfronto.find((i) =>
+    (i.campo.toLowerCase().includes('compras') ||
+     i.campo.toLowerCase().includes('existências') ||
+     i.campo.toLowerCase().includes('incidência do iva dedutível')) &&
+    !i.campo.toLowerCase().includes('iva dedutível') &&
+    !i.campo.toLowerCase().includes('iva suportado') &&
+    !i.campo.toLowerCase().includes('conta 34')
+  );
+
+  const itemExcessoAnterior = itensConfronto.find((i) =>
+    i.campo.toLowerCase().includes('excesso a reportar') ||
+    i.campo.toLowerCase().includes('campo 36') ||
+    i.campo.toLowerCase().includes('períodos anteriores')
   );
 
   // Linha genérica ou explícita de Apuramento do IVA
@@ -507,10 +543,10 @@ export function parseAnaliseIA(texto) {
 
   // Valores matemáticos e apurados oficiais
   const valorApuradoPagar = valLiq > valDed
-    ? `${(valLiq - valDed).toLocaleString('pt-AO', { minimumFractionDigits: 2 })} Kz`
+    ? formatKz(valLiq - valDed)
     : '0,00 Kz';
   const valorApuradoRecuperar = valDed > valLiq
-    ? `${(valDed - valLiq).toLocaleString('pt-AO', { minimumFractionDigits: 2 })} Kz`
+    ? formatKz(valDed - valLiq)
     : '0,00 Kz';
 
   const valorAtivoPagarContab = (itemPagar && limparSufixo(itemPagar.contabilidade) !== '0,00 Kz' && limparSufixo(itemPagar.contabilidade) !== '—')
@@ -576,6 +612,91 @@ export function parseAnaliseIA(texto) {
     },
   ];
 
+  // Extrações específicas do QUADRO OFICIAL DE APURAMENTO DO IVA no texto
+  const matchIncidVendasContab = texto.match(/Incidência\s*\/\s*Vendas[^\n:]*\(Conta\s*61\):\s*([^\n\-\>]+)/i);
+  const matchIncidVendasAgt = texto.match(/Incidência\s*\/\s*Vendas[^\n:]*\(Quadro\s*09[^\)]*\):\s*([^\n\-\>]+)/i);
+  const matchIncidComprasContab = texto.match(/Incidência\s*\/\s*Compras[^\n:]*\(Conta\s*21[^\)]*\):\s*([^\n\-\>]+)/i);
+  const matchIncidComprasAgt = texto.match(/Incidência\s*\/\s*Compras[^\n:]*\(Quadro\s*09[^\)]*\):\s*([^\n\-\>]+)/i);
+
+  const matchCalculoContab = texto.match(/Cálculo do Apuramento:\s*([^\n]+)/i);
+  const matchCalculoAgt = texto.match(/Cálculo do Período:\s*([^\n]+)/i);
+  const matchSaldoBalancete = texto.match(/Saldo Apurado no Balancete:\s*([^\n\(\)]+)/i);
+  const matchSaldoAgtPeriodo = texto.match(/Saldo do Período\s*\([^\)]*\):\s*([^\n\(\)]+)/i);
+  const matchExcessoAnteriorTxt = texto.match(/(?:\(\+\)\s*)?Excesso a Reportar[^\n:]*:\s*([^\n\(\)]+)/i);
+  const matchPosicaoFinalTxt = texto.match(/(?:\(=\)\s*)?Posição Final Acumulada:\s*([^\n\(\)]+)/i);
+
+  const valIncidVendasContab = matchIncidVendasContab ? matchIncidVendasContab[1].trim() : (itemBaseVendas?.contabilidade || '—');
+  const valIncidVendasAgt = matchIncidVendasAgt ? matchIncidVendasAgt[1].trim() : (itemBaseVendas?.agt || '—');
+  const difNumVendas = Math.abs(parseValorKz(valIncidVendasContab) - parseValorKz(valIncidVendasAgt));
+  const difIncidVendas = (parseValorKz(valIncidVendasContab) === parseValorKz(valIncidVendasAgt) || (itemBaseVendas && itemBaseVendas.status === 'IGUAIS'))
+    ? '0,00 Kz'
+    : formatKz(difNumVendas > 0 ? difNumVendas : (itemBaseVendas ? itemBaseVendas.diferenca : 0));
+  const statusIncidVendas = (parseValorKz(valIncidVendasContab) === parseValorKz(valIncidVendasAgt) || (itemBaseVendas && itemBaseVendas.status === 'IGUAIS')) ? 'IGUAIS' : 'DIFERENÇA';
+
+  const incidenciaVendas = {
+    contabilidade: valIncidVendasContab,
+    agt: valIncidVendasAgt,
+    status: statusIncidVendas,
+    diferenca: difIncidVendas,
+  };
+
+  const valIncidComprasContab = matchIncidComprasContab ? matchIncidComprasContab[1].trim() : (itemBaseCompras?.contabilidade || '—');
+  const valIncidComprasAgt = matchIncidComprasAgt ? matchIncidComprasAgt[1].trim() : (itemBaseCompras?.agt || '—');
+  const difNumCompras = Math.abs(parseValorKz(valIncidComprasContab) - parseValorKz(valIncidComprasAgt));
+  const difIncidCompras = (parseValorKz(valIncidComprasContab) === parseValorKz(valIncidComprasAgt) || (itemBaseCompras && itemBaseCompras.status === 'IGUAIS'))
+    ? '0,00 Kz'
+    : formatKz(difNumCompras > 0 ? difNumCompras : (itemBaseCompras ? itemBaseCompras.diferenca : 0));
+  const statusIncidCompras = (parseValorKz(valIncidComprasContab) === parseValorKz(valIncidComprasAgt) || (itemBaseCompras && itemBaseCompras.status === 'IGUAIS')) ? 'IGUAIS' : 'DIFERENÇA';
+
+  const incidenciaCompras = {
+    contabilidade: valIncidComprasContab,
+    agt: valIncidComprasAgt,
+    status: statusIncidCompras,
+    diferenca: difIncidCompras,
+  };
+
+  const saldoContabApurado = matchSaldoBalancete
+    ? matchSaldoBalancete[1].trim()
+    : (tipoApuramento === 'RECUPERAR' ? valorAtivoRecuperarContab : valorAtivoPagarContab);
+
+  const apuramentoContabilidade = {
+    titulo: 'Contabilidade (Balancete PGC)',
+    conta: tipoApuramento === 'RECUPERAR' ? 'Conta 34.5.7.1' : (tipoApuramento === 'REEMBOLSO' ? 'Conta 34.5.8.1' : 'Conta 34.5.6.1'),
+    rubrica: tipoApuramento === 'RECUPERAR' ? 'IVA a Recuperar (Crédito Fiscal)' : (tipoApuramento === 'REEMBOLSO' ? 'IVA Reembolsos Pedidos' : 'IVA a Pagar ao Estado'),
+    calculo: matchCalculoContab ? matchCalculoContab[1].trim() : `${itemLiquidado?.contabilidade || '0,00 Kz'} − ${itemDedutivel?.contabilidade || '0,00 Kz'}`,
+    saldo: saldoContabApurado,
+  };
+
+  const saldoAgtPeriodo = matchSaldoAgtPeriodo
+    ? matchSaldoAgtPeriodo[1].trim()
+    : (tipoApuramento === 'RECUPERAR' ? valorAtivoRecuperarAgt : valorAtivoPagarAgt);
+
+  const valExcessoAnterior = matchExcessoAnteriorTxt
+    ? matchExcessoAnteriorTxt[1].trim()
+    : (itemExcessoAnterior?.agt && itemExcessoAnterior.agt !== '—' && parseValorKz(itemExcessoAnterior.agt) > 0 ? itemExcessoAnterior.agt : null);
+
+  const valPosicaoFinal = matchPosicaoFinalTxt
+    ? matchPosicaoFinalTxt[1].trim()
+    : (valExcessoAnterior && parseValorKz(valExcessoAnterior) > 0
+        ? formatKz(parseValorKz(saldoAgtPeriodo) + parseValorKz(valExcessoAnterior))
+        : saldoAgtPeriodo);
+
+  const apuramentoAgt = {
+    titulo: 'Declaração AGT (Modelo 7)',
+    campo: tipoApuramento === 'RECUPERAR' ? 'Campo 34 (Crédito do Período)' : (tipoApuramento === 'REEMBOLSO' ? 'Campo 40 (Reembolso)' : 'Campo 35 (Dívida do Período)'),
+    calculo: matchCalculoAgt ? matchCalculoAgt[1].trim() : `${itemLiquidado?.agt || '0,00 Kz'} − ${itemDedutivel?.agt || '0,00 Kz'}`,
+    saldoPeriodo: saldoAgtPeriodo,
+    excessoAnterior: valExcessoAnterior && parseValorKz(valExcessoAnterior) > 0 ? valExcessoAnterior : null,
+    posicaoFinal: valPosicaoFinal,
+    rotuloFinal: tipoApuramento === 'RECUPERAR' ? 'Reporte p/ Mês Seguinte (Campo 39)' : 'Imposto Líquido a Pagar (Campo 37)',
+  };
+
+  const difConfrontoPeriodo = Math.abs(parseValorKz(apuramentoContabilidade.saldo) - parseValorKz(apuramentoAgt.saldoPeriodo));
+  const confrontoPeriodo = {
+    status: (difConfrontoPeriodo <= 0.05 || (tipoApuramento === 'RECUPERAR' ? statusRecuperar === 'IGUAIS' : statusPagar === 'IGUAIS')) ? 'IGUAIS' : 'DIFERENÇA',
+    diferenca: difConfrontoPeriodo <= 0.05 ? '0,00 Kz' : formatKz(difConfrontoPeriodo),
+  };
+
   const apuramentoIva = (itemLiquidado || itemDedutivel || itemPagar || itemRecuperar || itemApuramentoGeral)
     ? {
         tipoApuramento,
@@ -592,6 +713,8 @@ export function parseAnaliseIA(texto) {
           : tipoApuramento === 'REEMBOLSO'
           ? 'Conta 34.5.8.1 · Campo 40'
           : 'Conta 34.5.6.1 · Campo 37',
+        incidenciaVendas,
+        incidenciaCompras,
         liquidado: {
           contabilidade: itemLiquidado?.contabilidade || '0,00 Kz',
           agt: itemLiquidado?.agt || '0,00 Kz',
@@ -604,6 +727,9 @@ export function parseAnaliseIA(texto) {
           status: (itemDedutivel?.status === 'IGUAIS' || parseValorKz(itemDedutivel?.contabilidade) === parseValorKz(itemDedutivel?.agt)) ? 'IGUAIS' : (itemDedutivel?.status || 'DIFERENÇA'),
           diferenca: itemDedutivel?.diferenca || '0,00 Kz',
         },
+        apuramentoContabilidade,
+        apuramentoAgt,
+        confrontoPeriodo,
         resultadoPrincipal: tipoApuramento === 'RECUPERAR'
           ? {
               contabilidade: valorAtivoRecuperarContab,

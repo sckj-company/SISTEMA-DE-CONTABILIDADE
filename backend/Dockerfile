@@ -29,4 +29,4 @@ RUN mkdir -p /app/staticfiles /app/media
 EXPOSE 8000
 
 # Script de entrada para migrações e inicialização do Gunicorn
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn projeto.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn projeto.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120"]

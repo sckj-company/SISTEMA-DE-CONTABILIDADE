@@ -107,6 +107,49 @@ def verificar_permissao(user, codename):
         return False
     if user.is_superuser or user.is_staff or user.groups.filter(name__in=['Super Admin', 'Administrador']).exists():
         return True
+
+    # Perfis atribuídos nas empresas às quais o utilizador tem acesso
+    perfis = list(user.acessos_empresas.filter(ativo=True).values_list('perfil_acesso', flat=True))
+    grupos = list(user.groups.values_list('name', flat=True))
+
+    # Carregar documentos (balancetes, facturas, extractos, declarações)
+    if codename in ('add_documentoupload', 'change_documentoupload', 'view_documentoupload'):
+        if any(p in ('ADMIN', 'AUDITOR', 'CONTABILISTA', 'FISCALISTA', 'OPERADOR_FACTURAS', 'ANALISTA') for p in perfis):
+            return True
+        if any(g in ('Contabilista', 'Operador de Facturação', 'Operador de Faturação', 'Auditor', 'Fiscalista') for g in grupos):
+            return True
+        if user.acessos_empresas.filter(ativo=True).exists():
+            return True
+
+    # Eliminar documentos
+    if codename == 'delete_documentoupload':
+        if any(p in ('ADMIN', 'AUDITOR', 'CONTABILISTA') for p in perfis):
+            return True
+        if any(g in ('Contabilista', 'Auditor') for g in grupos):
+            return True
+
+    # Executar / Analisar com IA
+    if codename in ('add_analiseia', 'change_analiseia', 'view_analiseia'):
+        if any(p in ('ADMIN', 'AUDITOR', 'CONTABILISTA', 'FISCALISTA', 'ANALISTA') for p in perfis):
+            return True
+        if user.acessos_empresas.filter(ativo=True).exists():
+            return True
+
+    # Eliminar análise IA
+    if codename == 'delete_analiseia':
+        if any(p in ('ADMIN', 'AUDITOR', 'CONTABILISTA') for p in perfis):
+            return True
+
+    # Ocorrências e anotações fiscais
+    if codename in ('add_ocorrencia', 'change_ocorrencia'):
+        if any(p in ('ADMIN', 'AUDITOR', 'CONTABILISTA', 'FISCALISTA') for p in perfis):
+            return True
+
+    # Regras e configurações
+    if codename == 'change_regra':
+        if any(p in ('ADMIN', 'AUDITOR') for p in perfis):
+            return True
+
     return user.has_perm(f'reconciliacao.{codename}')
 
 

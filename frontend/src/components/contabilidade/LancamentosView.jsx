@@ -357,7 +357,7 @@ const LancamentosView = ({ defaultAba }) => {
 
       {/* FLUXO CONTABILÍSTICO OFICIAL PASSO A PASSO (1 -> 4) */}
       <div className="card card-default mb-20" style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,0.03)' }}>
-        <div style={{ backgroundColor: '#f8fafc', padding: '12px 18px', borderBottom: '1px solid #e2e8f0' }} className="d-flex align-items-center justify-content-between flex-wrap">
+        <div style={{ backgroundColor: '#ffffff', padding: '12px 18px', borderBottom: '1px solid #e2e8f0' }} className="d-flex align-items-center justify-content-between flex-wrap">
           <div className="d-flex align-items-center" style={{ gap: 8 }}>
             <span className="badge badge-primary" style={{ padding: '5px 9px', fontSize: 11, fontWeight: 700 }}>
               FLUXO OPERACIONAL
@@ -408,7 +408,7 @@ const LancamentosView = ({ defaultAba }) => {
                 className="card h-100 p-12"
                 style={{
                   borderRadius: 8,
-                  border: abaAtiva === 'diario' ? '2px solid #5f63f2' : '1px solid #e2e8f0',
+                  border: abaAtiva === 'diario' ? '2px solid #2563eb' : '1px solid #e2e8f0',
                   backgroundColor: abaAtiva === 'diario' ? '#f5f6fe' : '#ffffff',
                   transition: 'all 0.2s ease',
                   cursor: 'pointer',
@@ -420,7 +420,7 @@ const LancamentosView = ({ defaultAba }) => {
                   </span>
                   <i className="la la-book-open text-primary" style={{ fontSize: 18 }}></i>
                 </div>
-                <div style={{ fontWeight: 700, fontSize: 13.5, color: abaAtiva === 'diario' ? '#5f63f2' : '#1e293b' }}>
+                <div style={{ fontWeight: 700, fontSize: 13.5, color: abaAtiva === 'diario' ? '#2563eb' : '#1e293b' }}>
                   2. Livro Diário
                 </div>
                 <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>
@@ -436,7 +436,7 @@ const LancamentosView = ({ defaultAba }) => {
                 className="card h-100 p-12"
                 style={{
                   borderRadius: 8,
-                  border: abaAtiva === 'razao' ? '2px solid #5f63f2' : '1px solid #e2e8f0',
+                  border: abaAtiva === 'razao' ? '2px solid #2563eb' : '1px solid #e2e8f0',
                   backgroundColor: abaAtiva === 'razao' ? '#f5f6fe' : '#ffffff',
                   transition: 'all 0.2s ease',
                   cursor: 'pointer',
@@ -448,7 +448,7 @@ const LancamentosView = ({ defaultAba }) => {
                   </span>
                   <i className="la la-balance-scale text-primary" style={{ fontSize: 18 }}></i>
                 </div>
-                <div style={{ fontWeight: 700, fontSize: 13.5, color: abaAtiva === 'razao' ? '#5f63f2' : '#1e293b' }}>
+                <div style={{ fontWeight: 700, fontSize: 13.5, color: abaAtiva === 'razao' ? '#2563eb' : '#1e293b' }}>
                   3. Livro Razão
                 </div>
                 <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>
@@ -508,8 +508,8 @@ const LancamentosView = ({ defaultAba }) => {
                 }}
                 style={{
                   fontWeight: ativa ? 700 : 500,
-                  color: ativa ? (tab.isFinal ? '#00a854' : '#5f63f2') : '#64748b',
-                  borderBottom: ativa ? (tab.isFinal ? '2px solid #00a854' : '2px solid #5f63f2') : '2px solid transparent',
+                  color: ativa ? (tab.isFinal ? '#00a854' : '#2563eb') : '#64748b',
+                  borderBottom: ativa ? (tab.isFinal ? '2px solid #00a854' : '2px solid #2563eb') : '2px solid transparent',
                   borderRadius: 0,
                   fontSize: 13.5,
                   padding: '10px 16px',
@@ -585,7 +585,7 @@ const LancamentosView = ({ defaultAba }) => {
             <div className="card-body p-0">
               <div className="table-responsive">
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
-                  <thead style={{ backgroundColor: '#f8fafc' }}>
+                  <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
                       <th style={{ width: 130, padding: '12px 16px' }}>N.º Diário</th>
                       <th style={{ width: 110, padding: '12px 16px' }}>Data</th>
@@ -622,7 +622,7 @@ const LancamentosView = ({ defaultAba }) => {
                               onClick={() => setLancamentoExpandido(expandido ? null : l.id)}
                               style={{ cursor: 'pointer', backgroundColor: expandido ? '#f8f9fe' : 'transparent' }}
                             >
-                              <td style={{ padding: '12px 16px', fontWeight: 700, fontFamily: 'monospace', color: '#5f63f2' }}>
+                              <td style={{ padding: '12px 16px', fontWeight: 700, fontFamily: 'monospace', color: '#2563eb' }}>
                                 <i className={`la ${expandido ? 'la-angle-down' : 'la-angle-right'} mr-1`}></i>
                                 {l.numero_diario}
                               </td>
@@ -659,12 +659,12 @@ const LancamentosView = ({ defaultAba }) => {
 
                             {/* LINHAS EXPANDIDAS DO LANÇAMENTO */}
                             {expandido && (
-                              <tr style={{ backgroundColor: '#fcfdfe' }}>
+                              <tr style={{ backgroundColor: '#ffffff' }}>
                                 <td colSpan="7" style={{ padding: '16px 24px' }}>
                                   <div className="card card-default mb-0" style={{ border: '1px solid #e2e8f0', borderRadius: 8 }}>
                                     <div className="card-body p-0">
                                       <table className="table table-sm mb-0" style={{ fontSize: 12.5 }}>
-                                        <thead style={{ backgroundColor: '#f1f5f9' }}>
+                                        <thead style={{ backgroundColor: '#ffffff' }}>
                                           <tr>
                                             <th style={{ width: 110, padding: '8px 12px' }}>Conta PGC</th>
                                             <th style={{ padding: '8px 12px' }}>Designação Oficial</th>
@@ -676,7 +676,7 @@ const LancamentosView = ({ defaultAba }) => {
                                         <tbody>
                                           {(l.linhas || []).map((linha, idx) => (
                                             <tr key={idx}>
-                                              <td style={{ padding: '8px 12px', fontFamily: 'monospace', fontWeight: 700, color: '#5f63f2' }}>
+                                              <td style={{ padding: '8px 12px', fontFamily: 'monospace', fontWeight: 700, color: '#2563eb' }}>
                                                 {linha.conta_codigo}
                                               </td>
                                               <td style={{ padding: '8px 12px' }}>{linha.conta_nome}</td>
@@ -775,7 +775,7 @@ const LancamentosView = ({ defaultAba }) => {
                 <div className="card-body p-0">
                   <div className="table-responsive">
                     <table className="table table-sm table-hover align-middle mb-0" style={{ fontSize: 12.5 }}>
-                      <thead style={{ backgroundColor: '#f8fafc' }}>
+                      <thead style={{ backgroundColor: '#ffffff' }}>
                         <tr>
                           <th style={{ width: 100, padding: '10px 14px' }}>Data</th>
                           <th style={{ width: 130, padding: '10px 14px' }}>N.º Diário</th>
@@ -790,7 +790,7 @@ const LancamentosView = ({ defaultAba }) => {
                         {c.movimentos.map((m, idx) => (
                           <tr key={idx}>
                             <td style={{ padding: '8px 14px' }}>{m.data}</td>
-                            <td style={{ padding: '8px 14px', fontFamily: 'monospace', fontWeight: 600, color: '#5f63f2' }}>{m.numero_diario}</td>
+                            <td style={{ padding: '8px 14px', fontFamily: 'monospace', fontWeight: 600, color: '#2563eb' }}>{m.numero_diario}</td>
                             <td style={{ padding: '8px 14px' }}>{m.descricao}</td>
                             <td style={{ padding: '8px 14px', color: '#64748b' }}>{m.terceiro_nome || '-'}</td>
                             <td style={{ padding: '8px 14px', textAlign: 'right', fontWeight: 600, color: '#166534' }}>
@@ -848,7 +848,7 @@ const LancamentosView = ({ defaultAba }) => {
               <div className="card-body p-0">
                 <div className="table-responsive">
                   <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
-                    <thead style={{ backgroundColor: '#f8fafc' }}>
+                    <thead style={{ backgroundColor: '#ffffff' }}>
                       <tr>
                         <th style={{ width: 110, padding: '12px 16px' }}>Código</th>
                         <th style={{ minWidth: 240, padding: '12px 16px' }}>Designação da Conta PGC</th>
@@ -863,7 +863,7 @@ const LancamentosView = ({ defaultAba }) => {
                     <tbody>
                       {balanceteDados.linhas.map((l) => (
                         <tr key={l.codigo}>
-                          <td style={{ padding: '10px 16px', fontFamily: 'monospace', fontWeight: 700, color: '#5f63f2' }}>
+                          <td style={{ padding: '10px 16px', fontFamily: 'monospace', fontWeight: 700, color: '#2563eb' }}>
                             {l.codigo}
                           </td>
                           <td style={{ padding: '10px 16px', fontWeight: 600, color: '#272b41' }}>
@@ -890,7 +890,7 @@ const LancamentosView = ({ defaultAba }) => {
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot style={{ backgroundColor: '#f1f5f9', fontWeight: 800 }}>
+                    <tfoot style={{ backgroundColor: '#ffffff', borderTop: '2px solid #cbd5e1', fontWeight: 800 }}>
                       <tr>
                         <td colSpan="2" style={{ padding: '12px 16px', fontSize: 13.5 }}>TOTAIS GERAIS:</td>
                         <td style={{ padding: '12px 16px', textAlign: 'right', color: '#166534' }}>
@@ -1026,7 +1026,7 @@ const LancamentosView = ({ defaultAba }) => {
                     <div className="card-body p-0">
                       <div className="table-responsive">
                         <table className="table table-sm mb-0 align-middle" style={{ fontSize: 12.5 }}>
-                          <thead style={{ backgroundColor: '#f8fafc' }}>
+                          <thead style={{ backgroundColor: '#ffffff' }}>
                             <tr>
                               <th style={{ width: 40, textAlign: 'center' }}>#</th>
                               <th style={{ width: 140 }}>Conta PGC *</th>
@@ -1108,7 +1108,7 @@ const LancamentosView = ({ defaultAba }) => {
                               </tr>
                             ))}
                           </tbody>
-                          <tfoot style={{ backgroundColor: '#f1f5f9', fontWeight: 700 }}>
+                          <tfoot style={{ backgroundColor: '#ffffff', borderTop: '2px solid #cbd5e1', fontWeight: 700 }}>
                             <tr>
                               <td colSpan="3" className="text-right py-10">TOTAIS:</td>
                               <td className="text-right py-10 text-success" style={{ fontSize: 13.5 }}>

@@ -13,7 +13,7 @@ import { kzComMoeda, kzExacto, diferenca } from '../../utils/formato';
 const CORES = {
   ALTO: { barra: '#ff4d4f', texto: '#ff4d4f', etiqueta: 'Corrigir já' },
   MEDIO: { barra: '#fa8b0c', texto: '#fa8b0c', etiqueta: 'Rever' },
-  BAIXO: { barra: '#5f63f2', texto: '#5f63f2', etiqueta: 'Confirmar' },
+  BAIXO: { barra: '#2563eb', texto: '#2563eb', etiqueta: 'Confirmar' },
   INFORMATIVO: { barra: '#a0a4b8', texto: '#8c90a4', etiqueta: 'Nota' },
 };
 
@@ -207,7 +207,7 @@ const LinhaErro = ({ linha }) => {
             marginTop: 10,
             background: 'none',
             border: 'none',
-            color: '#5f63f2',
+            color: '#2563eb',
             fontSize: 12,
           }}
         >

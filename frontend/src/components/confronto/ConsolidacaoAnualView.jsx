@@ -67,19 +67,19 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
 
   return (
     <div>
-      {/* SELETOR DE ANO E AÇÕES */}
-      <div className="card card-default mb-20 no-print" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
-        <div className="card-body py-15 px-20">
+      {/* SELETOR DE ANO E AÇÕES (FUNDO BRANCO + BOTÕES AZUIS ESPAÇADOS) */}
+      <div className="card card-default mb-20 no-print" style={{ border: '1px solid #e2e8f0', borderRadius: 12, background: '#ffffff' }}>
+        <div className="card-body py-15 px-20 bg-white">
           <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 15 }}>
             <div className="d-flex align-items-center flex-wrap" style={{ gap: 12 }}>
-              <span className="fw-600 color-dark" style={{ fontSize: 13.5 }}>
-                <i className="la la-calendar text-primary mr-1"></i> Exercício Fiscal:
+              <span className="fw-700" style={{ fontSize: 13.5, color: '#0f172a' }}>
+                <i className="la la-calendar mr-1" style={{ color: '#2563eb' }}></i> Exercício Fiscal:
               </span>
               <select
                 className="form-control form-control-default"
                 value={ano}
                 onChange={(e) => setAno(Number(e.target.value))}
-                style={{ width: 110, height: 38, fontSize: 13, fontWeight: 600 }}
+                style={{ width: 110, height: 38, fontSize: 13, fontWeight: 700 }}
               >
                 <option value={2026}>2026</option>
                 <option value={2025}>2025</option>
@@ -89,35 +89,35 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
 
               <button
                 type="button"
-                className="btn btn-outline-lighten btn-sm bg-white"
+                className="btn btn-outline-primary btn-sm"
                 onClick={carregarConsolidacao}
                 disabled={carregando}
-                style={{ height: 38, border: '1px solid #dcdfe5', fontWeight: 600 }}
+                style={{ height: 38, fontWeight: 700, padding: '0 16px' }}
               >
                 <i className={`la ${carregando ? 'la-spinner la-spin' : 'la-sync'} mr-1`}></i> Atualizar
               </button>
             </div>
 
-            <div className="d-flex align-items-center" style={{ gap: 10 }}>
+            <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
               <button
                 type="button"
-                className="btn btn-outline-success btn-sm bg-white"
+                className="btn btn-primary btn-sm"
                 onClick={handleExportarExcel}
                 disabled={exportandoExcel || !dados}
-                style={{ height: 38, border: '1px solid #28a745', fontWeight: 600 }}
+                style={{ height: 38, fontWeight: 700, padding: '0 18px' }}
               >
-                <i className={`la ${exportandoExcel ? 'la-spinner la-spin' : 'la-file-excel'} mr-1 text-success`}></i>
+                <i className={`la ${exportandoExcel ? 'la-spinner la-spin' : 'la-file-excel'} mr-1`}></i>
                 {exportandoExcel ? 'A gerar...' : 'Exportar Excel Anual (.xlsx)'}
               </button>
 
               <button
                 type="button"
-                className="btn btn-outline-lighten btn-sm bg-white"
+                className="btn btn-outline-primary btn-sm"
                 onClick={() => window.print()}
                 disabled={!dados}
-                style={{ height: 38, border: '1px solid #dcdfe5', fontWeight: 600 }}
+                style={{ height: 38, fontWeight: 700, padding: '0 16px' }}
               >
-                <i className="la la-print mr-1 text-primary"></i> Imprimir / PDF
+                <i className="la la-print mr-1"></i> Imprimir / PDF
               </button>
             </div>
           </div>
@@ -247,7 +247,7 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
             <div className="card-body p-0">
               <div className="table-responsive">
                 <table className="table table-hover mb-0" style={{ fontSize: 13 }}>
-                  <thead style={{ backgroundColor: '#f9fafb' }}>
+                  <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
                       <th style={{ width: '35%', fontWeight: 700 }}>Rubrica Fiscal / Base</th>
                       <th style={{ width: '22%', fontWeight: 700 }}>Contabilidade (Balancete de Fecho)</th>
@@ -338,7 +338,7 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
             <div className="card-body p-0">
               <div className="table-responsive">
                 <table className="table table-hover mb-0" style={{ fontSize: 12.5 }}>
-                  <thead style={{ backgroundColor: '#f9fafb' }}>
+                  <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
                       <th style={{ width: '12%', fontWeight: 700 }}>Mês</th>
                       <th style={{ width: '12%', fontWeight: 700 }}>Estado</th>
@@ -353,16 +353,16 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
                     {dados.mapa_mensal.map((m) => {
                       const isFalta = m.estado === 'EM_FALTA';
                       return (
-                        <tr key={m.mes} style={{ backgroundColor: isFalta ? '#fffdf7' : 'transparent' }}>
+                        <tr key={m.mes} style={{ backgroundColor: '#ffffff' }}>
                           <td style={{ verticalAlign: 'middle', fontWeight: 700 }}>
                             {m.mes_nome} ({String(m.mes).padStart(2, '0')}/{dados.ano})
                           </td>
                           <td style={{ verticalAlign: 'middle' }}>
-                            <span className={isFalta ? 'badge badge-warning' : 'badge badge-success'} style={{ fontSize: 11 }}>
+                            <span className={isFalta ? 'status-badge-divergencia' : 'status-badge-conforme'} style={{ fontSize: 11 }}>
                               {isFalta ? 'Em Falta' : 'Declarado'}
                             </span>
                           </td>
-                          <td style={{ verticalAlign: 'middle', color: isFalta ? '#999' : '#333' }}>
+                          <td style={{ verticalAlign: 'middle', color: isFalta ? '#94a3b8' : '#0f172a' }}>
                             {m.numero_declaracao}
                           </td>
                           <td style={{ textAlign: 'right', verticalAlign: 'middle', fontWeight: 600 }}>
@@ -374,14 +374,14 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
                           <td style={{ textAlign: 'right', verticalAlign: 'middle' }}>
                             {formatarKz(m.iva_dedutivel)}
                           </td>
-                          <td style={{ textAlign: 'right', verticalAlign: 'middle', fontWeight: 600, color: m.iva_a_pagar > 0 ? '#1a3353' : '#666' }}>
+                          <td style={{ textAlign: 'right', verticalAlign: 'middle', fontWeight: 700, color: m.iva_a_pagar > 0 ? '#0f172a' : '#64748b' }}>
                             {formatarKz(m.iva_a_pagar)}
                           </td>
                         </tr>
                       );
                     })}
                   </tbody>
-                  <tfoot style={{ backgroundColor: '#f4f6f9', fontWeight: 700, fontSize: 13 }}>
+                  <tfoot style={{ backgroundColor: '#ffffff', borderTop: '2px solid #e2e8f0', fontWeight: 800, fontSize: 13 }}>
                     <tr>
                       <td colSpan={3} style={{ verticalAlign: 'middle' }}>
                         TOTAL ACUMULADO DOS 12 MESES

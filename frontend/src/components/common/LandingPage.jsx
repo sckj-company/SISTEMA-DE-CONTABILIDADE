@@ -152,7 +152,7 @@ const LandingPage = () => {
       </section>
 
       {/* Features */}
-      <section style={{ padding: '80px 0', backgroundColor: '#f4f5f7' }}>
+      <section style={{ padding: '80px 0', backgroundColor: '#ffffff', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
         <div className="container">
           <div className="row justify-content-center text-center mb-50">
             <div className="col-lg-8">
@@ -187,8 +187,9 @@ const LandingPage = () => {
                         width: 64,
                         height: 64,
                         borderRadius: 12,
-                        backgroundColor: 'rgba(95,99,242,0.10)',
-                        color: '#5f63f2',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #bfdbfe',
+                        color: '#2563eb',
                       }}
                     >
                       <i className={`la ${f.icon}`} style={{ fontSize: 26 }}></i>

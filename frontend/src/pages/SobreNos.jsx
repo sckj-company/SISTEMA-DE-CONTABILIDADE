@@ -114,21 +114,20 @@ const SobreNos = () => {
             </div>
 
             {/* Ações: Idioma e Botão de Acesso */}
-            <div className="sobre-header-actions d-flex align-items-center gap-2">
-              <div className="btn-group" role="group">
+            <div className="sobre-header-actions d-flex align-items-center" style={{ gap: 12 }}>
+              <div className="d-flex align-items-center" style={{ gap: 8 }} role="group">
                 {[
-                  { code: 'pt', label: 'PT', flag: '🇦🇴' },
-                  { code: 'en', label: 'EN', flag: '🇬🇧' },
-                  { code: 'zh', label: 'ZH', flag: '🇨🇳' },
+                  { code: 'pt', label: 'PT' },
+                  { code: 'en', label: 'EN' },
+                  { code: 'zh', label: 'ZH' },
                 ].map((lang) => (
                   <button
                     key={lang.code}
                     type="button"
-                    className={`btn btn-sm ${i18n.language?.substring(0, 2) === lang.code ? 'btn-primary' : 'btn-outline-secondary'}`}
-                    style={{ fontSize: 12, padding: '4px 8px' }}
+                    className={`btn btn-sm ${i18n.language?.substring(0, 2) === lang.code ? 'btn-primary' : 'btn-outline-primary'}`}
+                    style={{ fontSize: 12, padding: '5px 10px', fontWeight: 700 }}
                     onClick={() => i18n.changeLanguage(lang.code)}
                   >
-                    <span style={{ marginRight: 3 }}>{lang.flag}</span>
                     {lang.label}
                   </button>
                 ))}
@@ -136,8 +135,8 @@ const SobreNos = () => {
 
               <button
                 onClick={handleVoltarLogin}
-                className="btn btn-primary btn-sm d-inline-flex align-items-center gap-2 px-3 py-2"
-                style={{ borderRadius: 6, fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}
+                className="btn btn-primary btn-sm d-inline-flex align-items-center px-3 py-2"
+                style={{ gap: 8, borderRadius: 8, fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap' }}
               >
                 <i className="la la-sign-in-alt fs-15"></i>
                 {t('about.accessSystem', 'Aceder ao Sistema')}
@@ -148,19 +147,19 @@ const SobreNos = () => {
       </header>
 
       {/* Hero / Apresentação Inicial com Fundo Branco */}
-      <section className="py-4 py-md-5" style={{ background: '#ffffff', borderBottom: '1px solid #f1f5f9' }}>
+      <section className="py-4 py-md-5" style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0' }}>
         <div className="container py-2 py-md-3 text-center">
           <div className="row justify-content-center">
             <div className="col-xl-9 col-lg-10 col-12">
               <span
                 className="badge px-3 py-2 mb-3 d-inline-block"
                 style={{
-                  background: '#f1f5f9',
-                  color: '#475569',
+                  background: '#ffffff',
+                  border: '1px solid #bfdbfe',
+                  color: '#2563eb',
                   fontSize: 12,
-                  fontWeight: 600,
+                  fontWeight: 700,
                   borderRadius: 20,
-                  border: '1px solid #e2e8f0',
                 }}
               >
                 {t('about.heroBadge', 'SCKJ • LUANDA, ANGOLA')}

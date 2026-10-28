@@ -44,22 +44,6 @@ const MESES = [
   { valor: '12', chave: 'december', nome: 'Dezembro' },
 ];
 
-const TIPO_BADGE = {
-  BALANCETE: 'badge-primary',
-  MODELO7: 'badge-info',
-  IMPOSTO_INDUSTRIAL: 'badge-info',
-  DECLARACAO_IRT: 'badge-info',
-  FACTURA_VENDA: 'badge-success',
-  FACTURA_COMPRA: 'badge-success',
-  FOLHA_SALARIAL: 'badge-warning',
-  FOLHA_SS: 'badge-warning',
-  RETENCOES: 'badge-warning',
-  EXTRACTO_BANCARIO: 'badge-secondary',
-  COMPROVATIVOS: 'badge-secondary',
-  DOSSIE_MENSAL: 'badge-dark',
-  OUTRO: 'badge-light text-dark',
-};
-
 const SpinDots = () => (
   <div className="spin-dots-wrapper">
     <span className="atbd-spin-dots spin-lg">
@@ -102,7 +86,7 @@ const Documentos = () => {
   const [detecaoInfo, setDetecaoInfo] = useState(null);
   const [docApagar, setDocApagar] = useState(null);
 
-  const { empresaId, ano, mes, atualizar, escolherSeAusente } = usePeriodo();
+  const { empresaId, ano, mes, atualizar } = usePeriodo();
   usePeriodoDaUrl();
 
   const getTipoLabel = useCallback(
@@ -410,68 +394,27 @@ const Documentos = () => {
     <>
       <style>
         {`
-        .step-pill {
-          padding: 8px 16px;
-          border-radius: 8px;
-          background: #f4f6f9;
-          font-weight: 700;
-          font-size: 12.5px;
-          color: #495057;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          cursor: pointer;
-          border: 1px solid transparent;
-          transition: all 0.2s ease;
-        }
-        .step-pill:hover {
-          background: #eaedf2;
-          color: #1a3353;
-        }
-        .step-pill.active {
-          background: #e8ebfc;
-          color: #1a3353;
-          border: 1px solid #c2c9f5;
-        }
-        .upload-drop-card {
-          border: 2px dashed #cbd5e1;
-          border-radius: 12px;
-          padding: 24px 20px;
-          text-align: center;
-          background: #ffffff;
-          transition: all 0.25s ease;
-          cursor: pointer;
-        }
-        .upload-drop-card:hover, .upload-drop-card.dragging {
-          border-color: #5f63f2;
-          background: #fbfbfe;
-          box-shadow: 0 6px 16px rgba(95, 99, 242, 0.06);
-        }
-        .upload-drop-card.has-file {
-          border: 2px solid #52c41a;
-          background: #f6ffed;
-        }
         .confronto-kpi-card {
-          border: 1px solid #edf0f5;
-          border-radius: 10px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
           background: #ffffff;
           padding: 18px 20px;
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .confronto-kpi-card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+          box-shadow: 0 6px 16px rgba(37, 99, 235, 0.06);
         }
         `}
       </style>
 
       {/* CABEÇALHO DA PÁGINA COM NAVEGAÇÃO LIMPA */}
-      <div className="row mb-20">
+      <div className="row mb-20 pt-10">
         <div className="col-12">
-          <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
+          <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 14 }}>
             <div>
-              <h4 className="fw-800 color-dark mb-4" style={{ fontSize: 22, color: '#1a3353' }}>
-                <i className="la la-folder-open text-primary mr-6"></i>{' '}
+              <h4 className="fw-800 mb-4" style={{ fontSize: 22, color: '#0f172a' }}>
+                <i className="la la-folder-open mr-6" style={{ color: '#2563eb' }}></i>{' '}
                 {t('archive.title', 'Arquivo Digital & Repositório de Documentos')}
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13.5 }}>
@@ -482,10 +425,10 @@ const Documentos = () => {
             <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
               <button
                 type="button"
-                className="btn btn-sm btn-outline-lighten bg-white"
+                className="btn btn-sm btn-outline-primary"
                 onClick={fetchDocumentos}
                 disabled={loading}
-                style={{ fontWeight: 600, fontSize: 13, border: '1px solid #dcdfe5' }}
+                style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
               >
                 <i className={`la la-sync mr-4 ${loading ? 'la-spin' : ''}`}></i>
                 {t('archive.refresh', 'Atualizar Arquivo')}
@@ -494,7 +437,7 @@ const Documentos = () => {
                 type="button"
                 className="btn btn-sm btn-primary"
                 onClick={() => navigate('/confronto')}
-                style={{ fontWeight: 700, fontSize: 13, backgroundColor: '#5f63f2', borderColor: '#5f63f2' }}
+                style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
               >
                 <i className="la la-balance-scale mr-4"></i> Ir para Confronto com IA &rarr;
               </button>
@@ -504,22 +447,22 @@ const Documentos = () => {
       </div>
 
       {/* FAIXA DE PERÍODO E EMPRESA EM CONTEXTO */}
-      <div className="card card-default mb-20" style={{ border: '1px solid #edf0f5', borderRadius: 10, background: '#fff' }}>
-        <div className="card-body p-16">
+      <div className="card card-default mb-20" style={{ border: '1px solid #e2e8f0', borderRadius: 12, background: '#ffffff' }}>
+        <div className="card-body p-16 bg-white">
           <div className="d-flex align-items-center justify-content-between flex-wrap" style={{ gap: 12 }}>
             <div className="d-flex align-items-center" style={{ gap: 12 }}>
               <div
                 style={{
                   width: 40,
                   height: 40,
-                  borderRadius: 8,
-                  backgroundColor: '#5f63f2',
-                  color: '#fff',
+                  borderRadius: 10,
+                  backgroundColor: '#2563eb',
+                  color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontWeight: 700,
-                  fontSize: 18,
+                  fontWeight: 800,
+                  fontSize: 17,
                 }}
               >
                 {empresaAtual?.nome ? empresaAtual.nome.charAt(0).toUpperCase() : 'E'}
@@ -588,14 +531,14 @@ const Documentos = () => {
         </div>
       </div>
 
-      {/* 4 CARDS KPIS NO FORMATO DO CONFRONTO */}
-      <div className="row mb-20" style={{ rowGap: 12 }}>
+      {/* 4 CARDS KPIS EM FUNDO BRANCO PURO */}
+      <div className="row mb-20" style={{ rowGap: 14 }}>
         <div className="col-12 col-sm-6 col-lg-3">
-          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #5f63f2' }}>
+          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Total no Repositório
             </span>
-            <div className="fw-800 color-dark" style={{ fontSize: 24 }}>
+            <div className="fw-800" style={{ fontSize: 26, color: '#0f172a' }}>
               {documentosFiltrados.length}{' '}
               <span className="fs-13 text-muted fw-normal">ficheiros</span>
             </div>
@@ -606,11 +549,11 @@ const Documentos = () => {
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #52c41a' }}>
+          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Balancetes de Verificação
             </span>
-            <div className="fw-800" style={{ fontSize: 24, color: '#52c41a' }}>
+            <div className="fw-800" style={{ fontSize: 26, color: '#2563eb' }}>
               {contadoresPastas.BALANCETES || 0}{' '}
               <span className="fs-13 text-muted fw-normal">PGC</span>
             </div>
@@ -621,11 +564,11 @@ const Documentos = () => {
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #1890ff' }}>
+          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Declarações AGT (IVA)
             </span>
-            <div className="fw-800" style={{ fontSize: 24, color: '#1890ff' }}>
+            <div className="fw-800" style={{ fontSize: 26, color: '#2563eb' }}>
               {contadoresPastas.AGT || 0}{' '}
               <span className="fs-13 text-muted fw-normal">Modelo 7</span>
             </div>
@@ -636,11 +579,11 @@ const Documentos = () => {
         </div>
 
         <div className="col-12 col-sm-6 col-lg-3">
-          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #fa8b0c' }}>
+          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Outros Comprovativos
             </span>
-            <div className="fw-800" style={{ fontSize: 24, color: '#fa8b0c' }}>
+            <div className="fw-800" style={{ fontSize: 26, color: '#0f172a' }}>
               {contadoresPastas.OUTROS || 0}{' '}
               <span className="fs-13 text-muted fw-normal">anexos</span>
             </div>
@@ -651,17 +594,17 @@ const Documentos = () => {
         </div>
       </div>
 
-      {/* ZONA RÁPIDA DE ARQUIVAMENTO (UPLOAD COM ESTILO DO CONFRONTO) */}
-      <div className="card card-default mb-20" style={{ border: '1px solid #edf0f5', borderRadius: 12 }}>
-        <div className="card-header bg-white py-14 px-20 border-bottom d-flex align-items-center justify-content-between">
-          <h5 className="fw-700 text-dark mb-0" style={{ fontSize: 15 }}>
-            <i className="la la-cloud-upload-alt text-primary mr-1"></i> Carregar Novo Ficheiro para o Arquivo
+      {/* ZONA RÁPIDA DE ARQUIVAMENTO (MESMA ESTÉTICA BRANCA + AZUL DO SISTEMA) */}
+      <div className="card card-default mb-20" style={{ border: '1px solid #e2e8f0', borderRadius: 14, background: '#ffffff' }}>
+        <div className="card-header bg-white py-14 px-20 border-bottom d-flex align-items-center justify-content-between flex-wrap" style={{ gap: 8 }}>
+          <h5 className="fw-700 mb-0" style={{ fontSize: 15, color: '#0f172a' }}>
+            <i className="la la-cloud-upload-alt mr-1" style={{ color: '#2563eb' }}></i> Carregar Novo Ficheiro para o Arquivo
           </h5>
           <span className="text-muted" style={{ fontSize: 12 }}>
             Deteção inteligente de empresa, exercício fiscal e modelo
           </span>
         </div>
-        <div className="card-body p-20">
+        <div className="card-body p-20 bg-white">
           {!selectedFile ? (
             <div
               className={`upload-drop-card ${isDragging ? 'dragging' : ''}`}
@@ -677,10 +620,10 @@ const Documentos = () => {
                 accept=".pdf,.xlsx,.xls,.csv,.jpg,.jpeg,.png"
                 onChange={handleFileChange}
               />
-              <div style={{ fontSize: 36, color: '#5f63f2', marginBottom: 6 }}>
+              <div className="upload-icon-circle">
                 <i className="la la-cloud-upload-alt"></i>
               </div>
-              <h6 className="fw-700 color-dark mb-4" style={{ fontSize: 15 }}>
+              <h6 className="fw-700 mb-4" style={{ fontSize: 15, color: '#0f172a' }}>
                 Arraste qualquer ficheiro para aqui ou clique para selecionar
               </h6>
               <p className="text-muted mb-0" style={{ fontSize: 13 }}>
@@ -690,42 +633,54 @@ const Documentos = () => {
           ) : (
             <form onSubmit={handleUploadSubmit}>
               <div className="upload-drop-card has-file text-left p-20">
-                <div className="d-flex align-items-center justify-content-between mb-15 flex-wrap" style={{ gap: 10 }}>
+                <div className="d-flex align-items-center justify-content-between mb-15 flex-wrap" style={{ gap: 12 }}>
                   <div className="d-flex align-items-center" style={{ gap: 12 }}>
                     <div
                       style={{
                         width: 44,
                         height: 44,
-                        borderRadius: 8,
-                        backgroundColor: '#dcfce7',
-                        color: '#15803d',
+                        borderRadius: '50%',
+                        backgroundColor: '#ffffff',
+                        border: '2px solid #bfdbfe',
+                        color: '#2563eb',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: 22,
+                        flexShrink: 0,
                       }}
                     >
-                      <i className="la la-check-circle"></i>
+                      <i className="la la-check"></i>
                     </div>
                     <div>
-                      <strong className="color-dark d-block" style={{ fontSize: 14 }}>
+                      <strong className="d-block" style={{ fontSize: 14.5, color: '#0f172a' }}>
                         {selectedFile.name}
                       </strong>
                       <span className="text-muted" style={{ fontSize: 12 }}>
                         {(selectedFile.size / 1024).toFixed(1)} KB
                         {detectando && (
-                          <span className="text-primary ml-2">
+                          <span className="ml-2" style={{ color: '#2563eb', fontWeight: 600 }}>
                             <i className="la la-spinner la-spin"></i> A analisar documento...
                           </span>
                         )}
                         {detecaoInfo && !detectando && (
                           <>
-                            <span className="text-success ml-2 font-weight-bold">
+                            <span className="ml-2 font-weight-bold" style={{ color: '#2563eb' }}>
                               <i className="la la-check"></i> {detecaoInfo.tipo_nome || detecaoInfo.tipo}
                             </span>
                             {detecaoInfo.empresa_recem_criada && (
-                              <span className="badge ml-2" style={{ backgroundColor: '#10b981', color: '#fff', fontSize: 11, padding: '3px 8px', borderRadius: 4 }}>
-                                ✨ Nova Empresa Pré-Cadastrada Automaticamente
+                              <span
+                                className="badge ml-2"
+                                style={{
+                                  backgroundColor: '#ffffff',
+                                  color: '#2563eb',
+                                  border: '1px solid #bfdbfe',
+                                  fontSize: 11,
+                                  padding: '3px 8px',
+                                  borderRadius: 6,
+                                }}
+                              >
+                                Nova Empresa Pré-Cadastrada
                               </span>
                             )}
                           </>
@@ -734,12 +689,13 @@ const Documentos = () => {
                     </div>
                   </div>
 
-                  <div className="d-flex align-items-center" style={{ gap: 8 }}>
+                  <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
                     <button
                       type="button"
-                      className="btn btn-sm btn-outline-secondary"
+                      className="btn btn-sm btn-outline-primary"
                       onClick={cancelarUpload}
                       disabled={uploading}
+                      style={{ fontWeight: 700, padding: '7px 14px' }}
                     >
                       Cancelar
                     </button>
@@ -747,7 +703,7 @@ const Documentos = () => {
                       type="submit"
                       className="btn btn-sm btn-primary"
                       disabled={uploading}
-                      style={{ fontWeight: 700, backgroundColor: '#5f63f2', borderColor: '#5f63f2' }}
+                      style={{ fontWeight: 700, padding: '7px 16px' }}
                     >
                       {uploading ? (
                         <>
@@ -782,10 +738,10 @@ const Documentos = () => {
                       </select>
                     ) : (
                       <div
-                        className="form-control form-control-sm bg-light fw-600 text-truncate d-flex align-items-center"
-                        style={{ height: 34, fontSize: 12.5 }}
+                        className="form-control form-control-sm bg-white fw-600 text-truncate d-flex align-items-center"
+                        style={{ height: 34, fontSize: 12.5, border: '1px solid #bfdbfe', color: '#0f172a' }}
                       >
-                        <i className="la la-building text-primary mr-1"></i>
+                        <i className="la la-building mr-1" style={{ color: '#2563eb' }}></i>
                         <span className="text-truncate">
                           {empresaAtual?.nome || 'Empresa Vinculada'} (NIF: {empresaAtual?.nif || '---'})
                         </span>
@@ -851,9 +807,9 @@ const Documentos = () => {
         </div>
       </div>
 
-      {/* NAVEGAÇÃO POR CATEGORIAS (STEP-PILLS DO CONFRONTO) */}
-      <div className="d-flex align-items-center justify-content-between mb-15 flex-wrap" style={{ gap: 10 }}>
-        <div className="d-flex flex-wrap align-items-center" style={{ gap: 8 }}>
+      {/* NAVEGAÇÃO POR CATEGORIAS (BOTÕES AZUIS SEPARADOS) */}
+      <div className="d-flex align-items-center justify-content-between mb-15 flex-wrap" style={{ gap: 12 }}>
+        <div className="d-flex flex-wrap align-items-center" style={{ gap: 10 }}>
           {PASTAS_ORGANIZACIONAIS.map((pasta) => {
             const count = contadoresPastas[pasta.id] || 0;
             const isActive = pastaAtiva === pasta.id;
@@ -872,9 +828,11 @@ const Documentos = () => {
                 <span
                   className="badge"
                   style={{
-                    backgroundColor: isActive ? '#5f63f2' : '#cbd5e1',
-                    color: '#ffffff',
+                    backgroundColor: '#ffffff',
+                    color: '#2563eb',
+                    border: isActive ? 'none' : '1px solid #bfdbfe',
                     fontSize: 11,
+                    fontWeight: 800,
                     padding: '2px 7px',
                     borderRadius: 10,
                   }}
@@ -887,12 +845,12 @@ const Documentos = () => {
         </div>
 
         {/* BARRA DE PESQUISA E FILTROS DE DOCUMENTOS */}
-        <div className="d-flex align-items-center flex-wrap" style={{ gap: 8 }}>
+        <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
           {/* PESQUISA RÁPIDA */}
           <div style={{ minWidth: 200, maxWidth: 260 }}>
             <div className="input-group">
-              <span className="input-group-text bg-white border-right-0" style={{ border: '1px solid #dcdfe5' }}>
-                <i className="la la-search text-muted"></i>
+              <span className="input-group-text bg-white border-right-0" style={{ border: '1px solid #cbd5e1' }}>
+                <i className="la la-search" style={{ color: '#2563eb' }}></i>
               </span>
               <input
                 type="text"
@@ -905,12 +863,12 @@ const Documentos = () => {
               {termoBusca && (
                 <button
                   type="button"
-                  className="btn btn-outline-light bg-white border-left-0"
-                  style={{ border: '1px solid #dcdfe5', borderLeft: 'none' }}
+                  className="btn btn-outline-primary btn-xs ml-2"
+                  style={{ height: 36, padding: '0 10px' }}
                   onClick={() => setTermoBusca('')}
                   title="Limpar pesquisa"
                 >
-                  <i className="la la-times text-muted"></i>
+                  <i className="la la-times"></i>
                 </button>
               )}
             </div>
@@ -974,8 +932,8 @@ const Documentos = () => {
           {(termoBusca || filtroTipo !== 'todos' || filtroAno !== 'todos' || filtroMes !== 'todos' || pastaAtiva !== 'TODOS') && (
             <button
               type="button"
-              className="btn btn-sm btn-outline-danger d-flex align-items-center"
-              style={{ height: 36, fontSize: 12, padding: '0 12px' }}
+              className="btn btn-sm btn-outline-primary d-flex align-items-center"
+              style={{ height: 36, fontSize: 12, padding: '0 14px', fontWeight: 700 }}
               onClick={() => {
                 setTermoBusca('');
                 setFiltroTipo('todos');
@@ -991,9 +949,9 @@ const Documentos = () => {
         </div>
       </div>
 
-      {/* TABELA DE FICHEIROS COM ESTILO ELEGANTE */}
-      <div className="card card-default" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
-        <div className="card-body p-0">
+      {/* TABELA DE FICHEIROS EM FUNDO BRANCO PURO */}
+      <div className="card card-default" style={{ border: '1px solid #e2e8f0', borderRadius: 12, background: '#ffffff' }}>
+        <div className="card-body p-0 bg-white">
           {loading ? (
             <div className="text-center py-40">
               <SpinDots />
@@ -1003,8 +961,10 @@ const Documentos = () => {
             </div>
           ) : documentosFiltrados.length === 0 ? (
             <div className="text-center py-50 px-20">
-              <div style={{ fontSize: 42 }} className="mb-10">📁</div>
-              <h5 className="fw-700 color-dark mb-6" style={{ fontSize: 16 }}>
+              <div className="upload-icon-circle">
+                <i className="la la-folder-open"></i>
+              </div>
+              <h5 className="fw-700 mb-6" style={{ fontSize: 16, color: '#0f172a' }}>
                 Nenhum documento encontrado com os filtros selecionados
               </h5>
               <p className="text-muted mb-15" style={{ fontSize: 13 }}>
@@ -1028,22 +988,22 @@ const Documentos = () => {
             </div>
           ) : (
             <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
-                <thead style={{ backgroundColor: '#f8fafc' }}>
+              <table className="table table-hover align-middle mb-0" style={{ fontSize: 13, background: '#ffffff' }}>
+                <thead style={{ backgroundColor: '#ffffff' }}>
                   <tr>
-                    <th style={{ width: '42%', padding: '12px 18px', fontWeight: 700, color: '#495057' }}>
+                    <th style={{ width: '40%', padding: '14px 18px', fontWeight: 700, color: '#334155' }}>
                       Documento Arquivado ({documentosFiltrados.length})
                     </th>
-                    <th style={{ width: '20%', padding: '12px 18px', fontWeight: 700, color: '#495057' }}>
+                    <th style={{ width: '18%', padding: '14px 18px', fontWeight: 700, color: '#334155' }}>
                       Categoria
                     </th>
-                    <th style={{ width: '12%', padding: '12px 18px', fontWeight: 700, color: '#495057', textAlign: 'center' }}>
+                    <th style={{ width: '12%', padding: '14px 18px', fontWeight: 700, color: '#334155', textAlign: 'center' }}>
                       Período
                     </th>
-                    <th style={{ width: '12%', padding: '12px 18px', fontWeight: 700, color: '#495057', textAlign: 'center' }}>
+                    <th style={{ width: '12%', padding: '14px 18px', fontWeight: 700, color: '#334155', textAlign: 'center' }}>
                       Data
                     </th>
-                    <th style={{ width: '14%', padding: '12px 18px', fontWeight: 700, color: '#495057', textAlign: 'right' }}>
+                    <th style={{ width: '18%', padding: '14px 18px', fontWeight: 700, color: '#334155', textAlign: 'right' }}>
                       Ações
                     </th>
                   </tr>
@@ -1051,7 +1011,6 @@ const Documentos = () => {
                 <tbody>
                   {documentosFiltrados.map((doc) => {
                     const labelTipo = getTipoLabel(doc.tipo, doc.tipo);
-                    const badgeClasse = TIPO_BADGE[doc.tipo] || 'badge-secondary';
                     const mesTexto = getMesNome(doc.mes);
 
                     const isPdf = (doc.nome_arquivo || '').toLowerCase().endsWith('.pdf');
@@ -1061,15 +1020,16 @@ const Documentos = () => {
 
                     return (
                       <tr key={doc.id}>
-                        <td style={{ padding: '12px 18px', verticalAlign: 'middle' }}>
+                        <td style={{ padding: '14px 18px', verticalAlign: 'middle' }}>
                           <div className="d-flex align-items-center" style={{ gap: 12 }}>
                             <span
                               style={{
                                 width: 38,
                                 height: 38,
-                                borderRadius: 8,
-                                backgroundColor: isPdf ? '#fee2e2' : isExcel ? '#dcfce7' : '#f1f5f9',
-                                color: isPdf ? '#dc2626' : isExcel ? '#16a34a' : '#5f63f2',
+                                borderRadius: 10,
+                                backgroundColor: '#ffffff',
+                                border: '1px solid #bfdbfe',
+                                color: '#2563eb',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -1080,7 +1040,7 @@ const Documentos = () => {
                               <i className={isPdf ? 'la la-file-pdf' : isExcel ? 'la la-file-excel' : 'la la-file-alt'}></i>
                             </span>
                             <div>
-                              <strong className="color-dark d-block" style={{ fontSize: 13.5 }}>
+                              <strong className="d-block" style={{ fontSize: 13.5, color: '#0f172a' }}>
                                 {doc.nome_arquivo}
                               </strong>
                               <span className="text-muted" style={{ fontSize: 11.5 }}>
@@ -1090,19 +1050,30 @@ const Documentos = () => {
                           </div>
                         </td>
 
-                        <td style={{ padding: '12px 18px', verticalAlign: 'middle' }}>
-                          <span className={`badge ${badgeClasse} px-8 py-3`} style={{ fontSize: 11 }}>
+                        <td style={{ padding: '14px 18px', verticalAlign: 'middle' }}>
+                          <span
+                            className="badge"
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 700,
+                              background: '#ffffff',
+                              color: '#2563eb',
+                              border: '1px solid #bfdbfe',
+                              padding: '5px 10px',
+                              borderRadius: 6,
+                            }}
+                          >
                             {labelTipo}
                           </span>
                         </td>
 
-                        <td style={{ padding: '12px 18px', textAlign: 'center', verticalAlign: 'middle' }}>
-                          <strong className="color-dark" style={{ fontSize: 12.5 }}>
+                        <td style={{ padding: '14px 18px', textAlign: 'center', verticalAlign: 'middle' }}>
+                          <strong style={{ fontSize: 12.5, color: '#0f172a' }}>
                             {mesTexto} / {doc.ano}
                           </strong>
                         </td>
 
-                        <td style={{ padding: '12px 18px', textAlign: 'center', verticalAlign: 'middle' }}>
+                        <td style={{ padding: '14px 18px', textAlign: 'center', verticalAlign: 'middle' }}>
                           <span className="text-muted" style={{ fontSize: 12 }}>
                             {doc.created_at
                               ? new Date(doc.created_at).toLocaleDateString(dateLocale)
@@ -1110,43 +1081,43 @@ const Documentos = () => {
                           </span>
                         </td>
 
-                        <td style={{ padding: '12px 18px', textAlign: 'right', verticalAlign: 'middle' }}>
-                          <div className="d-inline-flex align-items-center" style={{ gap: 6 }}>
+                        <td style={{ padding: '14px 18px', textAlign: 'right', verticalAlign: 'middle' }}>
+                          <div className="d-inline-flex align-items-center" style={{ gap: 8 }}>
                             <button
                               type="button"
-                              className="btn btn-outline-primary btn-xs"
+                              className="btn btn-primary btn-xs"
                               title="Confrontar este documento"
                               onClick={() => navigate(`/confronto?empresa=${doc.empresa}&ano=${doc.ano}&mes=${doc.mes}`)}
-                              style={{ padding: '4px 8px', borderRadius: 6, fontWeight: 700, fontSize: 11.5 }}
+                              style={{ padding: '5px 10px', borderRadius: 6, fontWeight: 700, fontSize: 11.5 }}
                             >
                               <i className="la la-bolt mr-1"></i> Confrontar
                             </button>
                             <button
                               type="button"
-                              className="btn btn-outline-lighten btn-xs"
+                              className="btn btn-outline-primary btn-xs"
                               title="Visualizar documento"
                               onClick={() => handleView(doc)}
-                              style={{ padding: '5px 8px', borderRadius: 6 }}
+                              style={{ padding: '5px 9px', borderRadius: 6 }}
                             >
-                              <i className="la la-eye text-primary"></i>
+                              <i className="la la-eye"></i>
                             </button>
                             <button
                               type="button"
-                              className="btn btn-outline-lighten btn-xs"
+                              className="btn btn-outline-primary btn-xs"
                               title="Descarregar ficheiro"
                               onClick={() => handleDownload(doc)}
-                              style={{ padding: '5px 8px', borderRadius: 6 }}
+                              style={{ padding: '5px 9px', borderRadius: 6 }}
                             >
-                              <i className="la la-download text-success"></i>
+                              <i className="la la-download"></i>
                             </button>
                             <button
                               type="button"
-                              className="btn btn-outline-lighten btn-xs"
+                              className="btn btn-outline-primary btn-xs"
                               title="Eliminar documento"
                               onClick={() => setDocApagar(doc)}
-                              style={{ padding: '5px 8px', borderRadius: 6 }}
+                              style={{ padding: '5px 9px', borderRadius: 6 }}
                             >
-                              <i className="la la-trash text-danger"></i>
+                              <i className="la la-trash"></i>
                             </button>
                           </div>
                         </td>
@@ -1168,7 +1139,7 @@ const Documentos = () => {
         title={t('archive.deleteModal.title', 'Eliminar Documento do Arquivo')}
         subtitle={t('archive.deleteModal.subtitle', 'Aviso de salvaguarda')}
         confirmLabel={t('archive.deleteModal.confirm', 'Sim, Eliminar Documento')}
-        confirmClass="btn-danger"
+        confirmClass="btn-primary"
       >
         <p className="text-muted mb-0" style={{ fontSize: 13 }}>
           {t('archive.deleteModal.message', {

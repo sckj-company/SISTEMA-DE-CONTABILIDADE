@@ -52,7 +52,7 @@ body.overlayScroll {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Ícones Grandes com container de fundo destacado */
+/* Ícones Grandes com container de fundo branco limpo e borda azul suave */
 .sidebar__menu-group ul.sidebar_nav li > a .nav-icon {
   width: 38px !important;
   height: 38px !important;
@@ -62,14 +62,15 @@ body.overlayScroll {
   align-items: center !important;
   justify-content: center !important;
   border-radius: 10px !important;
-  background-color: #f0f2fa !important;
+  background-color: #ffffff !important;
+  border: 1px solid #dbeafe !important;
   transition: all 0.2s ease !important;
 }
 
 .sidebar__menu-group ul.sidebar_nav li > a .nav-icon i {
   font-size: 22px !important;
   line-height: 1 !important;
-  color: #5f63f2 !important;
+  color: #2563eb !important;
   transition: all 0.2s ease !important;
 }
 
@@ -77,30 +78,32 @@ body.overlayScroll {
 .sidebar__menu-group ul.sidebar_nav li > a .menu-text {
   font-size: 14.5px !important;
   font-weight: 600 !important;
-  color: #272b41 !important;
+  color: #1e293b !important;
   letter-spacing: -0.15px !important;
   line-height: 1.3 !important;
 }
 
 /* Efeito Hover */
 .sidebar__menu-group ul.sidebar_nav li > a:hover {
-  background-color: #f4f5fd !important;
+  background-color: #eff6ff !important;
   transform: translateX(3px);
 }
 .sidebar__menu-group ul.sidebar_nav li > a:hover .nav-icon {
-  background-color: #e5e8fc !important;
+  background-color: #ffffff !important;
+  border-color: #2563eb !important;
 }
 .sidebar__menu-group ul.sidebar_nav li > a:hover .menu-text {
-  color: #5f63f2 !important;
+  color: #2563eb !important;
 }
 
 /* Item Ativo (Página Atual Selecionada) */
 .sidebar__menu-group ul.sidebar_nav li > a.active {
-  background-color: #5f63f2 !important;
-  box-shadow: 0 4px 14px rgba(95, 99, 242, 0.28) !important;
+  background-color: #2563eb !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25) !important;
 }
 .sidebar__menu-group ul.sidebar_nav li > a.active .nav-icon {
-  background-color: rgba(255, 255, 255, 0.22) !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: transparent !important;
 }
 .sidebar__menu-group ul.sidebar_nav li > a.active .nav-icon i {
   color: #ffffff !important;
@@ -161,7 +164,7 @@ body.overlayScroll {
 .admin-sidebar-wrapper ul.sidebar_nav li > a .nav-icon i {
   font-size: 18px !important;
   line-height: 1 !important;
-  color: #5f63f2 !important;
+  color: #2563eb !important;
   transition: all 0.15s ease !important;
 }
 
@@ -183,11 +186,11 @@ body.overlayScroll {
 }
 
 .admin-sidebar-wrapper ul.sidebar_nav li > a:hover .menu-text {
-  color: #5f63f2 !important;
+  color: #2563eb !important;
 }
 
 .admin-sidebar-wrapper ul.sidebar_nav li > a.active {
-  background-color: #5f63f2 !important;
+  background-color: #2563eb !important;
   box-shadow: 0 4px 12px rgba(95, 99, 242, 0.25) !important;
 }
 
@@ -275,7 +278,7 @@ body.overlayScroll {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background: #5f63f2;
+  background: #2563eb;
   color: #fff;
   font-size: 13px;
   font-weight: 600;
@@ -295,7 +298,7 @@ body.overlayScroll {
 
 .author-initials--light {
   background: #eef0f6;
-  color: #5f63f2;
+  color: #2563eb;
 }
 
 /* Login */
@@ -328,12 +331,12 @@ body.overlayScroll {
   transition: all 0.2s ease;
 }
 .login-lang-switch button:hover {
-  border-color: #5f63f2;
-  color: #5f63f2;
+  border-color: #2563eb;
+  color: #2563eb;
 }
 .login-lang-switch button.active {
-  background: #5f63f2;
-  border-color: #5f63f2;
+  background: #2563eb;
+  border-color: #2563eb;
   color: #fff;
 }
 
@@ -465,7 +468,7 @@ body.overlayScroll {
   transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 .form-control:focus {
-  border-color: #5f63f2 !important;
+  border-color: #2563eb !important;
   box-shadow: 0 0 0 3px rgba(95, 99, 242, 0.12) !important;
   outline: none !important;
 }
@@ -523,6 +526,295 @@ body.overlayScroll {
 .gap-18 { gap: 18px !important; }
 .gap-20 { gap: 20px !important; }
 .gap-25 { gap: 25px !important; }
+
+/* ==========================================================================
+   SISTEMA ESTÉTICO CORPORATIVO: FUNDO 100% BRANCO, BOTÕES AZUIS & UPLOAD UNIFICADO
+   ========================================================================== */
+
+/* 1. Fundo 100% Branco Limpo em toda a aplicação (zero fundos cinzentos) */
+html,
+body,
+#root,
+.main-content,
+.contents,
+.footer-wrapper,
+.header-top,
+.header-top .navbar,
+.sidebar-wrapper,
+.sidebar {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+.header-top {
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03) !important;
+}
+
+.sidebar {
+  border-right: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+.footer-wrapper {
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+/* Remove qualquer fundo cinzento em cards, cabeçalhos, tabelas e modais */
+.card,
+.card-default,
+.card-header,
+.card-body,
+.card-footer,
+.bg-light,
+.bg-lighten,
+.table,
+.table thead,
+.table thead tr,
+.table thead th,
+.table tbody,
+.table tbody tr,
+.table tfoot,
+.table tfoot tr,
+.table tfoot th,
+.table tfoot td,
+.modal-content,
+.modal-header,
+.modal-body,
+.modal-footer {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+.table thead th {
+  border-bottom: 2px solid #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+.table-hover tbody tr:hover td {
+  background-color: #f8fbff !important;
+}
+
+.form-control,
+.form-select,
+select.form-control,
+input.form-control,
+textarea.form-control {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+}
+
+/* 2. Todos os Botões Unificados no Azul Institucional (#2563eb) */
+.btn-primary,
+.btn-success,
+.btn-info,
+.btn-dark,
+.btn-secondary {
+  background: #2563eb !important;
+  background-color: #2563eb !important;
+  border: 1px solid #2563eb !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-primary i,
+.btn-success i,
+.btn-info i,
+.btn-dark i,
+.btn-secondary i {
+  color: #ffffff !important;
+}
+
+.btn-primary:hover:not(:disabled),
+.btn-success:hover:not(:disabled),
+.btn-info:hover:not(:disabled),
+.btn-dark:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled) {
+  background: #1d4ed8 !important;
+  background-color: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22) !important;
+}
+
+/* Botões secundários / outline: fundo branco puro + borda e texto azul */
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-lighten,
+.btn-outline-info,
+.btn-outline-success,
+.btn-outline-dark,
+.btn-outline-danger,
+.btn-light,
+.btn-white {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid #2563eb !important;
+  color: #2563eb !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-outline-primary i,
+.btn-outline-secondary i,
+.btn-outline-lighten i,
+.btn-outline-info i,
+.btn-outline-success i,
+.btn-outline-dark i,
+.btn-outline-danger i,
+.btn-light i,
+.btn-white i {
+  color: #2563eb !important;
+}
+
+.btn-outline-primary:hover:not(:disabled),
+.btn-outline-secondary:hover:not(:disabled),
+.btn-outline-lighten:hover:not(:disabled),
+.btn-outline-info:hover:not(:disabled),
+.btn-outline-success:hover:not(:disabled),
+.btn-outline-dark:hover:not(:disabled),
+.btn-outline-danger:hover:not(:disabled),
+.btn-light:hover:not(:disabled),
+.btn-white:hover:not(:disabled) {
+  background: #eff6ff !important;
+  background-color: #eff6ff !important;
+  border-color: #1d4ed8 !important;
+  color: #1d4ed8 !important;
+}
+
+/* Estado desativado mantém estética azul suave em vez de cinzento */
+.btn-primary:disabled,
+.btn-primary.disabled,
+.btn-success:disabled,
+.btn-info:disabled,
+.btn-dark:disabled {
+  background: #93c5fd !important;
+  background-color: #93c5fd !important;
+  border-color: #93c5fd !important;
+  color: #ffffff !important;
+  opacity: 0.85 !important;
+  cursor: not-allowed !important;
+}
+
+.btn-outline-primary:disabled,
+.btn-outline-lighten:disabled,
+.btn-outline-secondary:disabled,
+.btn-light:disabled {
+  background: #ffffff !important;
+  border-color: #bfdbfe !important;
+  color: #93c5fd !important;
+  opacity: 0.85 !important;
+  cursor: not-allowed !important;
+}
+
+/* 3. Nenhum Botão Colado ao Outro — Espaçamento Obrigatório */
+.btn-group,
+.btn-group-sm,
+.btn-group-lg {
+  display: inline-flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+.btn-group > .btn,
+.btn-group > .btn:not(:first-child),
+.btn-group > .btn:not(:last-child) {
+  border-radius: 8px !important;
+  margin-left: 0 !important;
+}
+
+/* Caso dois botões sejam irmãos diretos num contentor sem flex gap */
+*:not(.d-flex):not(.btn-group) > .btn + .btn {
+  margin-left: 10px !important;
+}
+
+/* Step Pills e Filtros de Abas com Fundo Branco e Azul */
+.step-pill,
+.class-filter-btn {
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+  border: 1px solid #bfdbfe !important;
+  font-weight: 700 !important;
+  font-size: 12.5px !important;
+  color: #2563eb !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.step-pill:hover,
+.class-filter-btn:hover {
+  background: #eff6ff !important;
+  border-color: #2563eb !important;
+  color: #1d4ed8 !important;
+}
+
+.step-pill.active,
+.class-filter-btn.active {
+  background: #2563eb !important;
+  border: 1px solid #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.2) !important;
+}
+
+.step-pill.active i,
+.class-filter-btn.active i {
+  color: #ffffff !important;
+}
+
+/* 4. Zona de Upload de Documentos Unificada (100% Branca + Borda Azul) */
+.upload-drop-card {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 2px dashed #93c5fd !important;
+  border-radius: 14px !important;
+  padding: 28px 24px !important;
+  text-align: center;
+  transition: all 0.2s ease !important;
+  cursor: pointer;
+}
+
+.upload-drop-card:hover,
+.upload-drop-card.dragging {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08) !important;
+}
+
+.upload-drop-card.has-file {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 2px solid #2563eb !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.06) !important;
+}
+
+.upload-icon-circle {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid #bfdbfe;
+  color: #2563eb;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-bottom: 12px;
+}
+
 
 
 

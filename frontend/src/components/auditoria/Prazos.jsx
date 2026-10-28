@@ -19,7 +19,7 @@ const NOMES = {
 const ESTADOS = {
   VENCIDA: { cor: '#ff4d4f', fundo: '#fff1f0', icone: 'la-exclamation-triangle' },
   A_VENCER: { cor: '#fa8b0c', fundo: '#fff7e6', icone: 'la-clock' },
-  PENDENTE: { cor: '#5a5f7d', fundo: '#f8f9fb', icone: 'la-calendar' },
+  PENDENTE: { cor: '#5a5f7d', fundo: '#ffffff', icone: 'la-calendar' },
   CUMPRIDA: { cor: '#20c997', fundo: '#f0fdf9', icone: 'la-check' },
   CUMPRIDA_FORA_PRAZO: { cor: '#fa8b0c', fundo: '#fff7e6', icone: 'la-check' },
 };

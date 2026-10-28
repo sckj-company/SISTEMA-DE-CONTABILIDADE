@@ -785,8 +785,8 @@ const AdminGestao = () => {
                   fontWeight: 600,
                   fontSize: 13,
                   borderRadius: 6,
-                  backgroundColor: '#5f63f2',
-                  borderColor: '#5f63f2',
+                  backgroundColor: '#2563eb',
+                  borderColor: '#2563eb',
                 }}
                 onClick={abrirModalNovaEmpresa}
               >
@@ -800,12 +800,12 @@ const AdminGestao = () => {
       {/* KPI CARDS COM ESTILO PADRÃO DO SISTEMA */}
       <div className="row mb-25">
         <div className="col-xl-3 col-sm-6 mb-25 mb-xl-0">
-          <div className="card card-default" style={{ borderTop: '3px solid #5f63f2' }}>
+          <div className="card card-default" style={{ borderTop: '3px solid #2563eb' }}>
             <div className="card-body" style={{ padding: '20px 22px' }}>
               <span className="text-muted d-block" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.8 }}>
                 {t('admin.kpi.totalCompanies', 'Total de Empresas')}
               </span>
-              <div style={{ fontSize: 32, fontWeight: 800, color: '#5f63f2', margin: '6px 0 2px' }}>
+              <div style={{ fontSize: 32, fontWeight: 800, color: '#2563eb', margin: '6px 0 2px' }}>
                 {estatisticas?.total_empresas ?? '—'}
               </div>
               <span className="text-muted" style={{ fontSize: 12 }}>
@@ -893,8 +893,8 @@ const AdminGestao = () => {
                   padding: '10px 14px',
                   fontSize: 13,
                   fontWeight: isActive ? 700 : 500,
-                  color: isActive ? '#5f63f2' : '#8c90a4',
-                  borderBottom: isActive ? '2px solid #5f63f2' : '2px solid transparent',
+                  color: isActive ? '#2563eb' : '#8c90a4',
+                  borderBottom: isActive ? '2px solid #2563eb' : '2px solid transparent',
                   borderRadius: 0,
                   textDecoration: 'none',
                 }}
@@ -931,7 +931,7 @@ const AdminGestao = () => {
             </div>
             <div className="table-responsive">
               <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
-                <thead style={{ backgroundColor: '#f8fafc' }}>
+                <thead style={{ backgroundColor: '#ffffff' }}>
                   <tr>
                     <th className="py-12 px-20">Empresa</th>
                     <th>NIF</th>
@@ -954,7 +954,7 @@ const AdminGestao = () => {
                               width: 32,
                               height: 32,
                               backgroundColor: '#eef2ff',
-                              color: '#5f63f2',
+                              color: '#2563eb',
                               fontWeight: 700,
                               fontSize: 12,
                             }}
@@ -1008,8 +1008,8 @@ const AdminGestao = () => {
                             borderRadius: 6,
                             padding: '4px 10px',
                             fontWeight: 600,
-                            backgroundColor: '#5f63f2',
-                            borderColor: '#5f63f2',
+                            backgroundColor: '#2563eb',
+                            borderColor: '#2563eb',
                           }}
                           title="Entrar no espaço operacional de auditoria desta empresa"
                         >
@@ -1055,8 +1055,8 @@ const AdminGestao = () => {
               style={{
                 borderRadius: 8,
                 fontWeight: 600,
-                backgroundColor: '#5f63f2',
-                borderColor: '#5f63f2',
+                backgroundColor: '#2563eb',
+                borderColor: '#2563eb',
                 padding: '8px 16px',
               }}
             >
@@ -1123,7 +1123,7 @@ const AdminGestao = () => {
               {/* TABELA DE EMPRESAS */}
               <div className="table-responsive">
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
-                  <thead style={{ backgroundColor: '#f8fafc' }}>
+                  <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
                       <th className="py-12">Empresa</th>
                       <th>NIF</th>
@@ -1174,7 +1174,7 @@ const AdminGestao = () => {
                                     : '#fef3c7',
                                 color:
                                   emp.regime_iva === 'GERAL'
-                                    ? '#5f63f2'
+                                    ? '#2563eb'
                                     : emp.regime_iva === 'SIMPLIFICADO'
                                     ? '#059669'
                                     : '#b45309',
@@ -1206,9 +1206,9 @@ const AdminGestao = () => {
                                 borderRadius: 6,
                                 padding: '2px 6px',
                                 height: 26,
-                                backgroundColor: emp.estado === 'ATIVA' ? '#ecfdf5' : '#f1f5f9',
+                                backgroundColor: '#ffffff',
                                 color: emp.estado === 'ATIVA' ? '#059669' : '#475569',
-                                border: '1px solid #cbd5e1',
+                                border: emp.estado === 'ATIVA' ? '1px solid #a7f3d0' : '1px solid #cbd5e1',
                               }}
                               title="Alterar estado da empresa no sistema"
                             >
@@ -1227,8 +1227,8 @@ const AdminGestao = () => {
                                 borderRadius: 6,
                                 padding: '4px 10px',
                                 fontWeight: 600,
-                                backgroundColor: '#5f63f2',
-                                borderColor: '#5f63f2',
+                                backgroundColor: '#2563eb',
+                                borderColor: '#2563eb',
                               }}
                               title="Auditar empresa"
                             >
@@ -1285,8 +1285,8 @@ const AdminGestao = () => {
               style={{
                 borderRadius: 8,
                 fontWeight: 600,
-                backgroundColor: '#5f63f2',
-                borderColor: '#5f63f2',
+                backgroundColor: '#2563eb',
+                borderColor: '#2563eb',
                 padding: '8px 16px',
               }}
             >
@@ -1342,7 +1342,7 @@ const AdminGestao = () => {
               {/* TABELA DE UTILIZADORES */}
               <div className="table-responsive">
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
-                  <thead style={{ backgroundColor: '#f8fafc' }}>
+                  <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
                       <th className="py-12">{t('admin.users.thUser', 'Utilizador')}</th>
                       <th>{t('admin.users.thFullName', 'Nome Completo')}</th>
@@ -1375,7 +1375,7 @@ const AdminGestao = () => {
                                     width: 32,
                                     height: 32,
                                     backgroundColor: u.is_superuser ? '#fef3c7' : '#eef2ff',
-                                    color: u.is_superuser ? '#b45309' : '#5f63f2',
+                                    color: u.is_superuser ? '#b45309' : '#2563eb',
                                     fontWeight: 700,
                                     fontSize: 12,
                                   }}
@@ -1396,7 +1396,7 @@ const AdminGestao = () => {
                                 className="badge"
                                 style={{
                                   backgroundColor: u.is_superuser
-                                    ? '#5f63f2'
+                                    ? '#2563eb'
                                     : papelExibido === 'Administrador'
                                     ? '#3b82f6'
                                     : papelExibido === 'Operador de Facturação'
@@ -1652,7 +1652,7 @@ const AdminGestao = () => {
               {/* TABELA DE REGRAS */}
               <div className="table-responsive">
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
-                  <thead style={{ backgroundColor: '#f8fafc' }}>
+                  <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
                       <th className="py-12">Código</th>
                       <th>Nome da Regra</th>
@@ -1900,7 +1900,7 @@ const AdminGestao = () => {
               {/* TABELA DE OCORRÊNCIAS */}
               <div className="table-responsive">
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
-                  <thead style={{ backgroundColor: '#f8fafc' }}>
+                  <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
                       <th className="py-12">#</th>
                       <th>Empresa</th>
@@ -2055,7 +2055,7 @@ const AdminGestao = () => {
               {/* TABELA DE DOCUMENTOS */}
               <div className="table-responsive">
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
-                  <thead style={{ backgroundColor: '#f8fafc' }}>
+                  <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
                       <th className="py-12">Ficheiro</th>
                       <th>Empresa</th>
@@ -2147,7 +2147,7 @@ const AdminGestao = () => {
               <div className="d-flex flex-wrap justify-content-between align-items-center">
                 <div>
                   <h4 style={{ fontWeight: 700, margin: 0, color: '#272b41', display: 'flex', alignItems: 'center' }}>
-                    <i className="la la-sliders-h mr-2" style={{ color: '#5f63f2', fontSize: 24 }}></i>
+                    <i className="la la-sliders-h mr-2" style={{ color: '#2563eb', fontSize: 24 }}></i>
                     {t('admin.config.title', 'Configurações Gerais do Sistema')}
                   </h4>
                   <p className="text-muted mb-0 mt-1" style={{ fontSize: 13 }}>
@@ -2169,8 +2169,8 @@ const AdminGestao = () => {
                     disabled={salvandoConfig}
                     style={{
                       borderRadius: 6,
-                      backgroundColor: '#5f63f2',
-                      borderColor: '#5f63f2',
+                      backgroundColor: '#2563eb',
+                      borderColor: '#2563eb',
                       fontWeight: 600,
                       padding: '8px 18px',
                     }}
@@ -2189,7 +2189,7 @@ const AdminGestao = () => {
               <div className="card card-default h-100" style={{ borderRadius: 10 }}>
                 <div className="card-header" style={{ padding: '16px 20px', borderBottom: '1px solid #f1f2f6' }}>
                   <h6 style={{ margin: 0, fontWeight: 700, color: '#272b41', display: 'flex', alignItems: 'center' }}>
-                    <i className="la la-laptop-code mr-2" style={{ color: '#5f63f2', fontSize: 20 }}></i>
+                    <i className="la la-laptop-code mr-2" style={{ color: '#2563eb', fontSize: 20 }}></i>
                     {t('admin.config.platformCardTitle', 'Identidade da Plataforma & Operação')}
                   </h6>
                 </div>
@@ -2472,7 +2472,7 @@ const AdminGestao = () => {
               <div className="card card-default h-100" style={{ borderRadius: 10 }}>
                 <div className="card-header" style={{ padding: '16px 20px', borderBottom: '1px solid #f1f2f6' }}>
                   <h6 style={{ margin: 0, fontWeight: 700, color: '#272b41', display: 'flex', alignItems: 'center' }}>
-                    <i className="la la-user-shield mr-2" style={{ color: '#5f63f2', fontSize: 20 }}></i>
+                    <i className="la la-user-shield mr-2" style={{ color: '#2563eb', fontSize: 20 }}></i>
                     {t('admin.config.adminProfileTitle', 'Sessão do Administrador Ativo')}
                   </h6>
                 </div>
@@ -2484,7 +2484,7 @@ const AdminGestao = () => {
                         height: 56,
                         borderRadius: '50%',
                         backgroundColor: '#eff0f6',
-                        color: '#5f63f2',
+                        color: '#2563eb',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -2507,7 +2507,7 @@ const AdminGestao = () => {
                           className="badge"
                           style={{
                             backgroundColor: '#eff2f7',
-                            color: '#5f63f2',
+                            color: '#2563eb',
                             fontSize: 11,
                             fontWeight: 700,
                             padding: '3px 8px',
@@ -2556,8 +2556,8 @@ const AdminGestao = () => {
                 disabled={salvandoConfig}
                 style={{
                   borderRadius: 6,
-                  backgroundColor: '#5f63f2',
-                  borderColor: '#5f63f2',
+                  backgroundColor: '#2563eb',
+                  borderColor: '#2563eb',
                   fontWeight: 600,
                   padding: '10px 24px',
                 }}
@@ -2892,7 +2892,7 @@ const AdminGestao = () => {
                     type="submit"
                     className="btn btn-primary btn-sm"
                     disabled={salvandoEmpresa}
-                    style={{ backgroundColor: '#5f63f2', borderColor: '#5f63f2', fontWeight: 600 }}
+                    style={{ backgroundColor: '#2563eb', borderColor: '#2563eb', fontWeight: 600 }}
                   >
                     {salvandoEmpresa ? 'A guardar...' : empresaEmEdicao ? 'Guardar Alterações' : 'Criar Empresa'}
                   </button>
@@ -3035,7 +3035,7 @@ const AdminGestao = () => {
                     </label>
                     <div
                       className="border rounded p-10"
-                      style={{ maxHeight: 150, overflowY: 'auto', backgroundColor: '#f8fafc' }}
+                      style={{ maxHeight: 150, overflowY: 'auto', backgroundColor: '#ffffff' }}
                     >
                       {empresasLista.map((emp) => {
                         const checked = formUser.empresas_ids.includes(emp.id);
@@ -3084,7 +3084,7 @@ const AdminGestao = () => {
                     type="submit"
                     className="btn btn-primary btn-sm"
                     disabled={salvandoUser}
-                    style={{ backgroundColor: '#5f63f2', borderColor: '#5f63f2', fontWeight: 600 }}
+                    style={{ backgroundColor: '#2563eb', borderColor: '#2563eb', fontWeight: 600 }}
                   >
                     {salvandoUser
                       ? t('admin.users.saving', 'A guardar...')
@@ -3196,7 +3196,7 @@ const AdminGestao = () => {
                     type="submit"
                     className="btn btn-primary btn-sm"
                     disabled={executandoEngine}
-                    style={{ backgroundColor: '#5f63f2', borderColor: '#5f63f2', fontWeight: 600 }}
+                    style={{ backgroundColor: '#2563eb', borderColor: '#2563eb', fontWeight: 600 }}
                   >
                     {executandoEngine ? 'A executar motores...' : 'Iniciar Auditoria'}
                   </button>

@@ -256,27 +256,27 @@ const LoginPage = ({ onLogin }) => {
 
                           {/* Links Oficiais: Sobre Nós e Suporte Técnico */}
                           <div className="pt-20 mt-25 border-top text-center">
-                            <div className="d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                            <div className="d-flex justify-content-center align-items-center flex-wrap" style={{ gap: 10 }}>
                               <a
                                 href="/sobre"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn btn-outline-light text-dark fw-600 fs-13 px-3 py-2 rounded-pill shadow-xs d-inline-flex align-items-center"
-                                style={{ border: '1px solid #e2e8f0', background: '#f8fafc', transition: 'all 0.2s' }}
+                                className="btn btn-outline-primary fw-600 fs-13 px-3 py-2 rounded-pill d-inline-flex align-items-center"
+                                style={{ background: '#ffffff', transition: 'all 0.2s' }}
                                 title="Conheça a história e estrutura da SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA"
                               >
-                                <i className="la la-building mr-1 text-primary fs-16"></i>
+                                <i className="la la-building mr-1 fs-16"></i>
                                 {t('login.aboutUs', 'Sobre a SCKJ')}
                               </a>
                               <a
                                 href="/sobre#suporte"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn btn-outline-light text-dark fw-600 fs-13 px-3 py-2 rounded-pill shadow-xs d-inline-flex align-items-center"
-                                style={{ border: '1px solid #e2e8f0', background: '#f8fafc', transition: 'all 0.2s' }}
+                                className="btn btn-outline-primary fw-600 fs-13 px-3 py-2 rounded-pill d-inline-flex align-items-center"
+                                style={{ background: '#ffffff', transition: 'all 0.2s' }}
                                 title="Canais Oficiais de Suporte Técnico e Atendimento"
                               >
-                                <i className="la la-headset mr-1 text-success fs-16"></i>
+                                <i className="la la-headset mr-1 fs-16"></i>
                                 {t('login.techSupport', 'Suporte Técnico')}
                               </a>
                             </div>

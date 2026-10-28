@@ -18,14 +18,14 @@ const MESES = [
 ];
 
 const boxNeutro = {
-  backgroundColor: '#f8f9fb',
-  border: '1px solid #eef0f3',
+  backgroundColor: '#ffffff',
+  border: '1px solid #e2e8f0',
   borderRadius: 8,
 };
 
 const boxBranco = {
   backgroundColor: '#ffffff',
-  border: '1px solid #eef0f3',
+  border: '1px solid #e2e8f0',
   borderRadius: 8,
 };
 
@@ -182,7 +182,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
                 Fórmula Legal Obrigatória: <strong>Apuramento = IVA Liquidado (Vendas) − IVA Dedutível (Compras)</strong>
               </span>
             </div>
-            <span className="badge" style={{ fontSize: 10.5, fontWeight: 600, background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0' }}>
+            <span className="badge" style={{ fontSize: 10.5, fontWeight: 600, background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe' }}>
               Art. 19.º CIVA
             </span>
           </div>
@@ -197,7 +197,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
               </div>
               <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 16px', background: '#ffffff' }}>
                 {/* Incidência Vendas */}
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', marginBottom: '10px' }}>
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', marginBottom: '10px' }}>
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <span className="fw-700 text-uppercase" style={{ fontSize: 10, color: '#334155' }}>Incidência (Base de Vendas)</span>
                     <span className="badge" style={{ fontSize: 9, background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }}>Conta 61 vs C.1</span>
@@ -211,7 +211,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
                 </span>
                 <span className="text-muted d-block" style={{ fontSize: 11, marginBottom: '3px' }}>Contabilidade (Conta 34.5.3): <strong>{analiseIAEstruturada.apuramentoIva.liquidado.contabilidade}</strong></span>
                 <span className="text-muted d-block" style={{ fontSize: 11 }}>Modelo 7 (Campo 21/33): <strong>{analiseIAEstruturada.apuramentoIva.liquidado.agt}</strong></span>
-                <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', fontSize: 10.5, fontWeight: 700, color: analiseIAEstruturada.apuramentoIva.liquidado.status === 'IGUAIS' ? '#16a34a' : '#dc2626' }}>
+                <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #e2e8f0', fontSize: 10.5, fontWeight: 700, color: analiseIAEstruturada.apuramentoIva.liquidado.status === 'IGUAIS' ? '#16a34a' : '#dc2626' }}>
                   Dif: {analiseIAEstruturada.apuramentoIva.liquidado.diferenca || '0,00 Kz'}
                 </div>
               </div>
@@ -226,7 +226,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
               </div>
               <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 16px', background: '#ffffff' }}>
                 {/* Incidência Compras */}
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', marginBottom: '10px' }}>
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', marginBottom: '10px' }}>
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <span className="fw-700 text-uppercase" style={{ fontSize: 10, color: '#334155' }}>Incidência (Compras e FSE)</span>
                     <span className="badge" style={{ fontSize: 9, background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }}>Conta 21 vs C.22</span>
@@ -240,7 +240,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
                 </span>
                 <span className="text-muted d-block" style={{ fontSize: 11, marginBottom: '3px' }}>Contabilidade (Conta 34.5.1/34.5.2): <strong>{analiseIAEstruturada.apuramentoIva.dedutivel.contabilidade}</strong></span>
                 <span className="text-muted d-block" style={{ fontSize: 11 }}>Modelo 7 (Campo 22/32): <strong>{analiseIAEstruturada.apuramentoIva.dedutivel.agt}</strong></span>
-                <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', fontSize: 10.5, fontWeight: 700, color: analiseIAEstruturada.apuramentoIva.dedutivel.status === 'IGUAIS' ? '#16a34a' : '#dc2626' }}>
+                <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #e2e8f0', fontSize: 10.5, fontWeight: 700, color: analiseIAEstruturada.apuramentoIva.dedutivel.status === 'IGUAIS' ? '#16a34a' : '#dc2626' }}>
                   Dif: {analiseIAEstruturada.apuramentoIva.dedutivel.diferenca || '0,00 Kz'}
                 </div>
               </div>
@@ -262,7 +262,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
               <div
                 style={{
                   border: '1px solid #e2e8f0',
-                  borderTop: `4px solid ${analiseIAEstruturada.apuramentoIva.isRecuperar ? '#10b981' : analiseIAEstruturada.apuramentoIva.isReembolso ? '#3b82f6' : '#ef4444'}`,
+                  borderTop: `4px solid ${analiseIAEstruturada.apuramentoIva.isRecuperar ? '#10b981' : analiseIAEstruturada.apuramentoIva.isReembolso ? '#2563eb' : '#ef4444'}`,
                   borderRadius: '8px',
                   padding: '14px 16px',
                   background: '#ffffff'
@@ -278,13 +278,13 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
                   >
                     {analiseIAEstruturada.apuramentoIva.tituloCard3 || '(=) 3. APURAMENTO'}
                   </span>
-                  <span className="badge" style={{ fontSize: 9.5, background: analiseIAEstruturada.apuramentoIva.isRecuperar ? '#ecfdf5' : '#fef2f2', color: analiseIAEstruturada.apuramentoIva.isRecuperar ? '#047857' : '#b91c1c', border: `1px solid ${analiseIAEstruturada.apuramentoIva.isRecuperar ? '#a7f3d0' : '#fecaca'}` }}>
+                  <span className="badge" style={{ fontSize: 9.5, background: '#ffffff', color: analiseIAEstruturada.apuramentoIva.isRecuperar ? '#047857' : '#b91c1c', border: `1px solid ${analiseIAEstruturada.apuramentoIva.isRecuperar ? '#a7f3d0' : '#fecaca'}` }}>
                     {analiseIAEstruturada.apuramentoIva.isRecuperar ? 'a recuperar' : 'a pagar'}
                   </span>
                 </div>
 
                 {/* Bloco 1 Contab */}
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 8px', marginBottom: '6px' }}>
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 8px', marginBottom: '6px' }}>
                   <span style={{ fontSize: 10, color: '#64748b', display: 'block' }}>1. Contab ({analiseIAEstruturada.apuramentoIva.apuramentoContabilidade?.conta || 'Conta 34.5'}):</span>
                   <strong style={{ fontSize: 13, color: analiseIAEstruturada.apuramentoIva.isRecuperar ? '#047857' : '#b91c1c' }}>
                     {analiseIAEstruturada.apuramentoIva.apuramentoContabilidade?.saldo || analiseIAEstruturada.apuramentoIva.resultadoPrincipal?.contabilidade}
@@ -292,7 +292,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
                 </div>
 
                 {/* Bloco 2 AGT */}
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 8px', marginBottom: '8px' }}>
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 8px', marginBottom: '8px' }}>
                   <span style={{ fontSize: 10, color: '#64748b', display: 'block' }}>2. Modelo 7 ({analiseIAEstruturada.apuramentoIva.apuramentoAgt?.campo || 'Quadro 10'}):</span>
                   <strong style={{ fontSize: 13, color: analiseIAEstruturada.apuramentoIva.isRecuperar ? '#047857' : '#b91c1c' }}>
                     {analiseIAEstruturada.apuramentoIva.apuramentoAgt?.saldoPeriodo || analiseIAEstruturada.apuramentoIva.resultadoPrincipal?.agt}
@@ -349,7 +349,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
 
         <div className="table-responsive">
           <table className="table table-bordered mb-0" style={{ fontSize: 12.5 }}>
-            <thead style={{ backgroundColor: '#f4f5f7' }}>
+            <thead style={{ backgroundColor: '#ffffff' }}>
               <tr>
                 <th style={{ width: '32%' }}>{t('officialReport.thAuditPoint', 'Ponto Confrontado')}</th>
                 <th style={{ width: '24%' }}>{t('officialReport.thAccounting', 'Contabilidade (Balancete)')}</th>
@@ -477,8 +477,8 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
               <div
                 className="p-15 mb-15"
                 style={{
-                  backgroundColor: '#f6fbf9',
-                  border: '1px solid #c8eedf',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #a7f3d0',
                   borderRadius: 8,
                 }}
               >
@@ -495,7 +495,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
             )}
 
             {analiseIAEstruturada?.pontosIguais && analiseIAEstruturada.pontosIguais.length > 0 && (
-              <div className="p-12" style={{ backgroundColor: '#f6fbf9', border: '1px solid #c8eedf', borderRadius: 8 }}>
+              <div className="p-12" style={{ backgroundColor: '#ffffff', border: '1px solid #a7f3d0', borderRadius: 8 }}>
                 <strong className="color-success fs-12 d-block mb-5">
                   {t('officialReport.compliantPoints', '✓ Pontos em Plena Conformidade (Sem Risco de Autuação):')}
                 </strong>
@@ -527,7 +527,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
                         width: 22,
                         height: 22,
                         borderRadius: '50%',
-                        backgroundColor: '#5f63f2',
+                        backgroundColor: '#2563eb',
                         color: '#fff',
                         display: 'flex',
                         alignItems: 'center',
@@ -554,7 +554,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
           </div>
 
           {analiseIAEstruturada.resultadoEsperado && analiseIAEstruturada.resultadoEsperado.length > 0 && (
-            <div className="p-10 mt-10" style={{ backgroundColor: '#f0fbf7', border: '1px solid #b7f4db', borderRadius: 8 }}>
+            <div className="p-10 mt-10" style={{ backgroundColor: '#ffffff', border: '1px solid #a7f3d0', borderRadius: 8 }}>
               <strong className="color-success fs-12 d-block mb-3">
                 {t('officialReport.expectedResult', '✓ Resultado Esperado da Regularização:')}
               </strong>

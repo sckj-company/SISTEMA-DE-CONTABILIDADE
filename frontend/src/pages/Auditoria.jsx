@@ -240,7 +240,7 @@ const Auditoria = () => {
             >
               <div
                 className="progress-bar progress-bar-striped progress-bar-animated"
-                style={{ width: '100%', background: '#5f63f2' }}
+                style={{ width: '100%', background: '#2563eb' }}
               ></div>
             </div>
           </div>

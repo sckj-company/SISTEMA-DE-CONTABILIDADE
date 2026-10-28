@@ -78,8 +78,9 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
           <span
             className="badge badge-round d-none d-md-inline-block ml-15"
             style={{
-              backgroundColor: 'rgba(95, 99, 242, 0.1)',
-              color: '#5f63f2',
+              backgroundColor: '#ffffff',
+              border: '1px solid #bfdbfe',
+              color: '#2563eb',
               fontSize: 11,
               fontWeight: 700,
               padding: '4px 10px',
@@ -98,8 +99,8 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                 className="btn-empresa-header btn btn-sm d-flex align-items-center"
                 onClick={() => setOpenMenu(openMenu === 'empresa' ? null : 'empresa')}
                 style={{
-                  background: empresaAtual ? '#f0f4ff' : '#f8f9fb',
-                  border: '1px solid ' + (empresaAtual ? '#c7d2fe' : '#e2e8f0'),
+                  background: '#ffffff',
+                  border: '1px solid ' + (empresaAtual ? '#bfdbfe' : '#e2e8f0'),
                   borderRadius: 20,
                   padding: '5px 14px',
                   minHeight: 42,
@@ -118,7 +119,7 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                     minWidth: 26,
                     minHeight: 26,
                     borderRadius: '50%',
-                    background: empresaAtual ? '#4338ca' : '#94a3b8',
+                    background: empresaAtual ? '#2563eb' : '#94a3b8',
                     color: '#fff',
                     display: 'flex',
                     alignItems: 'center',
@@ -132,7 +133,7 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                 <div className="d-flex flex-column text-left" style={{ lineHeight: 1.25 }}>
                   <span
                     className="fw-700 text-truncate"
-                    style={{ fontSize: 12, maxWidth: 280, color: empresaAtual ? '#1e1b4b' : '#64748b', display: 'block' }}
+                    style={{ fontSize: 12, maxWidth: 280, color: empresaAtual ? '#0f172a' : '#64748b', display: 'block' }}
                   >
                     {empresaAtual ? empresaAtual.nome : (empresas.length > 0 ? `${empresas.length} Empresas` : 'Sem Empresa')}
                   </span>
@@ -187,12 +188,12 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                         <button
                           key={emp.id}
                           type="button"
-                          className="w-100 text-left btn btn-sm d-flex align-items-center justify-content-between py-8 px-10 mb-4"
+                          className="w-100 text-left btn btn-outline-primary btn-sm d-flex align-items-center justify-content-between py-8 px-10 mb-6"
                           onClick={() => handleSelecionarEmpresa(emp.id)}
                           style={{
-                            backgroundColor: '#f8f9fb',
-                            border: '1px solid #edf0f5',
-                            borderRadius: 6,
+                            backgroundColor: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: 8,
                           }}
                         >
                           <div className="d-flex align-items-center text-truncate mr-10">

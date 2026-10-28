@@ -8,7 +8,7 @@ import { analiseService } from '../../services/api';
  * Utiliza 100% a identidade visual nativa da aplicação:
  * - Cartões padrão: `card card-default`, bordas `#f1f2f6`.
  * - Cores e tipografia: `#272b41` (títulos), `#5a5f7d` (texto), `#8c90a4` (labels).
- * - Destaques: Primária `#5f63f2`, Sucesso `#20c997`, Alerta `#fa8b0c`, Erro `#ff4d4f`.
+ * - Destaques: Primária `#2563eb`, Sucesso `#20c997`, Alerta `#fa8b0c`, Erro `#ff4d4f`.
  * - Sem asteriscos de markdown, com texto formatado e tabelas no padrão do sistema.
  */
 
@@ -16,7 +16,7 @@ const BADGE_ESTADOS = {
   OK: { bg: '#f0fdf9', cor: '#20c997', label: 'CONFORME' },
   ALERTA: { bg: '#fff7e6', cor: '#fa8b0c', label: 'ALERTA' },
   FALHA: { bg: '#fff1f0', cor: '#ff4d4f', label: 'FALHA' },
-  INFO: { bg: '#f8f9fb', cor: '#5a5f7d', label: 'NOTA' },
+  INFO: { bg: '#ffffff', cor: '#5a5f7d', label: 'NOTA' },
 };
 
 // Formata texto inline substituindo **texto** por <strong> e limpando asteriscos
@@ -104,7 +104,7 @@ const DocumentoOficial = ({ texto, empresaNome, nif, periodo, regime }) => {
               style={{
                 width: 4,
                 height: 14,
-                background: '#5f63f2',
+                background: '#2563eb',
                 borderRadius: 2,
                 display: 'inline-block',
               }}
@@ -141,7 +141,7 @@ const DocumentoOficial = ({ texto, empresaNome, nif, periodo, regime }) => {
         elementos.push(
           <div key={`table-${i}`} className="table-responsive my-15" style={{ borderRadius: 6, border: '1px solid #f1f2f6' }}>
             <table className="table table-bordered mb-0" style={{ fontSize: 12.5, background: '#fff' }}>
-              <thead style={{ background: '#f8f9fb' }}>
+              <thead style={{ background: '#ffffff' }}>
                 <tr>
                   {headers.map((h, hIdx) => (
                     <th
@@ -253,8 +253,8 @@ const DocumentoOficial = ({ texto, empresaNome, nif, periodo, regime }) => {
         <div className="d-flex align-items-center" style={{ gap: 8 }}>
           <span
             style={{
-              background: '#f4f5fb',
-              color: '#5f63f2',
+              background: '#ffffff',
+              color: '#2563eb',
               padding: '4px 10px',
               borderRadius: 4,
               fontSize: 12,
@@ -423,8 +423,8 @@ const ParecerTecnicoIA = ({ parecerData, rastoData, aCarregar, onReanalisar, emp
               width: 34,
               height: 34,
               borderRadius: 6,
-              background: '#f4f5fb',
-              color: '#5f63f2',
+              background: '#ffffff',
+              color: '#2563eb',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -447,8 +447,8 @@ const ParecerTecnicoIA = ({ parecerData, rastoData, aCarregar, onReanalisar, emp
           <span
             className="badge"
             style={{
-              background: origem === 'IA' ? '#f4f5fb' : '#f8f9fb',
-              color: origem === 'IA' ? '#5f63f2' : '#5a5f7d',
+              background: origem === 'IA' ? '#ffffff' : '#ffffff',
+              color: origem === 'IA' ? '#2563eb' : '#5a5f7d',
               padding: '6px 12px',
               fontSize: 11,
               fontWeight: 600,
@@ -551,8 +551,8 @@ const ParecerTecnicoIA = ({ parecerData, rastoData, aCarregar, onReanalisar, emp
             padding: '12px 16px',
             fontSize: 13,
             fontWeight: abaAtiva === 'parecer' ? 700 : 500,
-            color: abaAtiva === 'parecer' ? '#5f63f2' : '#8c90a4',
-            borderBottom: abaAtiva === 'parecer' ? '2px solid #5f63f2' : '2px solid transparent',
+            color: abaAtiva === 'parecer' ? '#2563eb' : '#8c90a4',
+            borderBottom: abaAtiva === 'parecer' ? '2px solid #2563eb' : '2px solid transparent',
             borderRadius: 0,
             textDecoration: 'none',
           }}
@@ -568,8 +568,8 @@ const ParecerTecnicoIA = ({ parecerData, rastoData, aCarregar, onReanalisar, emp
             padding: '12px 16px',
             fontSize: 13,
             fontWeight: abaAtiva === 'riscos' ? 700 : 500,
-            color: abaAtiva === 'riscos' ? '#5f63f2' : '#8c90a4',
-            borderBottom: abaAtiva === 'riscos' ? '2px solid #5f63f2' : '2px solid transparent',
+            color: abaAtiva === 'riscos' ? '#2563eb' : '#8c90a4',
+            borderBottom: abaAtiva === 'riscos' ? '2px solid #2563eb' : '2px solid transparent',
             borderRadius: 0,
             textDecoration: 'none',
           }}
@@ -585,8 +585,8 @@ const ParecerTecnicoIA = ({ parecerData, rastoData, aCarregar, onReanalisar, emp
             padding: '12px 16px',
             fontSize: 13,
             fontWeight: abaAtiva === 'rasto' ? 700 : 500,
-            color: abaAtiva === 'rasto' ? '#5f63f2' : '#8c90a4',
-            borderBottom: abaAtiva === 'rasto' ? '2px solid #5f63f2' : '2px solid transparent',
+            color: abaAtiva === 'rasto' ? '#2563eb' : '#8c90a4',
+            borderBottom: abaAtiva === 'rasto' ? '2px solid #2563eb' : '2px solid transparent',
             borderRadius: 0,
             textDecoration: 'none',
           }}
@@ -673,12 +673,12 @@ const ParecerTecnicoIA = ({ parecerData, rastoData, aCarregar, onReanalisar, emp
               <div className="col-md-4">
                 <div
                   style={{
-                    background: '#f4f5fb',
+                    background: '#ffffff',
                     borderRadius: 8,
                     padding: '14px 16px',
                   }}
                 >
-                  <div style={{ fontWeight: 700, color: '#5f63f2', fontSize: 13, marginBottom: 4 }}>
+                  <div style={{ fontWeight: 700, color: '#2563eb', fontSize: 13, marginBottom: 4 }}>
                     <i className="la la-shield-alt mr-1"></i> Perda do Direito à Dedução
                   </div>
                   <div style={{ fontSize: 12, color: '#272b41', lineHeight: 1.5 }}>
@@ -756,7 +756,7 @@ const ParecerTecnicoIA = ({ parecerData, rastoData, aCarregar, onReanalisar, emp
             {/* Tabela de Passos */}
             <div className="table-responsive">
               <table className="table table-sm table-hover mb-0" style={{ fontSize: 12.5 }}>
-                <thead style={{ background: '#f8f9fb' }}>
+                <thead style={{ background: '#ffffff' }}>
                   <tr>
                     <th style={{ width: 110 }}>Fase</th>
                     <th style={{ width: 110 }}>Código</th>
@@ -781,8 +781,8 @@ const ParecerTecnicoIA = ({ parecerData, rastoData, aCarregar, onReanalisar, emp
                           <td>
                             <span
                               style={{
-                                background: '#f4f5fb',
-                                color: '#5f63f2',
+                                background: '#ffffff',
+                                color: '#2563eb',
                                 padding: '2px 8px',
                                 borderRadius: 4,
                                 fontSize: 11,

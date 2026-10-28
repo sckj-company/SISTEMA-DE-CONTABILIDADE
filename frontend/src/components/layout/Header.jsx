@@ -93,8 +93,8 @@ const Header = ({ onToggleSidebar }) => {
                         }
                       }}
                       style={{
-                        background: empresaExibida ? '#f0f4ff' : '#f8f9fb',
-                        border: '1px solid ' + (empresaExibida ? '#c7d2fe' : '#e2e8f0'),
+                        background: '#ffffff',
+                        border: '1px solid ' + (empresaExibida ? '#bfdbfe' : '#e2e8f0'),
                         borderRadius: 20,
                         padding: '5px 14px',
                         minHeight: 42,
@@ -113,7 +113,7 @@ const Header = ({ onToggleSidebar }) => {
                           minWidth: 26,
                           minHeight: 26,
                           borderRadius: '50%',
-                          background: empresaExibida ? '#4338ca' : '#94a3b8',
+                          background: empresaExibida ? '#2563eb' : '#94a3b8',
                           color: '#fff',
                           display: 'flex',
                           alignItems: 'center',
@@ -127,7 +127,7 @@ const Header = ({ onToggleSidebar }) => {
                       <div className="d-flex flex-column text-left" style={{ lineHeight: 1.25 }}>
                         <span
                           className="fw-700 text-truncate"
-                          style={{ fontSize: 12, maxWidth: 300, color: empresaExibida ? '#1e1b4b' : '#64748b', display: 'block' }}
+                          style={{ fontSize: 12, maxWidth: 300, color: empresaExibida ? '#0f172a' : '#64748b', display: 'block' }}
                         >
                           {empresaExibida ? empresaExibida.nome : 'Sem Empresa Ativa'}
                         </span>
@@ -273,7 +273,7 @@ const Header = ({ onToggleSidebar }) => {
                     </div>
                     <div>
                       <h6>{user.username || user.nome || 'Utilizador'}</h6>
-                      <span className="badge badge-light px-6 py-2" style={{ fontSize: 11, fontWeight: 600, color: '#4338ca' }}>
+                      <span className="badge px-6 py-2" style={{ fontSize: 11, fontWeight: 700, background: '#ffffff', border: '1px solid #bfdbfe', color: '#2563eb' }}>
                         {user.papel || user.perfil || (isAdmin ? 'Administrador' : 'Contabilista')}
                       </span>
                     </div>
@@ -288,9 +288,9 @@ const Header = ({ onToggleSidebar }) => {
                               e.preventDefault();
                               navigate('/admin-gestao');
                             }}
-                            style={{ color: '#5f63f2', fontWeight: 600 }}
+                            style={{ color: '#2563eb', fontWeight: 700 }}
                           >
-                            <i className="la la-shield-alt" style={{ color: '#5f63f2' }}></i>{' '}
+                            <i className="la la-shield-alt" style={{ color: '#2563eb' }}></i>{' '}
                             {t('navigation.admin', 'Administração Global')}
                           </a>
                         </li>

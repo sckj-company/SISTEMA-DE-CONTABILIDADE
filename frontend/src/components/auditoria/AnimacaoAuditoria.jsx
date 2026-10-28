@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
  *
  * Utiliza rigorosamente a identidade visual do sistema:
  * - Cards brancos padrão (`card card-default`), bordas `#f1f2f6`.
- * - Cores canónicas: Primária `#5f63f2`, Sucesso `#20c997`, Alerta `#fa8b0c`, Erro `#ff4d4f`.
+ * - Cores canónicas: Primária `#2563eb`, Sucesso `#20c997`, Alerta `#fa8b0c`, Erro `#ff4d4f`.
  * - Tipografia e espaçamentos idênticos aos cartões de Números e Prazos.
  */
 
@@ -128,8 +128,8 @@ const AnimacaoAuditoria = ({ emExecucao, progressoPassos, empresaNome, periodo, 
               width: 34,
               height: 34,
               borderRadius: 6,
-              background: '#f4f5fb',
-              color: '#5f63f2',
+              background: '#ffffff',
+              color: '#2563eb',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -166,7 +166,7 @@ const AnimacaoAuditoria = ({ emExecucao, progressoPassos, empresaNome, periodo, 
             style={{
               fontSize: 15,
               fontWeight: 800,
-              color: '#5f63f2',
+              color: '#2563eb',
               minWidth: 42,
               textAlign: 'right',
             }}
@@ -182,7 +182,7 @@ const AnimacaoAuditoria = ({ emExecucao, progressoPassos, empresaNome, periodo, 
           style={{
             width: `${progresso}%`,
             height: '100%',
-            background: progresso === 100 ? '#20c997' : '#5f63f2',
+            background: progresso === 100 ? '#20c997' : '#2563eb',
             transition: 'width 0.25s ease-in-out',
           }}
         ></div>
@@ -210,9 +210,9 @@ const AnimacaoAuditoria = ({ emExecucao, progressoPassos, empresaNome, periodo, 
                     style={{
                       padding: '8px 12px',
                       borderRadius: 6,
-                      background: estaAtiva ? '#f4f5fb' : estaConcluida ? '#f0fdf9' : '#fafbfe',
+                      background: estaAtiva ? '#ffffff' : estaConcluida ? '#f0fdf9' : '#fafbfe',
                       border: estaAtiva
-                        ? '1px solid #5f63f2'
+                        ? '1px solid #2563eb'
                         : estaConcluida
                         ? '1px solid rgba(32, 201, 151, 0.3)'
                         : '1px solid #f1f2f6',
@@ -234,7 +234,7 @@ const AnimacaoAuditoria = ({ emExecucao, progressoPassos, empresaNome, periodo, 
                         background: estaConcluida
                           ? '#20c997'
                           : estaAtiva
-                          ? '#5f63f2'
+                          ? '#2563eb'
                           : '#eef0f3',
                         color: estaConcluida || estaAtiva ? '#fff' : '#8c90a4',
                         fontWeight: 700,
@@ -254,7 +254,7 @@ const AnimacaoAuditoria = ({ emExecucao, progressoPassos, empresaNome, periodo, 
                         style={{
                           fontSize: 13,
                           fontWeight: 600,
-                          color: estaAtiva ? '#5f63f2' : estaConcluida ? '#272b41' : '#8c90a4',
+                          color: estaAtiva ? '#2563eb' : estaConcluida ? '#272b41' : '#8c90a4',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -292,7 +292,7 @@ const AnimacaoAuditoria = ({ emExecucao, progressoPassos, empresaNome, periodo, 
             <div
               ref={terminalRef}
               style={{
-                background: '#f8f9fb',
+                background: '#ffffff',
                 borderRadius: 6,
                 border: '1px solid #eef0f3',
                 padding: '12px 14px',
@@ -334,7 +334,7 @@ const AnimacaoAuditoria = ({ emExecucao, progressoPassos, empresaNome, periodo, 
               })}
 
               {progresso < 100 && (
-                <div style={{ color: '#5f63f2', display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: 11.5 }}>
+                <div style={{ color: '#2563eb', display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: 11.5 }}>
                   <i className="la la-spinner la-spin"></i>
                   <span>A cruzar contas e validar parâmetros fiscais...</span>
                 </div>

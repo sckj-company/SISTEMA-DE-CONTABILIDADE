@@ -107,60 +107,16 @@ const PgcView = () => {
     <>
       <style>
         {`
-        .step-pill {
-          padding: 8px 16px;
-          border-radius: 8px;
-          background: #f4f6f9;
-          font-weight: 700;
-          font-size: 12.5px;
-          color: #495057;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          cursor: pointer;
-          border: 1px solid transparent;
-          transition: all 0.2s ease;
-        }
-        .step-pill:hover {
-          background: #eaedf2;
-          color: #1a3353;
-        }
-        .step-pill.active {
-          background: #e8ebfc;
-          color: #1a3353;
-          border: 1px solid #c2c9f5;
-        }
         .confronto-kpi-card {
-          border: 1px solid #edf0f5;
-          border-radius: 10px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
           background: #ffffff;
           padding: 18px 20px;
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .confronto-kpi-card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0,0,0,0.06);
-        }
-        .class-filter-btn {
-          border: 1px solid #e2e8f0;
-          background: #ffffff;
-          padding: 6px 14px;
-          border-radius: 8px;
-          font-size: 12px;
-          font-weight: 700;
-          color: #475569;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-        .class-filter-btn:hover {
-          background: #f8faff;
-          border-color: #5f63f2;
-          color: #5f63f2;
-        }
-        .class-filter-btn.active {
-          background: #5f63f2;
-          color: #ffffff;
-          border-color: #5f63f2;
+          box-shadow: 0 6px 16px rgba(37, 99, 235, 0.06);
         }
         `}
       </style>
@@ -193,7 +149,7 @@ const PgcView = () => {
                 className="btn btn-sm btn-primary"
                 onClick={baixarPgcExcel}
                 disabled={baixandoExcelPgc}
-                style={{ fontWeight: 700, fontSize: 13, backgroundColor: '#5f63f2', borderColor: '#5f63f2' }}
+                style={{ fontWeight: 700, fontSize: 13, backgroundColor: '#2563eb', borderColor: '#2563eb' }}
               >
                 <i className={`la ${baixandoExcelPgc ? 'la-spinner la-spin' : 'la-file-excel'} mr-4`}></i>
                 {baixandoExcelPgc ? 'A gerar...' : 'Baixar PGC Completo em Excel (.xlsx)'}
@@ -214,7 +170,7 @@ const PgcView = () => {
                   height: 40,
                   borderRadius: 8,
                   backgroundColor: '#eef2ff',
-                  color: '#5f63f2',
+                  color: '#2563eb',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -237,7 +193,7 @@ const PgcView = () => {
               <span className="badge badge-light border p-2" style={{ fontSize: 12, fontWeight: 700, color: '#1a3353' }}>
                 <i className="la la-check-circle text-success mr-1"></i> 8 Classes Normalizadas
               </span>
-              <span className="badge badge-light border p-2" style={{ fontSize: 12, fontWeight: 700, color: '#5f63f2' }}>
+              <span className="badge badge-light border p-2" style={{ fontSize: 12, fontWeight: 700, color: '#2563eb' }}>
                 <i className="la la-calculator mr-1"></i> SAF-T Angola
               </span>
             </div>
@@ -248,7 +204,7 @@ const PgcView = () => {
       {/* 4 CARDS KPIS NO FORMATO DO CONFRONTO */}
       <div className="row mb-20" style={{ rowGap: 12 }}>
         <div className="col-12 col-sm-6 col-lg-3">
-          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #5f63f2' }}>
+          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Catálogo de Contas
             </span>
@@ -385,7 +341,7 @@ const PgcView = () => {
             <div className="card-body p-0">
               <div className="table-responsive">
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
-                  <thead style={{ backgroundColor: '#f8fafc' }}>
+                  <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
                       <th style={{ width: 110, padding: '12px 18px', fontWeight: 700, color: '#495057' }}>Código</th>
                       <th style={{ width: 280, padding: '12px 18px', fontWeight: 700, color: '#495057' }}>Designação Oficial</th>
@@ -431,8 +387,9 @@ const PgcView = () => {
                                   fontWeight: 700,
                                   fontFamily: 'monospace',
                                   fontSize: 13,
-                                  backgroundColor: isEstado ? '#eef2ff' : '#f1f5f9',
-                                  color: isEstado ? '#5f63f2' : '#1e293b',
+                                  backgroundColor: '#ffffff',
+                                  border: isEstado ? '1px solid #bfdbfe' : '1px solid #cbd5e1',
+                                  color: isEstado ? '#2563eb' : '#1e293b',
                                 }}
                               >
                                 {c.codigo}
@@ -581,7 +538,7 @@ const PgcView = () => {
               {tipoDemonstracao === 'balanco' ? (
                 <div className="row">
                   <div className="col-md-6 mb-20 mb-md-0">
-                    <div className="p-16 rounded" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                    <div className="p-16 rounded" style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}>
                       <h6 className="fw-700 text-primary mb-12">
                         <i className="la la-plus-circle mr-1"></i> ATIVO (Recursos e Direitos)
                       </h6>
@@ -594,7 +551,7 @@ const PgcView = () => {
                     </div>
                   </div>
                   <div className="col-md-6">
-                    <div className="p-16 rounded" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                    <div className="p-16 rounded" style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}>
                       <h6 className="fw-700 text-danger mb-12">
                         <i className="la la-minus-circle mr-1"></i> PASSIVO & CAPITAL PRÓPRIO
                       </h6>
@@ -609,7 +566,7 @@ const PgcView = () => {
               ) : (
                 <div className="table-responsive">
                   <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
-                    <thead style={{ backgroundColor: '#f8fafc' }}>
+                    <thead style={{ backgroundColor: '#ffffff' }}>
                       <tr>
                         <th style={{ width: 100 }}>Código</th>
                         <th>Rubrica da Operação</th>
@@ -678,7 +635,7 @@ const PgcView = () => {
                     className="badge mr-2 px-2 py-1 font-weight-bold"
                     style={{
                       backgroundColor: '#eef2fe',
-                      color: '#5f63f2',
+                      color: '#2563eb',
                       fontFamily: 'monospace',
                       fontSize: 14,
                     }}

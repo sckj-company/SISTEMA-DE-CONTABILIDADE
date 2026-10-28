@@ -122,39 +122,16 @@ const Configuracoes = () => {
     <>
       <style>
         {`
-        .step-pill {
-          padding: 8px 16px;
-          border-radius: 8px;
-          background: #f4f6f9;
-          font-weight: 700;
-          font-size: 12.5px;
-          color: #495057;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          cursor: pointer;
-          border: 1px solid transparent;
-          transition: all 0.2s ease;
-        }
-        .step-pill:hover {
-          background: #eaedf2;
-          color: #1a3353;
-        }
-        .step-pill.active {
-          background: #e8ebfc;
-          color: #1a3353;
-          border: 1px solid #c2c9f5;
-        }
         .confronto-kpi-card {
-          border: 1px solid #edf0f5;
-          border-radius: 10px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
           background: #ffffff;
           padding: 18px 20px;
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .confronto-kpi-card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+          box-shadow: 0 6px 16px rgba(37, 99, 235, 0.06);
         }
         `}
       </style>
@@ -182,8 +159,8 @@ const Configuracoes = () => {
                   borderRadius: 8,
                   fontWeight: 700,
                   fontSize: 13,
-                  backgroundColor: '#5f63f2',
-                  borderColor: '#5f63f2',
+                  backgroundColor: '#2563eb',
+                  borderColor: '#2563eb',
                   padding: '8px 16px',
                 }}
               >
@@ -205,7 +182,7 @@ const Configuracoes = () => {
                   width: 44,
                   height: 44,
                   borderRadius: 8,
-                  backgroundColor: '#5f63f2',
+                  backgroundColor: '#2563eb',
                   color: '#fff',
                   display: 'flex',
                   alignItems: 'center',
@@ -253,8 +230,8 @@ const Configuracoes = () => {
                       height: 38,
                       borderRadius: 8,
                       fontWeight: 700,
-                      backgroundColor: '#5f63f2',
-                      borderColor: '#5f63f2',
+                      backgroundColor: '#2563eb',
+                      borderColor: '#2563eb',
                       padding: '0 14px',
                       gap: 6,
                       whiteSpace: 'nowrap',
@@ -289,7 +266,7 @@ const Configuracoes = () => {
       {/* 4 CARDS KPIS NO FORMATO DO CONFRONTO */}
       <div className="row mb-20" style={{ rowGap: 12 }}>
         <div className="col-12 col-sm-6 col-lg-3">
-          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #5f63f2' }}>
+          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               NIF da Empresa
             </span>
@@ -382,14 +359,14 @@ const Configuracoes = () => {
               </div>
               <div className="card-body p-20">
                 {empresaSelecionada ? (
-                  <div className="p-16 rounded" style={{ background: '#f8f9fb', border: '1px solid #eef0f3' }}>
+                  <div className="p-16 rounded" style={{ background: '#ffffff', border: '1px solid #eef0f3' }}>
                     <div className="d-flex align-items-center mb-12" style={{ gap: 10 }}>
                       <div
                         style={{
                           width: 44,
                           height: 44,
                           borderRadius: 10,
-                          backgroundColor: '#5f63f2',
+                          backgroundColor: '#2563eb',
                           color: '#fff',
                           display: 'flex',
                           alignItems: 'center',
@@ -434,7 +411,7 @@ const Configuracoes = () => {
               </div>
             </div>
 
-            <div className="card card-default" style={{ border: '1px solid #c8eedf', background: '#f6fbf9', borderRadius: 10 }}>
+            <div className="card card-default" style={{ border: '1px solid #bfdbfe', background: '#ffffff', borderRadius: 10 }}>
               <div className="card-body p-20">
                 <div className="d-flex align-items-center mb-8" style={{ gap: 8 }}>
                   <span style={{ fontSize: 20 }}>🛡️</span>
@@ -486,7 +463,7 @@ const Configuracoes = () => {
                         className="form-control"
                         readOnly
                         value={empresaSelecionada.nome || ''}
-                        style={{ background: '#f8f9fb' }}
+                        style={{ background: '#ffffff' }}
                       />
                     </div>
 
@@ -499,7 +476,7 @@ const Configuracoes = () => {
                         className="form-control fw-700 color-dark"
                         readOnly
                         value={empresaSelecionada.nif || ''}
-                        style={{ background: '#f8f9fb' }}
+                        style={{ background: '#ffffff' }}
                       />
                     </div>
 
@@ -512,7 +489,7 @@ const Configuracoes = () => {
                         className="form-control"
                         readOnly
                         value={empresaSelecionada.nome_comercial || empresaSelecionada.nome || ''}
-                        style={{ background: '#f8f9fb' }}
+                        style={{ background: '#ffffff' }}
                       />
                     </div>
 
@@ -525,7 +502,7 @@ const Configuracoes = () => {
                         className="form-control"
                         readOnly
                         value={empresaSelecionada.tipo_entidade_display || empresaSelecionada.tipo_entidade || 'Sociedade por Quotas'}
-                        style={{ background: '#f8f9fb' }}
+                        style={{ background: '#ffffff' }}
                       />
                     </div>
 
@@ -538,7 +515,7 @@ const Configuracoes = () => {
                         className="form-control"
                         readOnly
                         value={empresaSelecionada.atividade_principal || 'Comércio Geral e Prestação de Serviços'}
-                        style={{ background: '#f8f9fb' }}
+                        style={{ background: '#ffffff' }}
                       />
                     </div>
 
@@ -551,7 +528,7 @@ const Configuracoes = () => {
                         className="form-control"
                         readOnly
                         value={empresaSelecionada.cae_principal || '46900'}
-                        style={{ background: '#f8f9fb' }}
+                        style={{ background: '#ffffff' }}
                       />
                     </div>
 
@@ -564,7 +541,7 @@ const Configuracoes = () => {
                         className="form-control"
                         readOnly
                         value={empresaSelecionada.provincia || 'Luanda'}
-                        style={{ background: '#f8f9fb' }}
+                        style={{ background: '#ffffff' }}
                       />
                     </div>
 
@@ -577,7 +554,7 @@ const Configuracoes = () => {
                         className="form-control"
                         readOnly
                         value={empresaSelecionada.municipio || 'Luanda'}
-                        style={{ background: '#f8f9fb' }}
+                        style={{ background: '#ffffff' }}
                       />
                     </div>
 
@@ -590,7 +567,7 @@ const Configuracoes = () => {
                         className="form-control fw-600"
                         readOnly
                         value={empresaSelecionada.regime_nome || empresaSelecionada.regime_iva || '—'}
-                        style={{ background: '#f8f9fb' }}
+                        style={{ background: '#ffffff' }}
                       />
                     </div>
                   </div>
@@ -614,7 +591,7 @@ const Configuracoes = () => {
                   width: 70,
                   height: 70,
                   borderRadius: '50%',
-                  backgroundColor: '#5f63f2',
+                  backgroundColor: '#2563eb',
                   color: '#fff',
                   display: 'flex',
                   alignItems: 'center',
@@ -707,7 +684,7 @@ const Configuracoes = () => {
                         type="submit"
                         className="btn btn-primary"
                         disabled={salvandoPerfil}
-                        style={{ fontWeight: 700, backgroundColor: '#5f63f2', borderColor: '#5f63f2', padding: '8px 20px', borderRadius: 8 }}
+                        style={{ fontWeight: 700, backgroundColor: '#2563eb', borderColor: '#2563eb', padding: '8px 20px', borderRadius: 8 }}
                       >
                         {salvandoPerfil ? 'A Guardar...' : 'Guardar Alterações do Perfil'}
                       </button>

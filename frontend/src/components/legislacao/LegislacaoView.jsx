@@ -172,39 +172,16 @@ const LegislacaoView = () => {
     <>
       <style>
         {`
-        .step-pill {
-          padding: 8px 16px;
-          border-radius: 8px;
-          background: #f4f6f9;
-          font-weight: 700;
-          font-size: 12.5px;
-          color: #495057;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          cursor: pointer;
-          border: 1px solid transparent;
-          transition: all 0.2s ease;
-        }
-        .step-pill:hover {
-          background: #eaedf2;
-          color: #1a3353;
-        }
-        .step-pill.active {
-          background: #e8ebfc;
-          color: #1a3353;
-          border: 1px solid #c2c9f5;
-        }
         .confronto-kpi-card {
-          border: 1px solid #edf0f5;
-          border-radius: 10px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
           background: #ffffff;
           padding: 18px 20px;
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .confronto-kpi-card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+          box-shadow: 0 6px 16px rgba(37, 99, 235, 0.06);
         }
         `}
       </style>
@@ -237,7 +214,7 @@ const LegislacaoView = () => {
                 className="btn btn-sm btn-primary"
                 onClick={baixarExcel}
                 disabled={baixandoExcel}
-                style={{ fontWeight: 700, fontSize: 13, backgroundColor: '#5f63f2', borderColor: '#5f63f2' }}
+                style={{ fontWeight: 700, fontSize: 13, backgroundColor: '#2563eb', borderColor: '#2563eb' }}
               >
                 <i className={`la ${baixandoExcel ? 'la-spinner la-spin' : 'la-file-excel'} mr-4`}></i>
                 {baixandoExcel ? 'A gerar...' : 'Baixar Legislação (.xlsx)'}
@@ -258,7 +235,7 @@ const LegislacaoView = () => {
                   height: 40,
                   borderRadius: 8,
                   backgroundColor: '#eef2ff',
-                  color: '#5f63f2',
+                  color: '#2563eb',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -281,7 +258,7 @@ const LegislacaoView = () => {
               <span className="badge badge-light border p-2" style={{ fontSize: 12, fontWeight: 700, color: '#1a3353' }}>
                 <i className="la la-check-circle text-success mr-1"></i> Legislação Atualizada
               </span>
-              <span className="badge badge-light border p-2" style={{ fontSize: 12, fontWeight: 700, color: '#5f63f2' }}>
+              <span className="badge badge-light border p-2" style={{ fontSize: 12, fontWeight: 700, color: '#2563eb' }}>
                 <i className="la la-gavel mr-1"></i> Leis 2025 / 2026
               </span>
             </div>
@@ -292,11 +269,11 @@ const LegislacaoView = () => {
       {/* 4 CARDS KPIS NO FORMATO DO CONFRONTO */}
       <div className="row mb-20" style={{ rowGap: 12 }}>
         <div className="col-12 col-sm-6 col-lg-3">
-          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #5f63f2' }}>
+          <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Taxa Geral de IVA
             </span>
-            <div className="fw-800" style={{ fontSize: 24, color: '#5f63f2' }}>
+            <div className="fw-800" style={{ fontSize: 24, color: '#2563eb' }}>
               14% <span className="fs-13 text-muted fw-normal">CIVA</span>
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
@@ -364,9 +341,11 @@ const LegislacaoView = () => {
               <span
                 className="badge"
                 style={{
-                  backgroundColor: isActive ? '#5f63f2' : '#cbd5e1',
-                  color: '#ffffff',
+                  backgroundColor: '#ffffff',
+                  color: '#2563eb',
+                  border: isActive ? 'none' : '1px solid #bfdbfe',
                   fontSize: 11,
+                  fontWeight: 800,
                   padding: '2px 7px',
                   borderRadius: 10,
                 }}
@@ -436,7 +415,7 @@ const LegislacaoView = () => {
 
           <div className="card-body p-20">
             {/* RESUMO / ÂMBITO */}
-            <div className="p-16 mb-20 rounded" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', fontSize: 13 }}>
+            <div className="p-16 mb-20 rounded" style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: 13 }}>
               <div className="mb-8">
                 <strong className="color-dark">Âmbito de Aplicação:</strong>{' '}
                 <span className="text-muted">{diplomaAtivo.ambito}</span>

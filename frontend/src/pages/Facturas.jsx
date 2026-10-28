@@ -318,12 +318,11 @@ const Facturas = () => {
       {/* BANNER INFORMATIVO PARA OPERADOR DE FACTURAÇÃO */}
       {isOperador && (
         <div
-          className="alert mb-25 p-16 d-flex flex-wrap align-items-center justify-content-between"
+          className="mb-25 p-16 d-flex flex-wrap align-items-center justify-content-between"
           style={{
-            backgroundColor: '#f0fdf4',
-            border: '1px solid #bbf7d0',
+            backgroundColor: '#ffffff',
+            border: '1px solid #bfdbfe',
             borderRadius: 14,
-            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.08)',
             gap: 16,
           }}
         >
@@ -335,23 +334,22 @@ const Facturas = () => {
                 minWidth: 44,
                 flexShrink: 0,
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                color: '#fff',
+                background: '#2563eb',
+                color: '#ffffff',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 22,
-                boxShadow: '0 4px 10px rgba(16, 185, 129, 0.25)',
                 marginRight: 6,
               }}
             >
               <i className="la la-cloud-upload-alt"></i>
             </span>
             <div>
-              <h6 className="fw-700 mb-2" style={{ color: '#064e3b', fontSize: 15 }}>
+              <h6 className="fw-700 mb-2" style={{ color: '#0f172a', fontSize: 15 }}>
                 Portal de Digitalização & Entrada de Facturas ({user.first_name || user.username || 'Operador'})
               </h6>
-              <p className="mb-0" style={{ fontSize: 12.5, color: '#047857' }}>
+              <p className="mb-0" style={{ fontSize: 12.5, color: '#475569' }}>
                 Carregue os ficheiros em PDF ou imagens das facturas físicas recebidas. A inteligência artificial extrai todos os dados e certificação AGT. O lançamento no Diário de Compras do PGC será efetuado pela equipa de Contabilidade.
               </p>
             </div>
@@ -361,9 +359,9 @@ const Facturas = () => {
             style={{
               borderRadius: 20,
               fontSize: 11,
-              backgroundColor: '#d1fae5',
-              color: '#065f46',
-              border: '1px solid #a7f3d0',
+              backgroundColor: '#ffffff',
+              color: '#2563eb',
+              border: '1px solid #bfdbfe',
               flexShrink: 0,
             }}
           >
@@ -374,7 +372,7 @@ const Facturas = () => {
 
       {/* 1. TOPO: TÍTULO & IDENTIFICAÇÃO DA EMPRESA */}
       <div
-        className="d-flex flex-wrap justify-content-between align-items-center mb-25"
+        className="d-flex flex-wrap justify-content-between align-items-center mb-25 pt-10"
         style={{ gap: 16, rowGap: 16 }}
       >
         <div style={{ flex: '1 1 360px', maxWidth: '100%' }}>
@@ -386,20 +384,19 @@ const Facturas = () => {
                 minWidth: 44,
                 flexShrink: 0,
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, #4338ca 0%, #6366f1 100%)',
-                color: '#fff',
+                background: '#2563eb',
+                color: '#ffffff',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 22,
-                boxShadow: '0 4px 10px rgba(99, 102, 241, 0.3)',
                 marginRight: 6,
               }}
             >
               <i className="la la-file-invoice-dollar"></i>
             </span>
             <div>
-              <h4 className="fw-700 color-dark mb-2" style={{ fontSize: 19 }}>
+              <h4 className="fw-800 mb-2" style={{ fontSize: 21, color: '#0f172a' }}>
                 {t('facturas.title', 'Leitor & Scanner de Facturas (IA)')}
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13, lineHeight: 1.45 }}>
@@ -409,14 +406,14 @@ const Facturas = () => {
           </div>
         </div>
 
-        <div className="d-flex flex-wrap align-items-center" style={{ gap: 12 }}>
+        <div className="d-flex flex-wrap align-items-center" style={{ gap: 10 }}>
           {!isOperador && (
             <button
               type="button"
               className="btn btn-outline-primary btn-sm d-inline-flex align-items-center"
               onClick={handleExportarExcel}
               disabled={exportando || facturas.length === 0}
-              style={{ borderRadius: 8, height: 38, padding: '0 16px', margin: '3px 4px' }}
+              style={{ borderRadius: 8, height: 38, padding: '0 16px', fontWeight: 700 }}
             >
               <i className={`la ${exportando ? 'la-spinner la-spin' : 'la-file-excel'} mr-6`} style={{ fontSize: 16 }}></i>
               {exportando ? t('common.loading', 'A Gerar Mapa...') : t('facturas.exportExcel', 'Exportar Mapa AGT (Excel)')}
@@ -427,7 +424,7 @@ const Facturas = () => {
             className="btn btn-outline-primary btn-sm d-inline-flex align-items-center"
             onClick={() => abrirCamera()}
             disabled={scanning}
-            style={{ borderRadius: 8, height: 38, padding: '0 16px', margin: '3px 4px' }}
+            style={{ borderRadius: 8, height: 38, padding: '0 16px', fontWeight: 700 }}
             title="Tirar fotografia da factura física com a câmara ou webcam"
           >
             <i className="la la-camera mr-6" style={{ fontSize: 16 }}></i>
@@ -438,7 +435,7 @@ const Facturas = () => {
             className="btn btn-primary btn-sm d-inline-flex align-items-center"
             onClick={() => fileInputRef.current?.click()}
             disabled={scanning}
-            style={{ borderRadius: 8, height: 38, padding: '0 16px', margin: '3px 4px' }}
+            style={{ borderRadius: 8, height: 38, padding: '0 16px', fontWeight: 700 }}
           >
             <i className={`la ${scanning ? 'la-spinner la-spin' : 'la-upload'} mr-6`} style={{ fontSize: 16 }}></i>
             {scanning ? t('common.loading', 'A Analisar...') : t('facturas.newInvoice', 'Carregar Ficheiro (PDF/Foto)')}
@@ -461,107 +458,84 @@ const Facturas = () => {
         </div>
       </div>
 
-      {/* 2. DROPZONE DE RECONHECIMENTO POR IA */}
+      {/* 2. DROPZONE DE RECONHECIMENTO POR IA (ESTÉTICA UNIFICADA BRANCA + AZUL) */}
       <div
-        className={`card mb-25 ${isDragging ? 'border-primary' : ''}`}
+        className={`upload-drop-card mb-25 ${isDragging ? 'dragging' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        style={{
-          border: isDragging ? '2px dashed #4f46e5' : '1px dashed #cbd5e1',
-          background: isDragging ? '#eef2ff' : '#f8fafc',
-          borderRadius: 14,
-          transition: 'all 0.2s ease',
-        }}
       >
-        <div className="card-body text-center py-30 px-20">
-          {scanning ? (
-            <div className="py-20">
-              <div className="spinner-border text-primary mb-15" role="status" style={{ width: '3rem', height: '3rem' }}>
-                <span className="sr-only">A analisar...</span>
-              </div>
-              <h5 className="fw-700 text-primary mb-6">A Processar Documento Fiscal com IA...</h5>
-              <p className="text-muted mb-0" style={{ fontSize: 13.5 }}>
-                {scanProgresso}
-              </p>
+        {scanning ? (
+          <div className="py-20">
+            <div className="spinner-border mb-15" role="status" style={{ width: '3rem', height: '3rem', color: '#2563eb' }}>
+              <span className="sr-only">A analisar...</span>
             </div>
-          ) : (
-            <div>
-              <div
+            <h5 className="fw-700 mb-6" style={{ color: '#2563eb' }}>A Processar Documento Fiscal com IA...</h5>
+            <p className="text-muted mb-0" style={{ fontSize: 13.5 }}>
+              {scanProgresso}
+            </p>
+          </div>
+        ) : (
+          <div>
+            <div className="upload-icon-circle">
+              <i className="la la-cloud-upload-alt"></i>
+            </div>
+            <h5 className="fw-700 mb-6" style={{ color: '#0f172a' }}>Arraste a sua Factura para aqui (PDF ou Foto)</h5>
+            <p className="text-muted mb-15" style={{ fontSize: 13, maxWidth: 620, margin: '0 auto' }}>
+              A IA extrai automaticamente o NIF e dados do fornecedor, verifica a menção de certificação da AGT, calcula as retenções de IVA (7%) e Imposto Industrial (6.5%) e sugere a conta do PGC.
+            </p>
+            <div
+              className="d-flex flex-wrap justify-content-center align-items-center"
+              style={{ gap: 12, marginTop: 16 }}
+            >
+              <button
+                type="button"
+                className="btn btn-primary btn-sm d-inline-flex align-items-center"
+                onClick={() => abrirCamera()}
                 style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: '50%',
-                  background: '#e0e7ff',
-                  color: '#4f46e5',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 26,
-                  marginBottom: 12,
+                  borderRadius: 10,
+                  height: 40,
+                  padding: '0 20px',
+                  fontWeight: 700,
                 }}
               >
-                <i className="la la-cloud-upload-alt"></i>
-              </div>
-              <h5 className="fw-700 mb-6">Arraste a sua Factura para aqui (PDF ou Foto)</h5>
-              <p className="text-muted mb-15" style={{ fontSize: 13, maxWidth: 620, margin: '0 auto' }}>
-                A IA extrai automaticamente o NIF e dados do fornecedor, verifica a menção de certificação da AGT, calcula as retenções de IVA (7%) e Imposto Industrial (6.5%) e sugere a conta do PGC.
-              </p>
-              <div
-                className="d-flex flex-wrap justify-content-center align-items-center"
-                style={{ gap: 16, marginTop: 15 }}
+                <i className="la la-camera mr-8" style={{ fontSize: 17 }}></i> Tirar Foto com a Câmara
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-primary btn-sm d-inline-flex align-items-center"
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  borderRadius: 10,
+                  height: 40,
+                  padding: '0 20px',
+                  fontWeight: 700,
+                }}
               >
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm px-20 d-inline-flex align-items-center"
-                  onClick={() => abrirCamera()}
-                  style={{
-                    borderRadius: 20,
-                    background: '#0f172a',
-                    borderColor: '#0f172a',
-                    height: 40,
-                    margin: '4px 8px',
-                    padding: '0 20px',
-                  }}
-                >
-                  <i className="la la-camera mr-8" style={{ fontSize: 17 }}></i> Tirar Foto com a Câmara
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline-primary btn-sm px-20 d-inline-flex align-items-center"
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{
-                    borderRadius: 20,
-                    height: 40,
-                    margin: '4px 8px',
-                    padding: '0 20px',
-                  }}
-                >
-                  <i className="la la-folder-open mr-8" style={{ fontSize: 17 }}></i> Selecionar Ficheiro do Computador
-                </button>
-              </div>
-              <div className="mt-14">
-                <small className="text-muted" style={{ fontSize: 11.5 }}>
-                  Formatos suportados: Fotografias tiradas por câmara ou telemóvel, PDFs com selo AGT, imagens (PNG/JPG) e facturas eletrónicas.
-                </small>
-              </div>
+                <i className="la la-folder-open mr-8" style={{ fontSize: 17 }}></i> Selecionar Ficheiro do Computador
+              </button>
             </div>
-          )}
-        </div>
+            <div className="mt-14">
+              <small className="text-muted" style={{ fontSize: 11.5 }}>
+                Formatos suportados: Fotografias tiradas por câmara ou telemóvel, PDFs com selo AGT, imagens (PNG/JPG) e facturas eletrónicas.
+              </small>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* 3. CARDS DE MÉTRICAS & RESUMO DO MAPA FISCAL */}
+      {/* 3. CARDS DE MÉTRICAS & RESUMO DO MAPA FISCAL (FUNDO BRANCO PURO) */}
       {estatisticas && (
         <div className="row mb-25">
           <div className="col-xl-3 col-sm-6 mb-15">
-            <div className="card border-0 shadow-sm" style={{ borderRadius: 12 }}>
-              <div className="card-body p-15 d-flex align-items-center justify-content-between">
+            <div className="card" style={{ borderRadius: 12, border: '1px solid #e2e8f0', borderTop: '3px solid #2563eb', background: '#ffffff' }}>
+              <div className="card-body p-18 d-flex align-items-center justify-content-between bg-white">
                 <div>
-                  <span className="text-muted fw-600" style={{ fontSize: 11.5 }}>
+                  <span className="text-muted fw-700" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
                     {t('facturas.totalInvoices', 'TOTAL FACTURAS')}
                   </span>
-                  <h4 className="fw-700 mb-0 mt-4 color-dark">{estatisticas.total_contagem}</h4>
-                  <small className="text-muted" style={{ fontSize: 11 }}>
+                  <h4 className="fw-800 mb-0 mt-4" style={{ color: '#0f172a', fontSize: 22 }}>{estatisticas.total_contagem}</h4>
+                  <small className="text-muted" style={{ fontSize: 11.5 }}>
                     {estatisticas.lancadas} escrituradas no diário
                   </small>
                 </div>
@@ -570,8 +544,9 @@ const Facturas = () => {
                     width: 44,
                     height: 44,
                     borderRadius: 10,
-                    background: '#f1f5f9',
-                    color: '#475569',
+                    background: '#ffffff',
+                    border: '1px solid #bfdbfe',
+                    color: '#2563eb',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -585,14 +560,14 @@ const Facturas = () => {
           </div>
 
           <div className="col-xl-3 col-sm-6 mb-15">
-            <div className="card border-0 shadow-sm" style={{ borderRadius: 12 }}>
-              <div className="card-body p-15 d-flex align-items-center justify-content-between">
+            <div className="card" style={{ borderRadius: 12, border: '1px solid #e2e8f0', borderTop: '3px solid #2563eb', background: '#ffffff' }}>
+              <div className="card-body p-18 d-flex align-items-center justify-content-between bg-white">
                 <div>
-                  <span className="text-muted fw-600" style={{ fontSize: 11.5 }}>
+                  <span className="text-muted fw-700" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
                     {t('facturas.baseAmount', 'BASE DE INCIDÊNCIA')}
                   </span>
-                  <h4 className="fw-700 mb-0 mt-4 text-primary">{formatarKz(estatisticas.total_base)}</h4>
-                  <small className="text-muted" style={{ fontSize: 11 }}>
+                  <h4 className="fw-800 mb-0 mt-4" style={{ color: '#2563eb', fontSize: 20 }}>{formatarKz(estatisticas.total_base)}</h4>
+                  <small className="text-muted" style={{ fontSize: 11.5 }}>
                     Total líquido de compras
                   </small>
                 </div>
@@ -601,8 +576,9 @@ const Facturas = () => {
                     width: 44,
                     height: 44,
                     borderRadius: 10,
-                    background: '#e0e7ff',
-                    color: '#4338ca',
+                    background: '#ffffff',
+                    border: '1px solid #bfdbfe',
+                    color: '#2563eb',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -616,14 +592,14 @@ const Facturas = () => {
           </div>
 
           <div className="col-xl-3 col-sm-6 mb-15">
-            <div className="card border-0 shadow-sm" style={{ borderRadius: 12 }}>
-              <div className="card-body p-15 d-flex align-items-center justify-content-between">
+            <div className="card" style={{ borderRadius: 12, border: '1px solid #e2e8f0', borderTop: '3px solid #2563eb', background: '#ffffff' }}>
+              <div className="card-body p-18 d-flex align-items-center justify-content-between bg-white">
                 <div>
-                  <span className="text-muted fw-600" style={{ fontSize: 11.5 }}>
+                  <span className="text-muted fw-700" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
                     {t('facturas.vatSupported', 'IVA SUPORTADO / DEDUTÍVEL')}
                   </span>
-                  <h4 className="fw-700 mb-0 mt-4 text-success">{formatarKz(estatisticas.total_iva_dedutivel)}</h4>
-                  <small className="text-muted" style={{ fontSize: 11 }}>
+                  <h4 className="fw-800 mb-0 mt-4" style={{ color: '#15803d', fontSize: 20 }}>{formatarKz(estatisticas.total_iva_dedutivel)}</h4>
+                  <small className="text-muted" style={{ fontSize: 11.5 }}>
                     Suportado: {formatarKz(estatisticas.total_iva_suportado)}
                   </small>
                 </div>
@@ -632,8 +608,9 @@ const Facturas = () => {
                     width: 44,
                     height: 44,
                     borderRadius: 10,
-                    background: '#dcfce7',
-                    color: '#15803d',
+                    background: '#ffffff',
+                    border: '1px solid #bfdbfe',
+                    color: '#2563eb',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -647,16 +624,16 @@ const Facturas = () => {
           </div>
 
           <div className="col-xl-3 col-sm-6 mb-15">
-            <div className="card border-0 shadow-sm" style={{ borderRadius: 12 }}>
-              <div className="card-body p-15 d-flex align-items-center justify-content-between">
+            <div className="card" style={{ borderRadius: 12, border: '1px solid #e2e8f0', borderTop: '3px solid #2563eb', background: '#ffffff' }}>
+              <div className="card-body p-18 d-flex align-items-center justify-content-between bg-white">
                 <div>
-                  <span className="text-muted fw-600" style={{ fontSize: 11.5 }}>
+                  <span className="text-muted fw-700" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
                     RETENÇÕES NA FONTE
                   </span>
-                  <h4 className="fw-700 mb-0 mt-4 text-warning">
+                  <h4 className="fw-800 mb-0 mt-4" style={{ color: '#0f172a', fontSize: 20 }}>
                     {formatarKz(estatisticas.total_retencao_iva + estatisticas.total_retencao_ii)}
                   </h4>
-                  <small className="text-muted" style={{ fontSize: 11 }}>
+                  <small className="text-muted" style={{ fontSize: 11.5 }}>
                     IVA 7%: {formatarKz(estatisticas.total_retencao_iva)} | II: {formatarKz(estatisticas.total_retencao_ii)}
                   </small>
                 </div>
@@ -665,8 +642,9 @@ const Facturas = () => {
                     width: 44,
                     height: 44,
                     borderRadius: 10,
-                    background: '#fef3c7',
-                    color: '#b45309',
+                    background: '#ffffff',
+                    border: '1px solid #bfdbfe',
+                    color: '#2563eb',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -682,13 +660,13 @@ const Facturas = () => {
       )}
 
       {/* 4. BARRA DE FILTROS & PESQUISA */}
-      <div className="card mb-20 border-0 shadow-sm" style={{ borderRadius: 12 }}>
-        <div className="card-body py-15 px-20">
+      <div className="card mb-20" style={{ borderRadius: 12, border: '1px solid #e2e8f0', background: '#ffffff' }}>
+        <div className="card-body py-15 px-20 bg-white">
           <div className="row align-items-center">
             <div className="col-md-4 col-sm-12 mb-10 mb-md-0">
               <div className="input-group input-group-sm">
-                <span className="input-group-text bg-white border-right-0">
-                  <i className="la la-search text-muted"></i>
+                <span className="input-group-text bg-white border-right-0" style={{ border: '1px solid #cbd5e1' }}>
+                  <i className="la la-search" style={{ color: '#2563eb' }}></i>
                 </span>
                 <input
                   type="text"
@@ -729,18 +707,18 @@ const Facturas = () => {
                 style={{ height: 38, borderRadius: 8 }}
               >
                 <option value="todos">Todas as Conformidades AGT</option>
-                <option value="CONFORME">🟢 Apenas Conformes AGT</option>
-                <option value="AVISO">🟡 Com Alertas / Avisos</option>
-                <option value="IRREGULAR">🔴 Irregulares</option>
+                <option value="CONFORME">Apenas Conformes AGT</option>
+                <option value="AVISO">Com Alertas / Avisos</option>
+                <option value="IRREGULAR">Irregulares</option>
               </select>
             </div>
 
             <div className="col-md-2 col-sm-12 text-md-end">
               <button
                 type="button"
-                className="btn btn-light btn-sm w-100"
+                className="btn btn-outline-primary btn-sm w-100"
                 onClick={carregarFacturas}
-                style={{ height: 38, borderRadius: 8, fontWeight: 600 }}
+                style={{ height: 38, borderRadius: 8, fontWeight: 700 }}
               >
                 <i className="la la-sync-alt mr-4"></i> Atualizar
               </button>
@@ -750,38 +728,51 @@ const Facturas = () => {
       </div>
 
       {/* 5. TABELA DE FACTURAS */}
-      <div className="card border-0 shadow-sm" style={{ borderRadius: 14 }}>
-        <div className="card-header bg-white py-15 px-20 border-bottom d-flex justify-content-between align-items-center">
-          <h6 className="fw-700 mb-0 color-dark">
-            <i className="la la-list-alt text-primary mr-6"></i> Facturas Registadas & Auditadas ({facturas.length})
+      <div className="card" style={{ borderRadius: 14, border: '1px solid #e2e8f0', background: '#ffffff' }}>
+        <div className="card-header bg-white py-15 px-20 border-bottom d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 8 }}>
+          <h6 className="fw-700 mb-0" style={{ color: '#0f172a' }}>
+            <i className="la la-list-alt mr-6" style={{ color: '#2563eb' }}></i> Facturas Registadas & Auditadas ({facturas.length})
           </h6>
           {empresaAtual && (
-            <span className="badge badge-round badge-light text-muted" style={{ fontSize: 11 }}>
+            <span
+              className="badge"
+              style={{
+                fontSize: 11.5,
+                background: '#ffffff',
+                color: '#2563eb',
+                border: '1px solid #bfdbfe',
+                padding: '5px 12px',
+                borderRadius: 20,
+                fontWeight: 700,
+              }}
+            >
               Empresa Ativa: {empresaAtual.nome} (NIF: {empresaAtual.nif})
             </span>
           )}
         </div>
 
-        <div className="card-body p-0">
+        <div className="card-body p-0 bg-white">
           {loading ? (
             <div className="text-center py-40">
-              <div className="spinner-border text-primary" role="status">
+              <div className="spinner-border" role="status" style={{ color: '#2563eb' }}>
                 <span className="sr-only">A carregar...</span>
               </div>
               <p className="text-muted mt-10 mb-0">A carregar registo de facturas...</p>
             </div>
           ) : facturas.length === 0 ? (
             <div className="text-center py-50 px-20">
-              <i className="la la-file-invoice text-muted" style={{ fontSize: 50 }}></i>
-              <h6 className="fw-600 mt-15 mb-4 text-muted">Nenhuma fatura encontrada neste período</h6>
+              <div className="upload-icon-circle">
+                <i className="la la-file-invoice"></i>
+              </div>
+              <h6 className="fw-700 mt-10 mb-4" style={{ color: '#0f172a' }}>Nenhuma fatura encontrada neste período</h6>
               <p className="text-muted" style={{ fontSize: 12.5, maxWidth: 450, margin: '0 auto' }}>
                 Arraste um PDF ou imagem de fatura para a área superior para processar automaticamente com a inteligência artificial.
               </p>
             </div>
           ) : (
             <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0" style={{ fontSize: 12.5 }}>
-                <thead className="table-light">
+              <table className="table table-hover align-middle mb-0" style={{ fontSize: 12.5, background: '#ffffff' }}>
+                <thead style={{ background: '#ffffff' }}>
                   <tr>
                     <th className="py-12 px-15">{t('facturas.invoiceNumber', 'Documento')}</th>
                     <th className="py-12 px-15">{t('facturas.issueDate', 'Data')}</th>
@@ -798,27 +789,28 @@ const Facturas = () => {
                 <tbody>
                   {facturas.map((f) => {
                     const badgeConformidade = {
-                      CONFORME: { bg: '#dcfce7', text: '#15803d', label: 'Conforme AGT', icon: 'la-check-circle' },
-                      AVISO: { bg: '#fef3c7', text: '#b45309', label: 'Alerta Fiscal', icon: 'la-exclamation-triangle' },
-                      IRREGULAR: { bg: '#fee2e2', text: '#b91c1c', label: 'Irregular', icon: 'la-times-circle' },
-                    }[f.conformidade_agt] || { bg: '#f1f5f9', text: '#475569', label: f.conformidade_agt, icon: 'la-info-circle' };
+                      CONFORME: { border: '#86efac', text: '#15803d', label: 'Conforme AGT', icon: 'la-check-circle' },
+                      AVISO: { border: '#fcd34d', text: '#b45309', label: 'Alerta Fiscal', icon: 'la-exclamation-triangle' },
+                      IRREGULAR: { border: '#fca5a5', text: '#dc2626', label: 'Irregular', icon: 'la-times-circle' },
+                    }[f.conformidade_agt] || { border: '#bfdbfe', text: '#2563eb', label: f.conformidade_agt, icon: 'la-info-circle' };
 
                     return (
                       <tr key={f.id}>
                         {/* Tipo e N.º da Fatura */}
                         <td className="px-15 py-12">
-                          <div className="d-flex align-items-center gap-8">
+                          <div className="d-flex align-items-center" style={{ gap: 8 }}>
                             <span
-                              className="badge badge-sm font-weight-bold"
+                              className="badge font-weight-bold"
                               style={{
-                                background: f.tipo_operacao === 'COMPRA' ? '#e0e7ff' : '#dcfce7',
-                                color: f.tipo_operacao === 'COMPRA' ? '#4338ca' : '#15803d',
+                                background: '#ffffff',
+                                color: '#2563eb',
+                                border: '1px solid #bfdbfe',
                                 borderRadius: 4,
                               }}
                             >
                               {f.tipo_documento}
                             </span>
-                            <span className="fw-700 color-dark">{f.numero_factura}</span>
+                            <span className="fw-700" style={{ color: '#0f172a' }}>{f.numero_factura}</span>
                           </div>
                           {f.hash_agt && (
                             <div className="text-muted" style={{ fontSize: 10.5 }}>
@@ -839,7 +831,7 @@ const Facturas = () => {
 
                         {/* Fornecedor & NIF */}
                         <td className="px-15 py-12" style={{ maxWidth: 240 }}>
-                          <div className="fw-600 text-truncate color-dark" title={f.fornecedor_nome}>
+                          <div className="fw-600 text-truncate" style={{ color: '#0f172a' }} title={f.fornecedor_nome}>
                             {f.fornecedor_nome || 'Não identificado'}
                           </div>
                           <div className="text-muted" style={{ fontSize: 11 }}>
@@ -848,11 +840,11 @@ const Facturas = () => {
                         </td>
 
                         {/* Base Incidência */}
-                        <td className="px-15 py-12 text-right fw-600">{formatarKz(f.base_incidencia)}</td>
+                        <td className="px-15 py-12 text-right fw-700" style={{ color: '#0f172a' }}>{formatarKz(f.base_incidencia)}</td>
 
                         {/* IVA e Taxa */}
                         <td className="px-15 py-12 text-right">
-                          <div className="fw-600 text-primary">{formatarKz(f.valor_iva)}</div>
+                          <div className="fw-700" style={{ color: '#2563eb' }}>{formatarKz(f.valor_iva)}</div>
                           <small className="text-muted" style={{ fontSize: 10.5 }}>
                             Taxa: {Number(f.taxa_iva)}% {f.iva_dedutivel ? '(Dedutível)' : '(Não dedutível)'}
                           </small>
@@ -862,7 +854,7 @@ const Facturas = () => {
                         <td className="px-15 py-12 text-right">
                           {Number(f.retencao_iva) > 0 || Number(f.retencao_ii) > 0 ? (
                             <div>
-                              <span className="fw-600 text-warning">
+                              <span className="fw-700" style={{ color: '#0f172a' }}>
                                 {formatarKz(Number(f.retencao_iva) + Number(f.retencao_ii))}
                               </span>
                               <div className="text-muted" style={{ fontSize: 10 }}>
@@ -877,19 +869,20 @@ const Facturas = () => {
 
                         {/* Total Líquido */}
                         <td className="px-15 py-12 text-right">
-                          <span className="fw-700 color-dark">{formatarKz(f.valor_liquido || f.valor_total)}</span>
+                          <span className="fw-800" style={{ color: '#0f172a' }}>{formatarKz(f.valor_liquido || f.valor_total)}</span>
                         </td>
 
                         {/* Conformidade AGT */}
                         <td className="px-15 py-12 text-center">
                           <span
-                            className="badge py-4 px-8 text-nowrap"
+                            className="badge py-4 px-10 text-nowrap"
                             style={{
-                              backgroundColor: badgeConformidade.bg,
+                              backgroundColor: '#ffffff',
                               color: badgeConformidade.text,
+                              border: `1px solid ${badgeConformidade.border}`,
                               borderRadius: 12,
                               fontSize: 11,
-                              fontWeight: 600,
+                              fontWeight: 700,
                             }}
                           >
                             <i className={`la ${badgeConformidade.icon} mr-3`}></i>
@@ -900,30 +893,40 @@ const Facturas = () => {
                         {/* Estado no Diário PGC */}
                         <td className="px-15 py-12 text-center">
                           {f.lancado_na_contabilidade ? (
-                            <span className="badge badge-success py-4 px-8" style={{ borderRadius: 12, fontSize: 11 }}>
+                            <span
+                              className="badge py-4 px-10"
+                              style={{
+                                borderRadius: 12,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                background: '#ffffff',
+                                color: '#15803d',
+                                border: '1px solid #86efac',
+                              }}
+                            >
                               <i className="la la-check mr-3"></i> {isOperador ? 'Escriturado' : `Lançado ${f.lancamento_numero ? `(${f.lancamento_numero})` : ''}`}
                             </span>
                           ) : isOperador ? (
                             <span
-                              className="badge py-4 px-8 text-nowrap"
+                              className="badge py-4 px-10 text-nowrap"
                               style={{
                                 borderRadius: 12,
                                 fontSize: 11,
-                                backgroundColor: '#f1f5f9',
-                                color: '#64748b',
+                                backgroundColor: '#ffffff',
+                                color: '#475569',
                                 border: '1px solid #e2e8f0',
                               }}
                               title="Aguardando validação e lançamento pela equipa de contabilidade"
                             >
-                              <i className="la la-clock mr-3 text-warning"></i> Aguardando Contabilidade
+                              <i className="la la-clock mr-3" style={{ color: '#2563eb' }}></i> Aguardando Contabilidade
                             </span>
                           ) : (
                             <button
                               type="button"
-                              className="btn btn-outline-primary btn-xs py-2 px-8"
+                              className="btn btn-primary btn-xs py-4 px-10"
                               onClick={() => handleLancarNoDiario(f)}
                               disabled={lancandoId === f.id}
-                              style={{ borderRadius: 12, fontSize: 11 }}
+                              style={{ borderRadius: 8, fontSize: 11.5, fontWeight: 700 }}
                               title="Criar lançamento automático no Livro Diário de Compras"
                             >
                               <i className={`la ${lancandoId === f.id ? 'la-spinner la-spin' : 'la-book'} mr-3`}></i>
@@ -932,38 +935,40 @@ const Facturas = () => {
                           )}
                         </td>
 
-                        {/* Ações */}
+                        {/* Ações (Botões Azuis Espaçados) */}
                         <td className="px-15 py-12 text-center text-nowrap">
-                          {f.documento_url && (
-                            <a
-                              href={formatarDocUrl(f.documento_url)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="btn btn-icon btn-light btn-sm mr-6"
-                              title={f.is_imagem ? "Ver Foto Original da Factura" : "Ver Documento Original (PDF)"}
-                              style={{ width: 32, height: 32, borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                          <div className="d-inline-flex align-items-center" style={{ gap: 8 }}>
+                            {f.documento_url && (
+                              <a
+                                href={formatarDocUrl(f.documento_url)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-outline-primary btn-xs"
+                                title={f.is_imagem ? 'Ver Foto Original da Factura' : 'Ver Documento Original (PDF)'}
+                                style={{ width: 32, height: 32, borderRadius: 6, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                              >
+                                <i className={`la ${f.is_imagem ? 'la-camera' : 'la-file-pdf'}`} style={{ fontSize: 15 }}></i>
+                              </a>
+                            )}
+                            <button
+                              type="button"
+                              className="btn btn-outline-primary btn-xs"
+                              onClick={() => setFacturaDetalhe(f)}
+                              title="Ver análise completa da IA e dados fiscais"
+                              style={{ width: 32, height: 32, borderRadius: 6, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                             >
-                              <i className={`la ${f.is_imagem ? 'la-camera text-info' : 'la-file-pdf text-danger'}`} style={{ fontSize: 16 }}></i>
-                            </a>
-                          )}
-                          <button
-                            type="button"
-                            className="btn btn-icon btn-light btn-sm mr-6"
-                            onClick={() => setFacturaDetalhe(f)}
-                            title="Ver análise completa da IA e dados fiscais"
-                            style={{ width: 32, height: 32, borderRadius: 6 }}
-                          >
-                            <i className="la la-eye text-primary"></i>
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-icon btn-light btn-sm"
-                            onClick={() => setFacturaApagar(f)}
-                            title="Eliminar fatura"
-                            style={{ width: 32, height: 32, borderRadius: 6 }}
-                          >
-                            <i className="la la-trash text-danger"></i>
-                          </button>
+                              <i className="la la-eye" style={{ fontSize: 15 }}></i>
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-outline-primary btn-xs"
+                              onClick={() => setFacturaApagar(f)}
+                              title="Eliminar fatura"
+                              style={{ width: 32, height: 32, borderRadius: 6, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                              <i className="la la-trash" style={{ fontSize: 15 }}></i>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -975,7 +980,7 @@ const Facturas = () => {
         </div>
       </div>
 
-      {/* 6. MODAL DE DETALHE & AUDITORIA DA FACTURA (IA) - EXTRAÇÃO COMPLETA SEM OMISSÕES */}
+      {/* 6. MODAL DE DETALHE & AUDITORIA DA FACTURA (IA) - FUNDO BRANCO PURO & BOTÕES AZUIS */}
       {facturaDetalhe && (
         <div
           className="modal fade show d-block"
@@ -985,7 +990,7 @@ const Facturas = () => {
             position: 'fixed',
             inset: 0,
             zIndex: 10050,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backgroundColor: 'rgba(15, 23, 42, 0.55)',
             backdropFilter: 'blur(4px)',
             display: 'flex',
             alignItems: 'center',
@@ -1009,7 +1014,7 @@ const Facturas = () => {
             }}
           >
             <div
-              className="modal-content border-0 shadow-lg"
+              className="modal-content shadow-lg"
               style={{
                 borderRadius: 14,
                 overflow: 'hidden',
@@ -1025,16 +1030,16 @@ const Facturas = () => {
                 className="modal-header py-14 px-20 border-bottom d-flex align-items-center justify-content-between"
                 style={{ background: '#ffffff', flexShrink: 0 }}
               >
-                <div className="d-flex align-items-center gap-12">
+                <div className="d-flex align-items-center" style={{ gap: 12 }}>
                   <span
                     style={{
                       width: 40,
                       height: 40,
                       minWidth: 40,
                       borderRadius: 10,
-                      background: '#f8fafc',
-                      color: '#0f172a',
-                      border: '1px solid #e2e8f0',
+                      background: '#ffffff',
+                      color: '#2563eb',
+                      border: '1px solid #bfdbfe',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1044,11 +1049,11 @@ const Facturas = () => {
                     <i className="la la-file-invoice"></i>
                   </span>
                   <div>
-                    <div className="d-flex flex-wrap align-items-center gap-6 mb-2">
+                    <div className="d-flex flex-wrap align-items-center mb-2" style={{ gap: 6 }}>
                       <span
                         className="badge"
                         style={{
-                          background: '#0f172a',
+                          background: '#2563eb',
                           color: '#ffffff',
                           borderRadius: 6,
                           padding: '3px 8px',
@@ -1061,13 +1066,13 @@ const Facturas = () => {
                       <span
                         className="badge"
                         style={{
-                          background: '#f1f5f9',
-                          color: '#334155',
-                          border: '1px solid #e2e8f0',
+                          background: '#ffffff',
+                          color: '#2563eb',
+                          border: '1px solid #bfdbfe',
                           borderRadius: 6,
                           padding: '3px 8px',
                           fontSize: 11,
-                          fontWeight: 600,
+                          fontWeight: 700,
                         }}
                       >
                         {facturaDetalhe.tipo_operacao === 'COMPRA' ? 'Compra / Fornecedor' : 'Venda / Cliente'}
@@ -1076,13 +1081,13 @@ const Facturas = () => {
                         <span
                           className="badge"
                           style={{
-                            background: '#f1f5f9',
+                            background: '#ffffff',
                             color: '#475569',
                             border: '1px solid #e2e8f0',
                             borderRadius: 6,
                             padding: '3px 8px',
                             fontSize: 11,
-                            fontWeight: 500,
+                            fontWeight: 600,
                           }}
                         >
                           {facturaDetalhe.regime_emissor}
@@ -1092,20 +1097,20 @@ const Facturas = () => {
                         <span
                           className="badge"
                           style={{
-                            background: '#f8fafc',
+                            background: '#ffffff',
                             color: '#64748b',
                             border: '1px solid #e2e8f0',
                             borderRadius: 6,
                             padding: '3px 8px',
                             fontSize: 11,
-                            fontWeight: 500,
+                            fontWeight: 600,
                           }}
                         >
                           Via: {facturaDetalhe.metadados.via}
                         </span>
                       )}
                     </div>
-                    <h5 className="modal-title fw-700 mb-0" style={{ fontSize: 17, color: '#0f172a' }}>
+                    <h5 className="modal-title fw-800 mb-0" style={{ fontSize: 17, color: '#0f172a' }}>
                       Factura N.º {facturaDetalhe.numero_factura}
                     </h5>
                     <div className="text-muted mt-2" style={{ fontSize: 12 }}>
@@ -1120,43 +1125,43 @@ const Facturas = () => {
                     </div>
                   </div>
                 </div>
-                <div className="d-flex align-items-center gap-8">
+                <div className="d-flex align-items-center" style={{ gap: 10 }}>
                   {facturaDetalhe.documento_url && (
                     <a
                       href={formatarDocUrl(facturaDetalhe.documento_url)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-6"
-                      style={{ borderRadius: 8, fontSize: 12, padding: '5px 12px', border: '1px solid #cbd5e1', color: '#1e293b' }}
+                      className="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
+                      style={{ borderRadius: 8, fontSize: 12, padding: '6px 12px', gap: 6, fontWeight: 700 }}
                       title="Abrir ficheiro ou foto original em novo separador"
                     >
-                      <i className={`la ${facturaDetalhe.is_imagem ? 'la-camera text-info' : 'la-file-pdf text-danger'}`}></i>
+                      <i className={`la ${facturaDetalhe.is_imagem ? 'la-camera' : 'la-file-pdf'}`}></i>
                       {facturaDetalhe.is_imagem ? 'Ver Foto Original' : 'Ver Documento (PDF)'}
                       <i className="la la-external-link-alt" style={{ fontSize: 11 }}></i>
                     </a>
                   )}
                   <button
                     type="button"
-                    className="btn btn-icon btn-light btn-sm"
+                    className="btn btn-outline-primary btn-xs"
                     onClick={() => setFacturaDetalhe(null)}
                     aria-label="Close"
-                    style={{ width: 32, height: 32, borderRadius: 8, fontSize: 18, lineHeight: 1, border: '1px solid #e2e8f0' }}
+                    style={{ width: 34, height: 34, borderRadius: 8, fontSize: 18, lineHeight: 1, padding: 0 }}
                   >
                     <span aria-hidden="true">&times;</span>
                   </button>
                 </div>
               </div>
 
-              {/* Corpo do Modal com Scroll Interno Limpo */}
-              <div className="modal-body p-20" style={{ background: '#f8fafc', flex: '1 1 auto', overflowY: 'auto' }}>
+              {/* Corpo do Modal em Fundo Branco Puro */}
+              <div className="modal-body p-20" style={{ background: '#ffffff', flex: '1 1 auto', overflowY: 'auto' }}>
                 {/* 0. Pré-visualização ou Acesso ao Documento / Foto Original */}
                 {facturaDetalhe.documento_url && (
                   facturaDetalhe.is_imagem ? (
-                    <div className="card border-0 shadow-sm mb-18" style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                    <div className="card mb-18" style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e2e8f0', background: '#ffffff' }}>
                       <div className="card-header py-8 px-14 bg-white border-bottom d-flex align-items-center justify-content-between">
-                        <div className="d-flex align-items-center gap-6">
-                          <i className="la la-camera text-info" style={{ fontSize: 16 }}></i>
-                          <span className="fw-700 color-dark" style={{ fontSize: 12.5 }}>
+                        <div className="d-flex align-items-center" style={{ gap: 6 }}>
+                          <i className="la la-camera" style={{ fontSize: 16, color: '#2563eb' }}></i>
+                          <span className="fw-700" style={{ fontSize: 12.5, color: '#0f172a' }}>
                             Foto Original Capturada ({facturaDetalhe.documento_nome || 'factura_foto.jpg'})
                           </span>
                         </div>
@@ -1164,13 +1169,13 @@ const Facturas = () => {
                           href={formatarDocUrl(facturaDetalhe.documento_url)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-4"
-                          style={{ borderRadius: 6, fontSize: 11 }}
+                          className="btn btn-xs btn-outline-primary d-inline-flex align-items-center"
+                          style={{ borderRadius: 6, fontSize: 11, gap: 4 }}
                         >
-                          <i className="la la-expand"></i> Abrir Imagem em Alta Resolução
+                          <i className="la la-expand"></i> Abrir em Alta Resolução
                         </a>
                       </div>
-                      <div className="card-body p-12 text-center" style={{ background: '#0f172a' }}>
+                      <div className="card-body p-12 text-center" style={{ background: '#ffffff' }}>
                         <img
                           src={formatarDocUrl(facturaDetalhe.documento_url)}
                           alt="Foto Original da Factura"
@@ -1179,22 +1184,23 @@ const Facturas = () => {
                             maxWidth: '100%',
                             objectFit: 'contain',
                             borderRadius: 6,
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                            border: '1px solid #e2e8f0',
                           }}
                         />
                       </div>
                     </div>
                   ) : (
-                    <div className="card border-0 shadow-sm mb-18" style={{ borderRadius: 10, border: '1px solid #e2e8f0', background: '#ffffff' }}>
-                      <div className="card-body py-10 px-15 d-flex flex-wrap align-items-center justify-content-between gap-10">
-                        <div className="d-flex align-items-center gap-10">
+                    <div className="card mb-18" style={{ borderRadius: 10, border: '1px solid #e2e8f0', background: '#ffffff' }}>
+                      <div className="card-body py-10 px-15 d-flex flex-wrap align-items-center justify-content-between bg-white" style={{ gap: 10 }}>
+                        <div className="d-flex align-items-center" style={{ gap: 10 }}>
                           <span
                             style={{
                               width: 36,
                               height: 36,
                               borderRadius: 8,
-                              background: '#fee2e2',
-                              color: '#dc2626',
+                              background: '#ffffff',
+                              border: '1px solid #bfdbfe',
+                              color: '#2563eb',
                               display: 'inline-flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -1204,7 +1210,7 @@ const Facturas = () => {
                             <i className="la la-file-pdf"></i>
                           </span>
                           <div>
-                            <div className="fw-700 color-dark" style={{ fontSize: 13 }}>
+                            <div className="fw-700" style={{ fontSize: 13, color: '#0f172a' }}>
                               {facturaDetalhe.documento_nome || 'Documento Fiscal Original (PDF)'}
                             </div>
                             <small className="text-muted" style={{ fontSize: 11 }}>
@@ -1216,8 +1222,8 @@ const Facturas = () => {
                           href={formatarDocUrl(facturaDetalhe.documento_url)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-6"
-                          style={{ borderRadius: 8, fontSize: 12 }}
+                          className="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
+                          style={{ borderRadius: 8, fontSize: 12, gap: 6, fontWeight: 700 }}
                         >
                           <i className="la la-external-link-alt"></i> Visualizar / Descarregar PDF
                         </a>
@@ -1229,20 +1235,20 @@ const Facturas = () => {
                 {/* 1. Alertas e Notas de Conformidade */}
                 {facturaDetalhe.alertas_auditoria && facturaDetalhe.alertas_auditoria.length > 0 && (
                   <div
-                    className="mb-18 p-12"
+                    className="mb-18 p-14"
                     style={{
-                      background: '#fffbeb',
-                      border: '1px solid #fef3c7',
+                      background: '#ffffff',
+                      border: '1px solid #fcd34d',
                       borderRadius: 10,
                     }}
                   >
-                    <div className="d-flex align-items-center gap-6 mb-6" style={{ color: '#92400e', fontWeight: 700, fontSize: 12.5 }}>
+                    <div className="d-flex align-items-center mb-6" style={{ gap: 6, color: '#b45309', fontWeight: 700, fontSize: 12.5 }}>
                       <i className="la la-shield-alt" style={{ fontSize: 16 }}></i>
                       <span>Notas de Conformidade Fiscal & Validação AGT</span>
                     </div>
-                    <div className="d-flex flex-column gap-4">
+                    <div className="d-flex flex-column" style={{ gap: 4 }}>
                       {facturaDetalhe.alertas_auditoria.map((alerta, i) => (
-                        <div key={i} className="d-flex align-items-start gap-6" style={{ fontSize: 12, color: '#92400e' }}>
+                        <div key={i} className="d-flex align-items-start" style={{ gap: 6, fontSize: 12, color: '#475569' }}>
                           <span style={{ fontSize: 14, lineHeight: 1 }}>•</span>
                           <span>{alerta}</span>
                         </div>
@@ -1255,28 +1261,28 @@ const Facturas = () => {
                 <div className="row g-3 mb-18">
                   {/* FORNECEDOR / EMISSOR */}
                   <div className="col-md-6">
-                    <div className="card h-100 border shadow-xs" style={{ borderRadius: 10, background: '#ffffff', borderColor: '#e2e8f0' }}>
-                      <div className="card-header py-8 px-14 border-bottom d-flex justify-content-between align-items-center" style={{ background: '#f8fafc' }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', color: '#475569' }}>
+                    <div className="card h-100" style={{ borderRadius: 10, background: '#ffffff', border: '1px solid #e2e8f0' }}>
+                      <div className="card-header py-8 px-14 border-bottom d-flex justify-content-between align-items-center" style={{ background: '#ffffff' }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.5px', color: '#2563eb' }}>
                           EMISSOR / FORNECEDOR
                         </span>
                         {facturaDetalhe.fornecedor_nif && (
-                          <span style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#0f172a', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, fontFamily: 'monospace' }}>
+                          <span style={{ background: '#ffffff', border: '1px solid #bfdbfe', color: '#0f172a', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, fontFamily: 'monospace' }}>
                             NIF: {facturaDetalhe.fornecedor_nif}
                           </span>
                         )}
                       </div>
-                      <div className="card-body p-14">
+                      <div className="card-body p-14 bg-white">
                         <h6 className="fw-700 mb-4" style={{ fontSize: 14, color: '#0f172a' }}>
                           {facturaDetalhe.fornecedor_nome || 'Não especificado'}
                         </h6>
                         {facturaDetalhe.fornecedor_endereco && (
-                          <div className="text-muted mb-6 d-flex align-items-start gap-6" style={{ fontSize: 11.5, lineHeight: 1.4 }}>
+                          <div className="text-muted mb-6 d-flex align-items-start" style={{ gap: 6, fontSize: 11.5, lineHeight: 1.4 }}>
                             <i className="la la-map-marker text-muted mt-2"></i>
                             <span>{facturaDetalhe.fornecedor_endereco}</span>
                           </div>
                         )}
-                        <div className="row g-2 mt-4 pt-6 border-top" style={{ fontSize: 11.5, borderColor: '#f1f5f9' }}>
+                        <div className="row g-2 mt-4 pt-6 border-top" style={{ fontSize: 11.5, borderColor: '#e2e8f0' }}>
                           {facturaDetalhe.fornecedor_telefone && (
                             <div className="col-sm-6 text-muted">
                               <strong>Tel:</strong> {facturaDetalhe.fornecedor_telefone}
@@ -1299,28 +1305,28 @@ const Facturas = () => {
 
                   {/* CLIENTE / ADQUIRENTE */}
                   <div className="col-md-6">
-                    <div className="card h-100 border shadow-xs" style={{ borderRadius: 10, background: '#ffffff', borderColor: '#e2e8f0' }}>
-                      <div className="card-header py-8 px-14 border-bottom d-flex justify-content-between align-items-center" style={{ background: '#f8fafc' }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', color: '#475569' }}>
+                    <div className="card h-100" style={{ borderRadius: 10, background: '#ffffff', border: '1px solid #e2e8f0' }}>
+                      <div className="card-header py-8 px-14 border-bottom d-flex justify-content-between align-items-center" style={{ background: '#ffffff' }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.5px', color: '#2563eb' }}>
                           CLIENTE / ADQUIRENTE
                         </span>
                         {facturaDetalhe.cliente_nif && (
-                          <span style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#0f172a', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, fontFamily: 'monospace' }}>
+                          <span style={{ background: '#ffffff', border: '1px solid #bfdbfe', color: '#0f172a', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, fontFamily: 'monospace' }}>
                             NIF: {facturaDetalhe.cliente_nif}
                           </span>
                         )}
                       </div>
-                      <div className="card-body p-14">
+                      <div className="card-body p-14 bg-white">
                         <h6 className="fw-700 mb-4" style={{ fontSize: 14, color: '#0f172a' }}>
                           {facturaDetalhe.cliente_nome || 'Não especificado'}
                         </h6>
                         {facturaDetalhe.cliente_endereco && (
-                          <div className="text-muted mb-6 d-flex align-items-start gap-6" style={{ fontSize: 11.5, lineHeight: 1.4 }}>
+                          <div className="text-muted mb-6 d-flex align-items-start" style={{ gap: 6, fontSize: 11.5, lineHeight: 1.4 }}>
                             <i className="la la-map-marker text-muted mt-2"></i>
                             <span>{facturaDetalhe.cliente_endereco}</span>
                           </div>
                         )}
-                        <div className="row g-2 mt-4 pt-6 border-top" style={{ fontSize: 11.5, borderColor: '#f1f5f9' }}>
+                        <div className="row g-2 mt-4 pt-6 border-top" style={{ fontSize: 11.5, borderColor: '#e2e8f0' }}>
                           {facturaDetalhe.cliente_telefone && (
                             <div className="col-sm-6 text-muted">
                               <strong>Tel:</strong> {facturaDetalhe.cliente_telefone}
@@ -1332,9 +1338,9 @@ const Facturas = () => {
                             </div>
                           )}
                         </div>
-                        <div className="mt-8 pt-6 border-top" style={{ fontSize: 11, borderColor: '#f1f5f9' }}>
+                        <div className="mt-8 pt-6 border-top" style={{ fontSize: 11, borderColor: '#e2e8f0' }}>
                           {empresaAtual && empresaAtual.nif === facturaDetalhe.cliente_nif ? (
-                            <span style={{ color: '#166534', fontWeight: 600 }}>
+                            <span style={{ color: '#15803d', fontWeight: 700 }}>
                               <i className="la la-check-circle mr-3"></i> NIF coincide com a empresa ativa ({empresaAtual.nome})
                             </span>
                           ) : (
@@ -1349,20 +1355,20 @@ const Facturas = () => {
                 </div>
 
                 {/* 3. Linhas & Artigos da Factura */}
-                <div className="card mb-18 border shadow-xs" style={{ borderRadius: 10, background: '#ffffff', borderColor: '#e2e8f0', overflow: 'hidden' }}>
-                  <div className="card-header py-10 px-16 border-bottom d-flex justify-content-between align-items-center" style={{ background: '#f8fafc' }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.4px', color: '#334155' }}>
+                <div className="card mb-18" style={{ borderRadius: 10, background: '#ffffff', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                  <div className="card-header py-10 px-16 border-bottom d-flex justify-content-between align-items-center" style={{ background: '#ffffff' }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.4px', color: '#0f172a' }}>
                       ARTIGOS & LINHAS DA FACTURA ({facturaDetalhe.itens_detalhe?.length || 0})
                     </span>
-                    <span style={{ fontSize: 11, color: '#64748b' }}>
+                    <span style={{ fontSize: 11, color: '#2563eb', fontWeight: 600 }}>
                       Extração integral com IA
                     </span>
                   </div>
-                  <div className="card-body p-0">
+                  <div className="card-body p-0 bg-white">
                     {facturaDetalhe.itens_detalhe && facturaDetalhe.itens_detalhe.length > 0 ? (
                       <div className="table-responsive" style={{ maxHeight: 260, overflowY: 'auto' }}>
-                        <table className="table table-hover align-middle mb-0" style={{ fontSize: 12, minWidth: 780 }}>
-                          <thead style={{ background: '#f8fafc', position: 'sticky', top: 0, zIndex: 2 }}>
+                        <table className="table table-hover align-middle mb-0" style={{ fontSize: 12, minWidth: 780, background: '#ffffff' }}>
+                          <thead style={{ background: '#ffffff', position: 'sticky', top: 0, zIndex: 2 }}>
                             <tr style={{ color: '#475569', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
                               <th className="py-8 px-12 text-center" style={{ width: 40 }}>#</th>
                               <th className="py-8 px-12" style={{ width: 110 }}>Ref.</th>
@@ -1386,13 +1392,13 @@ const Facturas = () => {
                               const totalLinha = Number(item.total_liquido || item.total || (qtd * preco - desc + vIva));
 
                               return (
-                                <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
                                   <td className="py-8 px-12 text-center text-muted fw-600">
                                     {item.numero_linha || idx + 1}
                                   </td>
                                   <td className="py-8 px-12">
                                     {item.codigo ? (
-                                      <code style={{ background: '#f1f5f9', color: '#334155', padding: '2px 5px', borderRadius: 4, fontSize: 11 }}>
+                                      <code style={{ background: '#ffffff', border: '1px solid #e2e8f0', color: '#334155', padding: '2px 5px', borderRadius: 4, fontSize: 11 }}>
                                         {item.codigo}
                                       </code>
                                     ) : (
@@ -1416,13 +1422,13 @@ const Facturas = () => {
                                   <td className="py-8 px-12 text-center">
                                     <span
                                       style={{
-                                        background: '#f1f5f9',
-                                        color: '#334155',
-                                        border: '1px solid #e2e8f0',
+                                        background: '#ffffff',
+                                        color: '#2563eb',
+                                        border: '1px solid #bfdbfe',
                                         borderRadius: 4,
                                         padding: '2px 6px',
                                         fontSize: 10.5,
-                                        fontWeight: 600,
+                                        fontWeight: 700,
                                       }}
                                     >
                                       {taxa === 0 ? '0% (Isento)' : `${taxa}%`}
@@ -1438,14 +1444,14 @@ const Facturas = () => {
                               );
                             })}
                           </tbody>
-                          <tfoot className="table-light border-top">
+                          <tfoot style={{ background: '#ffffff', borderTop: '2px solid #e2e8f0' }}>
                             <tr>
                               <th colSpan="3" className="py-8 px-12 text-end fw-700" style={{ color: '#334155' }}>Total das Linhas:</th>
                               <th className="py-8 px-12 text-center fw-700" style={{ color: '#0f172a' }}>
                                 {facturaDetalhe.itens_detalhe.reduce((acc, it) => acc + (Number(it.quantidade) || 0), 0)}
                               </th>
                               <th colSpan="5"></th>
-                              <th className="py-8 px-12 text-end fw-700" style={{ color: '#0f172a' }}>
+                              <th className="py-8 px-12 text-end fw-800" style={{ color: '#0f172a' }}>
                                 {formatarKz(
                                   facturaDetalhe.itens_detalhe.reduce(
                                     (acc, it) => acc + Number(it.total_liquido || it.total || (Number(it.quantidade || 1) * Number(it.preco_unitario || 0))),
@@ -1466,23 +1472,23 @@ const Facturas = () => {
                 </div>
 
                 {/* 4. Totais Financeiros & IVA */}
-                <div className="card mb-18 border shadow-xs" style={{ borderRadius: 10, background: '#ffffff', borderColor: '#e2e8f0' }}>
-                  <div className="card-header py-10 px-16 border-bottom" style={{ background: '#f8fafc' }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.4px', color: '#334155' }}>
+                <div className="card mb-18" style={{ borderRadius: 10, background: '#ffffff', border: '1px solid #e2e8f0' }}>
+                  <div className="card-header py-10 px-16 border-bottom" style={{ background: '#ffffff' }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.4px', color: '#0f172a' }}>
                       VALORES FINANCEIROS & APURAMENTO DE IMPOSTOS
                     </span>
                   </div>
-                  <div className="card-body p-16">
+                  <div className="card-body p-16 bg-white">
                     <div className="row text-center mb-12 g-2">
                       <div className="col-sm-3 col-6 mb-8">
                         <span className="text-muted fw-600" style={{ fontSize: 11 }}>BASE INCIDÊNCIA</span>
-                        <div className="fw-700 mt-2" style={{ fontSize: 14, color: '#0f172a' }}>
+                        <div className="fw-800 mt-2" style={{ fontSize: 16, color: '#0f172a' }}>
                           {formatarKz(facturaDetalhe.base_incidencia)}
                         </div>
                       </div>
                       <div className="col-sm-3 col-6 mb-8">
                         <span className="text-muted fw-600" style={{ fontSize: 11 }}>IVA ({Number(facturaDetalhe.taxa_iva)}%)</span>
-                        <div className="fw-700 mt-2" style={{ fontSize: 14, color: '#0f172a' }}>
+                        <div className="fw-800 mt-2" style={{ fontSize: 16, color: '#2563eb' }}>
                           {formatarKz(facturaDetalhe.valor_iva)}
                         </div>
                         <small className="text-muted" style={{ fontSize: 10.5 }}>
@@ -1491,19 +1497,19 @@ const Facturas = () => {
                       </div>
                       <div className="col-sm-3 col-6 mb-8">
                         <span className="text-muted fw-600" style={{ fontSize: 11 }}>RETENÇÕES</span>
-                        <div className="fw-700 mt-2" style={{ fontSize: 14, color: '#0f172a' }}>
+                        <div className="fw-800 mt-2" style={{ fontSize: 16, color: '#0f172a' }}>
                           {formatarKz(Number(facturaDetalhe.retencao_iva || 0) + Number(facturaDetalhe.retencao_ii || 0))}
                         </div>
                       </div>
                       <div className="col-sm-3 col-6 mb-8">
                         <span className="text-muted fw-600" style={{ fontSize: 11 }}>TOTAL BRUTO</span>
-                        <div className="fw-700 mt-2" style={{ fontSize: 14, color: '#0f172a' }}>
+                        <div className="fw-800 mt-2" style={{ fontSize: 16, color: '#0f172a' }}>
                           {formatarKz(facturaDetalhe.valor_total)}
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-12 rounded d-flex flex-wrap justify-content-between align-items-center gap-8" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                    <div className="p-14 rounded d-flex flex-wrap justify-content-between align-items-center" style={{ gap: 8, background: '#ffffff', border: '1px solid #bfdbfe' }}>
                       <div>
                         {facturaDetalhe.total_extenso ? (
                           <div className="text-muted font-italic" style={{ fontSize: 11.5 }}>
@@ -1516,8 +1522,8 @@ const Facturas = () => {
                         )}
                       </div>
                       <div className="text-sm-end">
-                        <span className="text-muted fw-600 mr-8" style={{ fontSize: 12 }}>TOTAL LÍQUIDO A PAGAR:</span>
-                        <span className="fw-800" style={{ fontSize: 18, color: '#0f172a', letterSpacing: '-0.3px' }}>
+                        <span className="text-muted fw-700 mr-8" style={{ fontSize: 12 }}>TOTAL LÍQUIDO A PAGAR:</span>
+                        <span className="fw-800" style={{ fontSize: 20, color: '#2563eb', letterSpacing: '-0.3px' }}>
                           {formatarKz(facturaDetalhe.valor_liquido || facturaDetalhe.valor_total)}
                         </span>
                       </div>
@@ -1526,53 +1532,53 @@ const Facturas = () => {
                 </div>
 
                 {/* 5. Contabilização no PGC */}
-                <div className="card border shadow-xs" style={{ borderRadius: 10, background: '#ffffff', borderColor: '#e2e8f0' }}>
-                  <div className="card-header py-10 px-16 border-bottom" style={{ background: '#f8fafc' }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.4px', color: '#334155' }}>
+                <div className="card" style={{ borderRadius: 10, background: '#ffffff', border: '1px solid #e2e8f0' }}>
+                  <div className="card-header py-10 px-16 border-bottom" style={{ background: '#ffffff' }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.4px', color: '#0f172a' }}>
                       ESCRITURAÇÃO SUGERIDA NO PGC (LIVRO DIÁRIO)
                     </span>
                   </div>
-                  <div className="card-body p-14">
-                    <div className="d-flex flex-column gap-6" style={{ fontSize: 12 }}>
-                      <div className="d-flex align-items-center gap-8">
-                        <span className="badge" style={{ background: '#0f172a', color: '#ffffff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 700 }}>D</span>
-                        <span>Conta <strong>{facturaDetalhe.conta_custo_sugerida}</strong> ({facturaDetalhe.conta_custo_nome}): {formatarKz(facturaDetalhe.base_incidencia)}</span>
+                  <div className="card-body p-14 bg-white">
+                    <div className="d-flex flex-column" style={{ gap: 8, fontSize: 12.5 }}>
+                      <div className="d-flex align-items-center" style={{ gap: 8 }}>
+                        <span className="badge" style={{ background: '#2563eb', color: '#ffffff', borderRadius: 4, padding: '2px 7px', fontSize: 10.5, fontWeight: 700 }}>D</span>
+                        <span>Conta <strong>{facturaDetalhe.conta_custo_sugerida}</strong> ({facturaDetalhe.conta_custo_nome}): <strong>{formatarKz(facturaDetalhe.base_incidencia)}</strong></span>
                       </div>
                       {facturaDetalhe.iva_dedutivel && Number(facturaDetalhe.valor_iva) > 0 && (
-                        <div className="d-flex align-items-center gap-8">
-                          <span className="badge" style={{ background: '#0f172a', color: '#ffffff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 700 }}>D</span>
-                          <span>Conta <strong>{facturaDetalhe.conta_iva_sugerida}</strong> ({facturaDetalhe.conta_iva_nome}): {formatarKz(facturaDetalhe.valor_iva)}</span>
+                        <div className="d-flex align-items-center" style={{ gap: 8 }}>
+                          <span className="badge" style={{ background: '#2563eb', color: '#ffffff', borderRadius: 4, padding: '2px 7px', fontSize: 10.5, fontWeight: 700 }}>D</span>
+                          <span>Conta <strong>{facturaDetalhe.conta_iva_sugerida}</strong> ({facturaDetalhe.conta_iva_nome}): <strong>{formatarKz(facturaDetalhe.valor_iva)}</strong></span>
                         </div>
                       )}
                       {Number(facturaDetalhe.retencao_iva) > 0 && (
-                        <div className="d-flex align-items-center gap-8">
-                          <span className="badge" style={{ background: '#64748b', color: '#ffffff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 700 }}>C</span>
-                          <span>Conta <strong>34.2.2</strong> (Retenção na Fonte de IVA 7%): {formatarKz(facturaDetalhe.retencao_iva)}</span>
+                        <div className="d-flex align-items-center" style={{ gap: 8 }}>
+                          <span className="badge" style={{ background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 4, padding: '2px 7px', fontSize: 10.5, fontWeight: 700 }}>C</span>
+                          <span>Conta <strong>34.2.2</strong> (Retenção na Fonte de IVA 7%): <strong>{formatarKz(facturaDetalhe.retencao_iva)}</strong></span>
                         </div>
                       )}
                       {Number(facturaDetalhe.retencao_ii) > 0 && (
-                        <div className="d-flex align-items-center gap-8">
-                          <span className="badge" style={{ background: '#64748b', color: '#ffffff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 700 }}>C</span>
-                          <span>Conta <strong>34.2.1</strong> (Retenção Imposto Industrial 6.5%): {formatarKz(facturaDetalhe.retencao_ii)}</span>
+                        <div className="d-flex align-items-center" style={{ gap: 8 }}>
+                          <span className="badge" style={{ background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 4, padding: '2px 7px', fontSize: 10.5, fontWeight: 700 }}>C</span>
+                          <span>Conta <strong>34.2.1</strong> (Retenção Imposto Industrial 6.5%): <strong>{formatarKz(facturaDetalhe.retencao_ii)}</strong></span>
                         </div>
                       )}
-                      <div className="d-flex align-items-center gap-8">
-                        <span className="badge" style={{ background: '#64748b', color: '#ffffff', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 700 }}>C</span>
-                        <span>Conta <strong>{facturaDetalhe.conta_terceiro_sugerida}</strong> ({facturaDetalhe.conta_terceiro_nome}): {formatarKz(facturaDetalhe.valor_liquido || facturaDetalhe.valor_total)}</span>
+                      <div className="d-flex align-items-center" style={{ gap: 8 }}>
+                        <span className="badge" style={{ background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 4, padding: '2px 7px', fontSize: 10.5, fontWeight: 700 }}>C</span>
+                        <span>Conta <strong>{facturaDetalhe.conta_terceiro_sugerida}</strong> ({facturaDetalhe.conta_terceiro_nome}): <strong>{formatarKz(facturaDetalhe.valor_liquido || facturaDetalhe.valor_total)}</strong></span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Rodapé Fixo */}
+              {/* Rodapé Fixo com Botões Azuis Espaçados */}
               <div
-                className="modal-footer py-12 px-20 border-top d-flex justify-content-between align-items-center"
-                style={{ background: '#ffffff', flexShrink: 0 }}
+                className="modal-footer py-12 px-20 border-top d-flex justify-content-between align-items-center flex-wrap"
+                style={{ background: '#ffffff', flexShrink: 0, gap: 10 }}
               >
                 <button
                   type="button"
-                  className="btn btn-sm"
+                  className="btn btn-outline-primary btn-sm"
                   onClick={() => {
                     const toDelete = facturaDetalhe;
                     setFacturaDetalhe(null);
@@ -1580,10 +1586,7 @@ const Facturas = () => {
                   }}
                   style={{
                     borderRadius: 8,
-                    background: '#ffffff',
-                    border: '1px solid #fee2e2',
-                    color: '#dc2626',
-                    fontWeight: 600,
+                    fontWeight: 700,
                     fontSize: 12.5,
                     padding: '6px 14px',
                   }}
@@ -1591,29 +1594,26 @@ const Facturas = () => {
                   <i className="la la-trash mr-4"></i> Eliminar Fatura
                 </button>
 
-                <div className="d-flex align-items-center gap-8">
+                <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
                   <button
                     type="button"
-                    className="btn btn-light btn-sm"
+                    className="btn btn-outline-primary btn-sm"
                     onClick={() => setFacturaDetalhe(null)}
                     style={{
                       borderRadius: 8,
-                      background: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      color: '#475569',
-                      fontWeight: 500,
+                      fontWeight: 700,
                       fontSize: 12.5,
-                      padding: '6px 14px',
+                      padding: '6px 16px',
                     }}
                   >
                     Fechar
                   </button>
                   {isOperador ? (
                     <span
-                      className="d-flex align-items-center gap-6 px-12 py-6 text-muted"
-                      style={{ background: '#f8fafc', borderRadius: 8, fontSize: 12, border: '1px solid #e2e8f0' }}
+                      className="d-flex align-items-center px-12 py-6 text-muted"
+                      style={{ gap: 6, background: '#ffffff', borderRadius: 8, fontSize: 12, border: '1px solid #e2e8f0' }}
                     >
-                      <i className="la la-info-circle text-muted"></i>
+                      <i className="la la-info-circle" style={{ color: '#2563eb' }}></i>
                       {facturaDetalhe.lancado_na_contabilidade
                         ? 'Documento escriturado no Livro Diário'
                         : 'Escrituração no Livro Diário reservada à Contabilidade'}
@@ -1622,18 +1622,15 @@ const Facturas = () => {
                     !facturaDetalhe.lancado_na_contabilidade && (
                       <button
                         type="button"
-                        className="btn btn-sm d-flex align-items-center gap-6"
+                        className="btn btn-primary btn-sm d-flex align-items-center"
                         onClick={() => handleLancarNoDiario(facturaDetalhe)}
                         disabled={lancandoId === facturaDetalhe.id}
                         style={{
+                          gap: 6,
                           borderRadius: 8,
-                          background: '#0f172a',
-                          color: '#ffffff',
-                          border: 'none',
-                          fontWeight: 600,
+                          fontWeight: 700,
                           fontSize: 12.5,
                           padding: '6px 16px',
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                         }}
                       >
                         <i className={`la ${lancandoId === facturaDetalhe.id ? 'la-spinner la-spin' : 'la-check-double'}`}></i>
@@ -1653,7 +1650,7 @@ const Facturas = () => {
         show={Boolean(facturaApagar)}
         title="Eliminar Registo de Factura"
         confirmLabel="Sim, Eliminar"
-        confirmClass="btn-danger"
+        confirmClass="btn-primary"
         onConfirm={handleConfirmarExclusao}
         onClose={() => setFacturaApagar(null)}
       >
@@ -1664,7 +1661,7 @@ const Facturas = () => {
         </p>
       </ConfirmModal>
 
-      {/* 8. MODAL DE CAPTURA DE FOTOGRAFIA (CÂMARA) */}
+      {/* 8. MODAL DE CAPTURA DE FOTOGRAFIA (CÂMARA) - FUNDO BRANCO PURO & BOTÕES AZUIS */}
       {cameraAberta && (
         <div
           className="modal fade show"
@@ -1672,7 +1669,7 @@ const Facturas = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(15, 23, 42, 0.85)',
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
             position: 'fixed',
             top: 0,
             left: 0,
@@ -1694,28 +1691,29 @@ const Facturas = () => {
             }}
           >
             <div
-              className="modal-content border-0 shadow-2xl"
+              className="modal-content shadow-lg"
               style={{
                 borderRadius: 16,
                 overflow: 'hidden',
-                backgroundColor: '#0f172a',
-                color: '#ffffff',
-                border: '1px solid #334155',
+                backgroundColor: '#ffffff',
+                color: '#0f172a',
+                border: '1px solid #e2e8f0',
               }}
             >
               {/* Cabeçalho */}
               <div
                 className="py-14 px-20 border-bottom d-flex align-items-center justify-content-between"
-                style={{ borderColor: '#1e293b' }}
+                style={{ background: '#ffffff', borderColor: '#e2e8f0' }}
               >
-                <div className="d-flex align-items-center gap-10">
+                <div className="d-flex align-items-center" style={{ gap: 10 }}>
                   <span
                     style={{
                       width: 36,
                       height: 36,
                       borderRadius: 10,
-                      background: 'rgba(99, 102, 241, 0.2)',
-                      color: '#818cf8',
+                      background: '#ffffff',
+                      border: '1px solid #bfdbfe',
+                      color: '#2563eb',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1725,26 +1723,24 @@ const Facturas = () => {
                     <i className="la la-camera"></i>
                   </span>
                   <div>
-                    <h5 className="modal-title fw-700 text-white mb-0" style={{ fontSize: 16 }}>
+                    <h5 className="modal-title fw-800 mb-0" style={{ fontSize: 16, color: '#0f172a' }}>
                       Tirar Fotografia da Factura
                     </h5>
-                    <small style={{ color: '#94a3b8', fontSize: 12 }}>
+                    <small className="text-muted" style={{ fontSize: 12 }}>
                       Enquadre a factura ou talão no visor para extração automática com IA
                     </small>
                   </div>
                 </div>
                 <button
                   type="button"
-                  className="btn btn-icon btn-sm"
+                  className="btn btn-outline-primary btn-xs"
                   onClick={fecharCamera}
                   style={{
                     width: 32,
                     height: 32,
                     borderRadius: 8,
-                    background: '#1e293b',
-                    color: '#94a3b8',
-                    border: 'none',
                     fontSize: 18,
+                    padding: 0,
                   }}
                 >
                   &times;
@@ -1752,27 +1748,14 @@ const Facturas = () => {
               </div>
 
               {/* Visor da Câmara / Foto Capturada */}
-              <div className="p-16 text-center position-relative" style={{ background: '#020617', minHeight: 380 }}>
+              <div className="p-16 text-center position-relative" style={{ background: '#ffffff', minHeight: 340 }}>
                 {cameraErro ? (
                   <div className="py-40 px-20 text-center">
-                    <div
-                      style={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: '50%',
-                        background: 'rgba(239, 68, 68, 0.2)',
-                        color: '#f87171',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 26,
-                        marginBottom: 12,
-                      }}
-                    >
-                      <i className="la la-exclamation-triangle"></i>
+                    <div className="upload-icon-circle">
+                      <i className="la la-camera"></i>
                     </div>
-                    <h6 className="text-white fw-700 mb-8">Não foi possível iniciar a câmara</h6>
-                    <p style={{ color: '#94a3b8', fontSize: 13, maxWidth: 460, margin: '0 auto 20px' }}>
+                    <h6 className="fw-700 mb-8" style={{ color: '#0f172a' }}>Não foi possível iniciar a câmara</h6>
+                    <p className="text-muted" style={{ fontSize: 13, maxWidth: 460, margin: '0 auto 20px' }}>
                       {cameraErro}. Verifique se concedeu permissão de câmara ao seu navegador ou use o botão abaixo para abrir diretamente a câmara do seu telemóvel/computador.
                     </p>
                     <button
@@ -1782,7 +1765,7 @@ const Facturas = () => {
                         fecharCamera();
                         cameraInputFallbackRef.current?.click();
                       }}
-                      style={{ borderRadius: 8 }}
+                      style={{ borderRadius: 8, fontWeight: 700 }}
                     >
                       <i className="la la-camera mr-6"></i> Abrir Câmara do Dispositivo / Ficheiro
                     </button>
@@ -1795,8 +1778,9 @@ const Facturas = () => {
                         maxHeight: 460,
                         overflow: 'hidden',
                         borderRadius: 12,
-                        border: '2px solid #22c55e',
+                        border: '2px solid #2563eb',
                         position: 'relative',
+                        background: '#ffffff',
                       }}
                     >
                       <img
@@ -1809,12 +1793,12 @@ const Facturas = () => {
                           position: 'absolute',
                           top: 10,
                           left: 10,
-                          background: 'rgba(21, 128, 61, 0.85)',
+                          background: '#2563eb',
                           color: '#ffffff',
                           borderRadius: 6,
                           padding: '4px 10px',
                           fontSize: 12,
-                          fontWeight: 600,
+                          fontWeight: 700,
                           display: 'flex',
                           alignItems: 'center',
                           gap: 6,
@@ -1836,10 +1820,9 @@ const Facturas = () => {
                         maxHeight: 460,
                         objectFit: 'cover',
                         borderRadius: 12,
-                        background: '#000000',
+                        background: '#0f172a',
                       }}
                     />
-                    {/* Linhas de Enquadramento Guia */}
                     <div
                       style={{
                         position: 'absolute',
@@ -1847,10 +1830,9 @@ const Facturas = () => {
                         left: '6%',
                         right: '6%',
                         bottom: '8%',
-                        border: '2px dashed rgba(255, 255, 255, 0.45)',
+                        border: '2px dashed rgba(255, 255, 255, 0.7)',
                         borderRadius: 12,
                         pointerEvents: 'none',
-                        boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.25)',
                       }}
                     >
                       <div
@@ -1860,9 +1842,9 @@ const Facturas = () => {
                           left: 0,
                           right: 0,
                           textAlign: 'center',
-                          color: 'rgba(255, 255, 255, 0.9)',
+                          color: '#ffffff',
                           fontSize: 12,
-                          fontWeight: 500,
+                          fontWeight: 600,
                           textShadow: '0 1px 3px rgba(0,0,0,0.8)',
                         }}
                       >
@@ -1871,44 +1853,40 @@ const Facturas = () => {
                     </div>
                   </div>
                 )}
-                {/* Canvas oculto para captura */}
                 <canvas ref={canvasRef} style={{ display: 'none' }} />
               </div>
 
-              {/* Barra de Ações Inferior */}
+              {/* Barra de Ações Inferior (Fundo Branco + Botões Azuis Espaçados) */}
               <div
-                className="py-14 px-20 border-top d-flex align-items-center justify-content-between"
-                style={{ borderColor: '#1e293b', background: '#0f172a' }}
+                className="py-14 px-20 border-top d-flex align-items-center justify-content-between flex-wrap"
+                style={{ borderColor: '#e2e8f0', background: '#ffffff', gap: 10 }}
               >
                 {!fotoCapturada ? (
                   <>
                     <button
                       type="button"
-                      className="btn btn-sm"
+                      className="btn btn-outline-primary btn-sm"
                       onClick={fecharCamera}
                       style={{
-                        background: 'transparent',
-                        color: '#94a3b8',
-                        border: '1px solid #334155',
                         borderRadius: 8,
-                        padding: '6px 14px',
+                        padding: '7px 16px',
+                        fontWeight: 700,
                       }}
                     >
                       Cancelar
                     </button>
 
-                    <div className="d-flex align-items-center gap-12">
+                    <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
                       <button
                         type="button"
-                        className="btn btn-sm d-flex align-items-center gap-6"
+                        className="btn btn-outline-primary btn-sm d-flex align-items-center"
                         onClick={alternarCamera}
                         title="Alternar entre câmara frontal e traseira"
                         style={{
-                          background: '#1e293b',
-                          color: '#e2e8f0',
-                          border: '1px solid #334155',
+                          gap: 6,
                           borderRadius: 8,
-                          padding: '6px 14px',
+                          padding: '7px 16px',
+                          fontWeight: 700,
                         }}
                       >
                         <i className="la la-sync-alt"></i> Mudar Câmara
@@ -1916,27 +1894,17 @@ const Facturas = () => {
 
                       <button
                         type="button"
-                        className="btn btn-primary btn-sm d-flex align-items-center gap-8 px-20"
+                        className="btn btn-primary btn-sm d-flex align-items-center px-20"
                         onClick={tirarFoto}
                         disabled={Boolean(cameraErro)}
                         style={{
-                          background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)',
-                          border: 'none',
-                          borderRadius: 24,
-                          fontWeight: 600,
-                          padding: '8px 24px',
-                          boxShadow: '0 4px 14px rgba(79, 70, 229, 0.4)',
+                          gap: 8,
+                          borderRadius: 10,
+                          fontWeight: 700,
+                          padding: '8px 22px',
                         }}
                       >
-                        <span
-                          style={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: '50%',
-                            background: '#ffffff',
-                            display: 'inline-block',
-                          }}
-                        ></span>
+                        <i className="la la-camera"></i>
                         Tirar Fotografia
                       </button>
                     </div>
@@ -1945,14 +1913,13 @@ const Facturas = () => {
                   <>
                     <button
                       type="button"
-                      className="btn btn-sm d-flex align-items-center gap-6"
+                      className="btn btn-outline-primary btn-sm d-flex align-items-center"
                       onClick={repetirFoto}
                       style={{
-                        background: '#1e293b',
-                        color: '#cbd5e1',
-                        border: '1px solid #334155',
+                        gap: 6,
                         borderRadius: 8,
-                        padding: '6px 16px',
+                        padding: '7px 16px',
+                        fontWeight: 700,
                       }}
                     >
                       <i className="la la-redo"></i> Repetir Foto
@@ -1960,15 +1927,13 @@ const Facturas = () => {
 
                     <button
                       type="button"
-                      className="btn btn-success btn-sm d-flex align-items-center gap-8 px-20"
+                      className="btn btn-primary btn-sm d-flex align-items-center px-20"
                       onClick={confirmarFotoEEnviar}
                       style={{
-                        background: '#16a34a',
-                        borderColor: '#16a34a',
-                        borderRadius: 8,
-                        fontWeight: 600,
+                        gap: 8,
+                        borderRadius: 10,
+                        fontWeight: 700,
                         padding: '8px 22px',
-                        boxShadow: '0 4px 14px rgba(22, 163, 74, 0.35)',
                       }}
                     >
                       <i className="la la-magic" style={{ fontSize: 16 }}></i> Processar & Extrair Factura com IA

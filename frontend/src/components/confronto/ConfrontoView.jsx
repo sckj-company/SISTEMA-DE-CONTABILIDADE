@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { usePeriodo, usePeriodoDaUrl } from '../../context/PeriodoContext';
 import { empresaService, analiseService, authHeaders, API_BASE } from '../../services/api';
-import { parseAnaliseIA } from '../../utils/analiseIaParser';
+import { parseAnaliseIA, parseValorKz, formatKz } from '../../utils/analiseIaParser';
 import ConsolidacaoAnualView from './ConsolidacaoAnualView';
 
 const SpinDots = () => (
@@ -20,9 +20,9 @@ const SpinDots = () => (
 
 const ConfrontoView = () => {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const idiomaSistema = (i18n?.language || 'pt').substring(0, 2);
-  const { empresaId, ano, mes, atualizar, escolherSeAusente } = usePeriodo();
+  const { empresaId, ano, mes, atualizar } = usePeriodo();
   usePeriodoDaUrl();
 
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -390,57 +390,46 @@ const ConfrontoView = () => {
     <>
       <style>
         {`
-        .step-pill {
-          padding: 8px 16px;
-          border-radius: 8px;
-          background: #f4f6f9;
-          font-weight: 700;
-          font-size: 12.5px;
-          color: #495057;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .step-pill.active {
-          background: #e8ebfc;
-          color: #1a3353;
-          border: 1px solid #c2c9f5;
-        }
-        .upload-drop-card {
-          border: 2px dashed #cbd5e1;
-          border-radius: 12px;
-          padding: 24px 20px;
-          text-align: center;
-          background: #ffffff;
-          transition: all 0.25s ease;
-          cursor: pointer;
-        }
-        .upload-drop-card:hover {
-          border-color: #5f63f2;
-          background: #fbfbfe;
-          box-shadow: 0 6px 16px rgba(95, 99, 242, 0.06);
-        }
-        .upload-drop-card.has-file {
-          border: 2px solid #52c41a;
-          background: #f6ffed;
-        }
         .confronto-kpi-card {
-          border: 1px solid #edf0f5;
-          border-radius: 10px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
           background: #ffffff;
-          padding: 18px 20px;
+          padding: 20px 22px;
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .confronto-kpi-card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+          box-shadow: 0 6px 18px rgba(37, 99, 235, 0.06);
+        }
+        .confronto-big-card {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 14px;
+          padding: 24px 22px;
+          box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 18px;
+          transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .confronto-big-card:hover {
+          border-color: #bfdbfe;
+          box-shadow: 0 8px 24px rgba(37, 99, 235, 0.07);
+        }
+        .confronto-subbox {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 16px 18px;
         }
         .status-badge-conforme {
-          background-color: #e6f7ef;
-          color: #00a854;
-          border: 1px solid #b7eb8f;
-          padding: 4px 10px;
-          border-radius: 6px;
+          background-color: #ffffff;
+          color: #15803d;
+          border: 1px solid #86efac;
+          padding: 5px 12px;
+          border-radius: 20px;
           font-weight: 700;
           font-size: 11.5px;
           display: inline-flex;
@@ -448,53 +437,16 @@ const ConfrontoView = () => {
           gap: 5px;
         }
         .status-badge-divergencia {
-          background-color: #fff1f0;
-          color: #f5222d;
-          border: 1px solid #ffa39e;
-          padding: 4px 10px;
-          border-radius: 6px;
+          background-color: #ffffff;
+          color: #dc2626;
+          border: 1px solid #fca5a5;
+          padding: 5px 12px;
+          border-radius: 20px;
           font-weight: 700;
           font-size: 11.5px;
           display: inline-flex;
           align-items: center;
           gap: 5px;
-        }
-        .diff-box {
-          border-left: 4px solid #f5222d;
-          background: #fafafa;
-          border-radius: 0 8px 8px 0;
-          padding: 14px 18px;
-          margin-bottom: 12px;
-        }
-        .diff-box-ok {
-          border-left: 4px solid #52c41a;
-          background: #fafafa;
-          border-radius: 0 8px 8px 0;
-          padding: 12px 18px;
-          margin-bottom: 8px;
-        }
-        .rec-item-card {
-          background: #ffffff;
-          border: 1px solid #edf0f5;
-          border-radius: 8px;
-          padding: 14px 18px;
-          margin-bottom: 10px;
-          display: flex;
-          gap: 14px;
-          align-items: flex-start;
-        }
-        .rec-badge-number {
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          background: #1a3353;
-          color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          font-size: 13px;
-          flex-shrink: 0;
         }
         .print-only {
           display: none;
@@ -505,8 +457,7 @@ const ConfrontoView = () => {
           .sidebar-wrapper, .header-top { display: none !important; }
           .main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; }
           body { font-size: 10.5pt !important; background: #ffffff !important; color: #000000 !important; }
-          .card { border: 1px solid #dcdfe5 !important; box-shadow: none !important; page-break-inside: avoid; }
-          .confronto-kpi-card { border: 1px solid #dcdfe5 !important; box-shadow: none !important; page-break-inside: avoid; }
+          .card, .confronto-big-card, .confronto-kpi-card { border: 1px solid #cbd5e1 !important; box-shadow: none !important; page-break-inside: avoid; }
           @page { margin: 12mm; size: A4 portrait; }
         }
         `}
@@ -515,45 +466,43 @@ const ConfrontoView = () => {
       {/* CABEÇALHO DA PÁGINA COM NAVEGAÇÃO LIMPA */}
       <div className="row mb-20 no-print pt-10">
         <div className="col-12">
-          <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
+          <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 16 }}>
             <div>
-              <h4 className="fw-800 color-dark mb-4" style={{ fontSize: 22, color: '#1a3353' }}>
-                <i className="la la-balance-scale text-primary mr-6"></i>{' '}
+              <h4 className="fw-800 mb-4" style={{ fontSize: 22, color: '#0f172a' }}>
+                <i className="la la-balance-scale mr-6" style={{ color: '#2563eb' }}></i>{' '}
                 Confronto Contabilidade vs Portal AGT
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13.5 }}>
-                Cruzamento inteligente em 3 passos simples: carregue o Balancete e o Modelo 7 para apurar diferenças e gerar o relatório fiscal.
+                Cruzamento inteligente em 3 passos: carregue o Balancete e o Modelo 7 para apurar os números e saldos fiscais.
               </p>
             </div>
 
-            {/* SELEÇÃO DE ABAS */}
+            {/* SELEÇÃO DE ABAS (BOTÕES AZUIS SEPARADOS, NUNCA COLADOS) */}
             <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
-              <div className="btn-group" role="group">
-                <button
-                  type="button"
-                  className={`btn btn-sm ${abaAtiva === 'confronto' ? 'btn-primary' : 'btn-outline-lighten bg-white'}`}
-                  onClick={() => setAbaAtiva('confronto')}
-                  style={{ fontWeight: 700, fontSize: 13 }}
-                >
-                  <i className="la la-bolt mr-4"></i> 1. Confronto com IA
-                </button>
-                <button
-                  type="button"
-                  className={`btn btn-sm ${abaAtiva === 'consolidacao' ? 'btn-primary' : 'btn-outline-lighten bg-white'}`}
-                  onClick={() => setAbaAtiva('consolidacao')}
-                  style={{ fontWeight: 700, fontSize: 13 }}
-                >
-                  <i className="la la-calendar-check mr-4"></i> 2. Consolidação Anual (12 Meses)
-                </button>
-                <button
-                  type="button"
-                  className={`btn btn-sm ${abaAtiva === 'historico' ? 'btn-primary' : 'btn-outline-lighten bg-white'}`}
-                  onClick={() => setAbaAtiva('historico')}
-                  style={{ fontWeight: 700, fontSize: 13 }}
-                >
-                  <i className="la la-history mr-4"></i> 3. Histórico ({historico.length})
-                </button>
-              </div>
+              <button
+                type="button"
+                className={`btn btn-sm ${abaAtiva === 'confronto' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setAbaAtiva('confronto')}
+                style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
+              >
+                <i className="la la-bolt mr-4"></i> 1. Confronto com IA
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${abaAtiva === 'consolidacao' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setAbaAtiva('consolidacao')}
+                style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
+              >
+                <i className="la la-calendar-check mr-4"></i> 2. Consolidação Anual (12 Meses)
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${abaAtiva === 'historico' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setAbaAtiva('historico')}
+                style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
+              >
+                <i className="la la-history mr-4"></i> 3. Histórico ({historico.length})
+              </button>
             </div>
           </div>
         </div>
@@ -570,13 +519,13 @@ const ConfrontoView = () => {
         /* HISTÓRICO DE ANÁLISES */
         <div className="row">
           <div className="col-12">
-            <div className="card card-default" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
-              <div className="card-header py-12 px-20 bg-light border-bottom">
+            <div className="card card-default" style={{ border: '1px solid #e2e8f0', borderRadius: 12, background: '#ffffff' }}>
+              <div className="card-header py-14 px-20 bg-white border-bottom">
                 <strong className="color-dark" style={{ fontSize: 14 }}>
-                  <i className="la la-history text-primary mr-5"></i> Relatórios de Confronto Realizados Anteriormente
+                  <i className="la la-history mr-5" style={{ color: '#2563eb' }}></i> Relatórios de Confronto Realizados Anteriormente
                 </strong>
               </div>
-              <div className="card-body p-0">
+              <div className="card-body p-0 bg-white">
                 {carregandoHistorico ? (
                   <div className="text-center py-40">
                     <SpinDots />
@@ -584,14 +533,16 @@ const ConfrontoView = () => {
                   </div>
                 ) : historico.length === 0 ? (
                   <div className="text-center py-40">
-                    <div style={{ fontSize: 36 }}>📊</div>
+                    <div className="upload-icon-circle">
+                      <i className="la la-chart-bar"></i>
+                    </div>
                     <h5 className="mt-10">Nenhum confronto gravado no histórico</h5>
                     <p className="text-muted">Execute o primeiro confronto para arquivar o relatório.</p>
                   </div>
                 ) : (
                   <div className="table-responsive">
-                    <table className="table table-hover mb-0" style={{ fontSize: 13 }}>
-                      <thead style={{ backgroundColor: '#f9fafb' }}>
+                    <table className="table table-hover mb-0" style={{ fontSize: 13, background: '#ffffff' }}>
+                      <thead style={{ backgroundColor: '#ffffff' }}>
                         <tr>
                           <th>ID</th>
                           <th>Balancete (Contabilidade)</th>
@@ -606,15 +557,15 @@ const ConfrontoView = () => {
                           <tr key={item.id}>
                             <td style={{ verticalAlign: 'middle', fontWeight: 700 }}>#{item.id}</td>
                             <td style={{ verticalAlign: 'middle' }}>
-                              <i className="la la-book text-primary mr-1"></i>
+                              <i className="la la-book mr-1" style={{ color: '#2563eb' }}></i>
                               {item.documento_contabilidade?.nome_arquivo || 'Balancete'}
                             </td>
                             <td style={{ verticalAlign: 'middle' }}>
-                              <i className="la la-landmark text-info mr-1"></i>
+                              <i className="la la-landmark mr-1" style={{ color: '#2563eb' }}></i>
                               {item.documento_agt?.nome_arquivo || 'Modelo 7'}
                             </td>
                             <td style={{ verticalAlign: 'middle' }}>
-                              <span className="badge badge-success" style={{ fontSize: 11 }}>
+                              <span className="status-badge-conforme">
                                 {item.status}
                               </span>
                             </td>
@@ -647,34 +598,25 @@ const ConfrontoView = () => {
           {/* GUIA VISUAL DOS 3 PASSOS */}
           <div className="row mb-25 no-print">
             <div className="col-12">
-              <div className="card card-default" style={{ border: '1px solid #edf0f5', borderRadius: 10, background: '#ffffff' }}>
-                <div className="card-body py-15 px-20">
-                  <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
+              <div className="card card-default" style={{ border: '1px solid #e2e8f0', borderRadius: 12, background: '#ffffff' }}>
+                <div className="card-body py-15 px-20 bg-white">
+                  <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 14 }}>
                     <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
                       <div className={`step-pill ${!resultadoRaw ? 'active' : ''}`}>
-                        <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#1a3353', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>
-                          1
-                        </span>
-                        <span>Carregar Balancete & Modelo 7</span>
+                        <span>1. Carregar Balancete & Modelo 7</span>
                       </div>
-                      <span className="text-muted">&rarr;</span>
+                      <span style={{ color: '#93c5fd', fontWeight: 700 }}>&rarr;</span>
                       <div className={`step-pill ${executando ? 'active' : ''}`}>
-                        <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#1a3353', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>
-                          2
-                        </span>
-                        <span>Confrontar com IA</span>
+                        <span>2. Confrontar com IA</span>
                       </div>
-                      <span className="text-muted">&rarr;</span>
+                      <span style={{ color: '#93c5fd', fontWeight: 700 }}>&rarr;</span>
                       <div className={`step-pill ${resultadoRaw ? 'active' : ''}`}>
-                        <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#1a3353', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>
-                          3
-                        </span>
-                        <span>Ver Relatório, Excel & PDF</span>
+                        <span>3. Cards Numéricos, Excel & PDF</span>
                       </div>
                     </div>
 
                     {/* SELETOR DE EMPRESA ATIVA */}
-                    <div className="d-flex align-items-center" style={{ gap: 8 }}>
+                    <div className="d-flex align-items-center" style={{ gap: 10 }}>
                       <span className="text-muted fw-600" style={{ fontSize: 12 }}>EMPRESA:</span>
                       {isAdmin ? (
                         <>
@@ -682,7 +624,7 @@ const ConfrontoView = () => {
                             className="form-control form-control-sm"
                             value={empresaId}
                             onChange={(e) => atualizar({ empresaId: e.target.value })}
-                            style={{ height: 34, fontSize: 12.5, fontWeight: 700, minWidth: 200 }}
+                            style={{ height: 36, fontSize: 12.5, fontWeight: 700, minWidth: 200 }}
                           >
                             {empresas.length === 0 ? (
                               <option value="">Sem empresas cadastradas (+)</option>
@@ -698,7 +640,7 @@ const ConfrontoView = () => {
                             type="button"
                             className="btn btn-xs btn-outline-primary d-flex align-items-center justify-content-center"
                             onClick={() => navigate('/admin-gestao?aba=empresas&novaEmpresa=1')}
-                            style={{ height: 34, width: 34, borderRadius: 6, padding: 0 }}
+                            style={{ height: 36, width: 36, borderRadius: 8, padding: 0 }}
                             title="Cadastrar Nova Empresa"
                           >
                             <i className="la la-plus" style={{ fontSize: 16 }}></i>
@@ -706,11 +648,11 @@ const ConfrontoView = () => {
                         </>
                       ) : (
                         <div
-                          className="px-12 py-6 bg-white rounded border fw-700 color-dark text-truncate d-flex align-items-center"
-                          style={{ height: 34, fontSize: 12.5, maxWidth: 300 }}
+                          className="px-12 py-6 bg-white rounded fw-700 color-dark text-truncate d-flex align-items-center"
+                          style={{ height: 36, fontSize: 12.5, maxWidth: 300, border: '1px solid #bfdbfe' }}
                           title={empresas.find((e) => String(e.id) === String(empresaId))?.nome || 'Minha Empresa'}
                         >
-                          <i className="la la-building mr-1 text-primary"></i>
+                          <i className="la la-building mr-1" style={{ color: '#2563eb' }}></i>
                           <span className="text-truncate">
                             {empresas.find((e) => String(e.id) === String(empresaId))?.nome || 'Minha Empresa'}
                           </span>
@@ -723,30 +665,30 @@ const ConfrontoView = () => {
             </div>
           </div>
 
-          {/* PASSO 1: CAIXAS DE CARREGAMENTO DOS 2 FICHEIROS */}
-          <div className="row mb-25 no-print" style={{ rowGap: 16 }}>
+          {/* PASSO 1: CAIXAS DE CARREGAMENTO DOS 2 FICHEIROS (MESMA ESTÉTICA BRANCA + AZUL) */}
+          <div className="row mb-25 no-print" style={{ rowGap: 20 }}>
             {/* CAIXA 1: BALANCETE DA CONTABILIDADE */}
             <div className="col-12 col-lg-6">
-              <div className="card card-default h-100" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
-                <div className="card-header py-12 px-20 bg-light border-bottom">
-                  <div className="d-flex justify-content-between align-items-center w-100">
-                    <strong className="color-dark" style={{ fontSize: 13.5 }}>
-                      <i className="la la-book text-primary mr-5"></i> 1. Balancete de Verificação (PGC)
+              <div className="card card-default h-100" style={{ border: '1px solid #e2e8f0', borderRadius: 14, background: '#ffffff' }}>
+                <div className="card-header py-14 px-20 bg-white border-bottom">
+                  <div className="d-flex justify-content-between align-items-center flex-wrap w-100" style={{ gap: 10 }}>
+                    <strong className="color-dark" style={{ fontSize: 14 }}>
+                      <i className="la la-book mr-5" style={{ color: '#2563eb' }}></i> 1. Balancete de Verificação (PGC)
                     </strong>
-                    <div className="btn-group btn-group-sm" role="group">
+                    <div className="d-flex align-items-center flex-wrap" style={{ gap: 8 }}>
                       <button
                         type="button"
-                        className={`btn btn-xs ${origemContab === 'upload' ? 'btn-primary text-white' : 'btn-outline-lighten bg-white'}`}
+                        className={`btn btn-xs ${origemContab === 'upload' ? 'btn-primary' : 'btn-outline-primary'}`}
                         onClick={() => setOrigemContab('upload')}
-                        style={{ fontSize: 11, fontWeight: 600 }}
+                        style={{ fontSize: 11.5, fontWeight: 600, padding: '5px 12px' }}
                       >
                         Carregar Ficheiro
                       </button>
                       <button
                         type="button"
-                        className={`btn btn-xs ${origemContab === 'arquivo' ? 'btn-primary text-white' : 'btn-outline-lighten bg-white'}`}
+                        className={`btn btn-xs ${origemContab === 'arquivo' ? 'btn-primary' : 'btn-outline-primary'}`}
                         onClick={() => setOrigemContab('arquivo')}
-                        style={{ fontSize: 11, fontWeight: 600 }}
+                        style={{ fontSize: 11.5, fontWeight: 600, padding: '5px 12px' }}
                       >
                         Do Arquivo ({balancetesDisponiveis.length})
                       </button>
@@ -754,7 +696,7 @@ const ConfrontoView = () => {
                   </div>
                 </div>
 
-                <div className="card-body p-20 d-flex flex-column justify-content-center">
+                <div className="card-body p-20 bg-white d-flex flex-column justify-content-center">
                   {origemContab === 'upload' ? (
                     <div>
                       <input
@@ -776,34 +718,42 @@ const ConfrontoView = () => {
                       >
                         {ficheiroContab ? (
                           <div>
-                            <div style={{ fontSize: 36 }} className="text-success mb-5">✓</div>
-                            <strong className="d-block text-dark" style={{ fontSize: 14 }}>
+                            <div className="upload-icon-circle">
+                              <i className="la la-check"></i>
+                            </div>
+                            <strong className="d-block text-dark" style={{ fontSize: 14.5 }}>
                               {ficheiroContab.name}
                             </strong>
-                            <span className="badge badge-success mt-4" style={{ fontSize: 11.5 }}>
+                            <span
+                              className="badge mt-6"
+                              style={{ fontSize: 11.5, background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '5px 12px' }}
+                            >
                               {formatFileSize(ficheiroContab.size)} &nbsp;·&nbsp; Pronto para confrontar
                             </span>
-                            <div className="mt-8">
+                            <div className="mt-12">
                               <button
                                 type="button"
-                                className="btn btn-outline-danger btn-xs"
+                                className="btn btn-outline-primary btn-xs"
+                                style={{ padding: '5px 14px', fontSize: 12 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setFicheiroContab(null);
                                   if (fileInputContabRef.current) fileInputContabRef.current.value = '';
                                 }}
                               >
-                                Trocar Ficheiro
+                                <i className="la la-sync mr-1"></i> Trocar Ficheiro
                               </button>
                             </div>
                           </div>
                         ) : (
                           <div>
-                            <div style={{ fontSize: 36 }} className="text-primary mb-5">📄</div>
-                            <strong className="d-block color-dark" style={{ fontSize: 14 }}>
+                            <div className="upload-icon-circle">
+                              <i className="la la-cloud-upload-alt"></i>
+                            </div>
+                            <strong className="d-block color-dark" style={{ fontSize: 14.5 }}>
                               Clique aqui para selecionar o Balancete
                             </strong>
-                            <span className="text-muted d-block mt-4" style={{ fontSize: 12 }}>
+                            <span className="text-muted d-block mt-6" style={{ fontSize: 12.5 }}>
                               Suporta ficheiros em <strong>PDF</strong> ou folha de cálculo <strong>Excel (.xlsx)</strong>
                             </span>
                           </div>
@@ -812,7 +762,7 @@ const ConfrontoView = () => {
                     </div>
                   ) : (
                     <div>
-                      <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
+                      <label className="fw-600 text-muted mb-6" style={{ fontSize: 12 }}>
                         SELECIONE O BALANCETE JÁ ARQUIVADO DA EMPRESA:
                       </label>
                       <select
@@ -827,12 +777,12 @@ const ConfrontoView = () => {
                         <option value="">-- Escolha o Balancete arquivado --</option>
                         {balancetesDisponiveis.map((doc) => (
                           <option key={doc.id} value={String(doc.id)}>
-                            📄 {doc.nome_arquivo} ({doc.mes}/{doc.ano})
+                            {doc.nome_arquivo} ({doc.mes}/{doc.ano})
                           </option>
                         ))}
                       </select>
                       {balancetesDisponiveis.length === 0 && (
-                        <div className="text-warning mt-8" style={{ fontSize: 12 }}>
+                        <div className="mt-8" style={{ fontSize: 12, color: '#2563eb' }}>
                           Nenhum balancete guardado no arquivo para esta empresa. Use a opção "Carregar Ficheiro".
                         </div>
                       )}
@@ -844,26 +794,26 @@ const ConfrontoView = () => {
 
             {/* CAIXA 2: DECLARAÇÃO MODELO 7 (PORTAL AGT) */}
             <div className="col-12 col-lg-6">
-              <div className="card card-default h-100" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
-                <div className="card-header py-12 px-20 bg-light border-bottom">
-                  <div className="d-flex justify-content-between align-items-center w-100">
-                    <strong className="color-dark" style={{ fontSize: 13.5 }}>
-                      <i className="la la-landmark text-primary mr-5"></i> 2. Declaração Modelo 7 da AGT (IVA)
+              <div className="card card-default h-100" style={{ border: '1px solid #e2e8f0', borderRadius: 14, background: '#ffffff' }}>
+                <div className="card-header py-14 px-20 bg-white border-bottom">
+                  <div className="d-flex justify-content-between align-items-center flex-wrap w-100" style={{ gap: 10 }}>
+                    <strong className="color-dark" style={{ fontSize: 14 }}>
+                      <i className="la la-landmark mr-5" style={{ color: '#2563eb' }}></i> 2. Declaração Modelo 7 da AGT (IVA)
                     </strong>
-                    <div className="btn-group btn-group-sm" role="group">
+                    <div className="d-flex align-items-center flex-wrap" style={{ gap: 8 }}>
                       <button
                         type="button"
-                        className={`btn btn-xs ${origemAgt === 'upload' ? 'btn-primary text-white' : 'btn-outline-lighten bg-white'}`}
+                        className={`btn btn-xs ${origemAgt === 'upload' ? 'btn-primary' : 'btn-outline-primary'}`}
                         onClick={() => setOrigemAgt('upload')}
-                        style={{ fontSize: 11, fontWeight: 600 }}
+                        style={{ fontSize: 11.5, fontWeight: 600, padding: '5px 12px' }}
                       >
                         Carregar Ficheiro
                       </button>
                       <button
                         type="button"
-                        className={`btn btn-xs ${origemAgt === 'arquivo' ? 'btn-primary text-white' : 'btn-outline-lighten bg-white'}`}
+                        className={`btn btn-xs ${origemAgt === 'arquivo' ? 'btn-primary' : 'btn-outline-primary'}`}
                         onClick={() => setOrigemAgt('arquivo')}
-                        style={{ fontSize: 11, fontWeight: 600 }}
+                        style={{ fontSize: 11.5, fontWeight: 600, padding: '5px 12px' }}
                       >
                         Do Arquivo ({docsAgtDisponiveis.length})
                       </button>
@@ -871,7 +821,7 @@ const ConfrontoView = () => {
                   </div>
                 </div>
 
-                <div className="card-body p-20 d-flex flex-column justify-content-center">
+                <div className="card-body p-20 bg-white d-flex flex-column justify-content-center">
                   {origemAgt === 'upload' ? (
                     <div>
                       <input
@@ -893,34 +843,42 @@ const ConfrontoView = () => {
                       >
                         {ficheiroAgt ? (
                           <div>
-                            <div style={{ fontSize: 36 }} className="text-success mb-5">✓</div>
-                            <strong className="d-block text-dark" style={{ fontSize: 14 }}>
+                            <div className="upload-icon-circle">
+                              <i className="la la-check"></i>
+                            </div>
+                            <strong className="d-block text-dark" style={{ fontSize: 14.5 }}>
                               {ficheiroAgt.name}
                             </strong>
-                            <span className="badge badge-success mt-4" style={{ fontSize: 11.5 }}>
+                            <span
+                              className="badge mt-6"
+                              style={{ fontSize: 11.5, background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '5px 12px' }}
+                            >
                               {formatFileSize(ficheiroAgt.size)} &nbsp;·&nbsp; Pronto para confrontar
                             </span>
-                            <div className="mt-8">
+                            <div className="mt-12">
                               <button
                                 type="button"
-                                className="btn btn-outline-danger btn-xs"
+                                className="btn btn-outline-primary btn-xs"
+                                style={{ padding: '5px 14px', fontSize: 12 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setFicheiroAgt(null);
                                   if (fileInputAgtRef.current) fileInputAgtRef.current.value = '';
                                 }}
                               >
-                                Trocar Ficheiro
+                                <i className="la la-sync mr-1"></i> Trocar Ficheiro
                               </button>
                             </div>
                           </div>
                         ) : (
                           <div>
-                            <div style={{ fontSize: 36 }} className="text-primary mb-5">🏛️</div>
-                            <strong className="d-block color-dark" style={{ fontSize: 14 }}>
+                            <div className="upload-icon-circle">
+                              <i className="la la-cloud-upload-alt"></i>
+                            </div>
+                            <strong className="d-block color-dark" style={{ fontSize: 14.5 }}>
                               Clique aqui para selecionar a Declaração Modelo 7
                             </strong>
-                            <span className="text-muted d-block mt-4" style={{ fontSize: 12 }}>
+                            <span className="text-muted d-block mt-6" style={{ fontSize: 12.5 }}>
                               Suporta o PDF do <strong>Comprovativo de Entrega</strong> gerado no Portal da AGT
                             </span>
                           </div>
@@ -929,7 +887,7 @@ const ConfrontoView = () => {
                     </div>
                   ) : (
                     <div>
-                      <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
+                      <label className="fw-600 text-muted mb-6" style={{ fontSize: 12 }}>
                         SELECIONE O MODELO 7 JÁ ARQUIVADO DA EMPRESA:
                       </label>
                       <select
@@ -944,12 +902,12 @@ const ConfrontoView = () => {
                         <option value="">-- Escolha o Modelo 7 arquivado --</option>
                         {docsAgtDisponiveis.map((doc) => (
                           <option key={doc.id} value={String(doc.id)}>
-                            🏛️ {doc.nome_arquivo} ({doc.mes}/{doc.ano})
+                            {doc.nome_arquivo} ({doc.mes}/{doc.ano})
                           </option>
                         ))}
                       </select>
                       {docsAgtDisponiveis.length === 0 && (
-                        <div className="text-warning mt-8" style={{ fontSize: 12 }}>
+                        <div className="mt-8" style={{ fontSize: 12, color: '#2563eb' }}>
                           Nenhuma declaração guardada no arquivo para esta empresa. Use a opção "Carregar Ficheiro".
                         </div>
                       )}
@@ -959,20 +917,18 @@ const ConfrontoView = () => {
               </div>
             </div>
 
-            {/* PASSO 2: BOTÃO CENTRAL DE EXECUÇÃO */}
+            {/* PASSO 2: BOTÃO CENTRAL DE EXECUÇÃO (AZUL INSTITUCIONAL) */}
             <div className="col-12 mt-10 text-center">
               <button
                 type="button"
-                className="btn btn-primary btn-lg shadow-sm"
+                className="btn btn-primary btn-lg"
                 onClick={handleExecutarConfronto}
                 disabled={executando || !prontoParaConfrontar}
                 style={{
                   fontSize: 15,
                   fontWeight: 800,
                   padding: '14px 36px',
-                  borderRadius: 30,
-                  backgroundColor: prontoParaConfrontar ? '#1a3353' : '#a0aec0',
-                  borderColor: prontoParaConfrontar ? '#1a3353' : '#a0aec0',
+                  borderRadius: 10,
                   letterSpacing: '0.3px',
                 }}
               >
@@ -987,8 +943,8 @@ const ConfrontoView = () => {
                 )}
               </button>
               {!prontoParaConfrontar && (
-                <div className="text-muted mt-8" style={{ fontSize: 12 }}>
-                  <i className="la la-info-circle mr-1"></i> Carregue o Balancete (Caixa 1) e o Modelo 7 da AGT (Caixa 2) acima para habilitar o confronto.
+                <div className="text-muted mt-10" style={{ fontSize: 12.5 }}>
+                  <i className="la la-info-circle mr-1" style={{ color: '#2563eb' }}></i> Carregue o Balancete (Caixa 1) e o Modelo 7 da AGT (Caixa 2) acima para habilitar o confronto.
                 </div>
               )}
             </div>
@@ -999,910 +955,920 @@ const ConfrontoView = () => {
             <div className="row mb-25 no-print">
               <div className="col-12">
                 <div
-                  className="card card-default text-center py-50 d-flex flex-column align-items-center justify-content-center"
-                  style={{ border: '1px solid #edf0f5', borderRadius: 12, minHeight: 220 }}
+                  className="card card-default bg-white text-center py-50 d-flex flex-column align-items-center justify-content-center"
+                  style={{ border: '1px solid #e2e8f0', borderRadius: 14, minHeight: 220 }}
                 >
                   <SpinDots />
                   <h5 className="fw-700 color-dark mt-20 mb-8" style={{ fontSize: 17 }}>
                     {etapaTexto || 'A confrontar Balancete com o Portal da AGT...'}
                   </h5>
                   <p className="text-muted mb-0" style={{ fontSize: 13.5, maxWidth: 650, margin: '0 auto', textAlign: 'center' }}>
-                    O motor de inteligência artificial está a validar as contas do PGC, a cruzar com as 56 linhas do Modelo 7 e a apurar conformidades e divergências fiscais.
+                    O motor de inteligência artificial está a extrair e cruzar todos os saldos numéricos do PGC com a Declaração Modelo 7.
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* PASSO 3: RELATÓRIO DO CONFRONTO GERADO */}
-          {!executando && parsedData && (
-            <div id="secao-relatorio-confronto">
-              {/* CABEÇALHO TIMBRADO PARA IMPRESSÃO / PDF */}
-              <div className="print-only mb-25 pb-15 border-bottom" style={{ borderBottom: '2px solid #1a3353' }}>
-                <div className="d-flex justify-content-between align-items-start">
-                  <div>
-                    <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1a3353', margin: 0, textTransform: 'uppercase' }}>
-                      {empresaAtual?.nome || 'EMPRESA CONTRIBUINTE'}
-                    </h2>
-                    <div style={{ fontSize: 12, color: '#555', marginTop: 4 }}>
-                      <strong>NIF:</strong> {empresaAtual?.nif || '---'} &nbsp;|&nbsp; <strong>Regime IVA:</strong> {empresaAtual?.regime_iva || 'Geral'}
-                    </div>
-                    <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>
-                      {empresaAtual?.morada || 'República de Angola'}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: '#1a3353', letterSpacing: '0.5px' }}>
-                      RELATÓRIO TÉCNICO DE CONFRONTO FISCAL
-                    </div>
-                    <div style={{ fontSize: 11, color: '#555', marginTop: 2 }}>
-                      Balancete PGC vs Modelo 7 AGT
-                    </div>
-                    <div style={{ fontSize: 11, color: '#333', marginTop: 2 }}>
-                      Período: <strong>{String(mes).padStart(2, '0')}/{ano}</strong> &nbsp;|&nbsp; Emissão: {new Date().toLocaleDateString('pt-PT')}
-                    </div>
-                  </div>
-                </div>
-                <div style={{ marginTop: 10, padding: '6px 12px', background: '#f4f6f9', fontSize: 10.5, color: '#444', borderRadius: 4, border: '1px solid #e2e8f0' }}>
-                  <strong>Enquadramento Legal:</strong> Plano Geral de Contabilidade (Decreto Presidencial n.º 82/01), Código do IVA (Lei n.º 7/19 de 24 de Abril) e Código Geral Tributário (Lei n.º 21/14).
-                </div>
-              </div>
+          {/* PASSO 3: RELATÓRIO DO CONFRONTO GERADO (100% EM CARTÕES NUMÉRICOS E FUNDO BRANCO) */}
+          {!executando && parsedData && (() => {
+            const totalRubricas = parsedData.totalPontos || parsedData.itensConfronto.length || 0;
+            const rubricasConformes = parsedData.iguaisCount || 0;
+            const rubricasDivergentes = parsedData.diferencasCount || 0;
+            const indiceConformidade = totalRubricas > 0
+              ? Math.round((rubricasConformes / totalRubricas) * 100)
+              : 100;
 
-              {/* BARRA DE AÇÕES DO RELATÓRIO NO ECRÃ */}
-              <div className="card card-default mb-20 no-print" style={{ border: '1px solid #edf0f5', borderRadius: 10, background: '#f8fafc' }}>
-                <div className="card-body py-15 px-20">
-                  <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
+            const liqContabNum = parseValorKz(parsedData.apuramentoIva?.liquidado?.contabilidade);
+            const liqAgtNum = parseValorKz(parsedData.apuramentoIva?.liquidado?.agt);
+            const desvioLiqNum = Math.abs(liqContabNum - liqAgtNum);
+            const desvioLiqTexto = parsedData.apuramentoIva?.liquidado?.status === 'IGUAIS' || desvioLiqNum <= 0.05
+              ? '0,00 Kz'
+              : (parsedData.apuramentoIva?.liquidado?.diferenca || formatKz(desvioLiqNum));
+
+            const dedContabNum = parseValorKz(parsedData.apuramentoIva?.dedutivel?.contabilidade);
+            const dedAgtNum = parseValorKz(parsedData.apuramentoIva?.dedutivel?.agt);
+            const desvioDedNum = Math.abs(dedContabNum - dedAgtNum);
+            const desvioDedTexto = parsedData.apuramentoIva?.dedutivel?.status === 'IGUAIS' || desvioDedNum <= 0.05
+              ? '0,00 Kz'
+              : (parsedData.apuramentoIva?.dedutivel?.diferenca || formatKz(desvioDedNum));
+
+            const desvioVendasTexto = parsedData.apuramentoIva?.incidenciaVendas?.status === 'IGUAIS'
+              ? '0,00 Kz'
+              : (parsedData.apuramentoIva?.incidenciaVendas?.diferenca || '0,00 Kz');
+
+            const desvioComprasTexto = parsedData.apuramentoIva?.incidenciaCompras?.status === 'IGUAIS'
+              ? '0,00 Kz'
+              : (parsedData.apuramentoIva?.incidenciaCompras?.diferenca || '0,00 Kz');
+
+            const desvioApuramentoTexto = parsedData.apuramentoIva?.confrontoPeriodo?.status === 'IGUAIS'
+              ? '0,00 Kz'
+              : (parsedData.apuramentoIva?.confrontoPeriodo?.diferenca || '0,00 Kz');
+
+            const corApuramentoPrincipal = parsedData.apuramentoIva?.isRecuperar
+              ? '#15803d'
+              : parsedData.apuramentoIva?.isReembolso
+              ? '#2563eb'
+              : '#dc2626';
+
+            return (
+              <div id="secao-relatorio-confronto">
+                {/* CABEÇALHO TIMBRADO PARA IMPRESSÃO / PDF */}
+                <div className="print-only mb-25 pb-15 border-bottom" style={{ borderBottom: '2px solid #0f172a' }}>
+                  <div className="d-flex justify-content-between align-items-start">
                     <div>
-                      <span className="badge badge-success mr-2" style={{ fontSize: 12 }}>
-                        ✓ Passo 3 Concluído
-                      </span>
-                      <strong className="color-dark" style={{ fontSize: 14 }}>
-                        Relatório de Confronto Gerado com Sucesso
-                      </strong>
-                    </div>
-
-                    <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
-                      {/* Tradução com IA */}
-                      <div className="d-flex align-items-center bg-white p-1 rounded border shadow-xs" style={{ gap: 4 }}>
-                        <span className="text-muted fw-600 px-2" style={{ fontSize: 12 }}>
-                          <i className="la la-language text-primary mr-1"></i> Traduzir Relatório:
-                        </span>
-                        <button
-                          type="button"
-                          className={`btn btn-xs ${idiomaRelatorio === 'pt' ? 'btn-primary' : 'btn-light'}`}
-                          onClick={() => handleTraduzirRelatorio('pt')}
-                          disabled={traduzindo}
-                          style={{ fontWeight: 700, borderRadius: 6, fontSize: 11.5, padding: '3px 8px' }}
-                          title="Traduzir relatório para Português"
-                        >
-                          🇦🇴 PT
-                        </button>
-                        <button
-                          type="button"
-                          className={`btn btn-xs ${idiomaRelatorio === 'en' ? 'btn-primary' : 'btn-light'}`}
-                          onClick={() => handleTraduzirRelatorio('en')}
-                          disabled={traduzindo}
-                          style={{ fontWeight: 700, borderRadius: 6, fontSize: 11.5, padding: '3px 8px' }}
-                          title="Translate report to English"
-                        >
-                          🇬🇧 EN
-                        </button>
-                        <button
-                          type="button"
-                          className={`btn btn-xs ${idiomaRelatorio === 'zh' ? 'btn-primary' : 'btn-light'}`}
-                          onClick={() => handleTraduzirRelatorio('zh')}
-                          disabled={traduzindo}
-                          style={{ fontWeight: 700, borderRadius: 6, fontSize: 11.5, padding: '3px 8px' }}
-                          title="翻译报告为中文 (Chinese)"
-                        >
-                          🇨🇳 中文
-                        </button>
-                        {traduzindo && (
-                          <span className="text-primary px-1" style={{ fontSize: 12 }}>
-                            <i className="la la-spinner la-spin"></i>
-                          </span>
-                        )}
+                      <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase' }}>
+                        {empresaAtual?.nome || 'EMPRESA CONTRIBUINTE'}
+                      </h2>
+                      <div style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>
+                        <strong>NIF:</strong> {empresaAtual?.nif || '---'} &nbsp;|&nbsp; <strong>Regime IVA:</strong> {empresaAtual?.regime_iva || 'Geral'}
                       </div>
-
-                      {/* Alternar Painel Visual vs Texto Pericial */}
-                      <button
-                        type="button"
-                        className={`btn btn-sm ${visualizacaoTexto ? 'btn-info text-white' : 'btn-outline-info bg-white'}`}
-                        onClick={() => setVisualizacaoTexto(!visualizacaoTexto)}
-                        style={{ fontWeight: 700, padding: '7px 14px', fontSize: 12.5 }}
-                        title="Alternar entre painel de cartões visuais e texto pericial completo"
-                      >
-                        <i className={`la ${visualizacaoTexto ? 'la-th-large' : 'la-file-alt'} mr-1`}></i>
-                        {visualizacaoTexto ? 'Painel Visual' : 'Texto Completo'}
-                      </button>
-
-                      <button
-                        type="button"
-                        className="btn btn-success btn-sm"
-                        onClick={handleExportarExcel}
-                        disabled={exportandoExcel}
-                        style={{ fontWeight: 700, padding: '8px 16px', fontSize: 13 }}
-                      >
-                        <i className={`la ${exportandoExcel ? 'la-spinner la-spin' : 'la-file-excel'} mr-2`}></i>
-                        {exportandoExcel ? 'A descarregar...' : 'Descarregar Excel (.xlsx)'}
-                      </button>
-
-                      <button
-                        type="button"
-                        className="btn btn-outline-primary btn-sm bg-white"
-                        onClick={handlePrint}
-                        style={{ fontWeight: 700, padding: '8px 16px', fontSize: 13 }}
-                      >
-                        <i className="la la-print mr-2"></i> Imprimir / Salvar PDF
-                      </button>
-
-                      <button
-                        type="button"
-                        className="btn btn-outline-lighten btn-sm bg-white"
-                        onClick={handleLimparNovoConfronto}
-                        style={{ fontWeight: 600, padding: '8px 14px', fontSize: 13 }}
-                      >
-                        <i className="la la-sync mr-1"></i> Fazer Novo Confronto
-                      </button>
+                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                        {empresaAtual?.morada || 'República de Angola'}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', letterSpacing: '0.5px' }}>
+                        RELATÓRIO NUMÉRICO DE CONFRONTO FISCAL
+                      </div>
+                      <div style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>
+                        Balancete PGC vs Modelo 7 AGT
+                      </div>
+                      <div style={{ fontSize: 11, color: '#334155', marginTop: 2 }}>
+                        Período: <strong>{String(mes).padStart(2, '0')}/{ano}</strong> &nbsp;|&nbsp; Emissão: {new Date().toLocaleDateString('pt-PT')}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* MODO DE TEXTO PERICIAL COMPLETO */}
-              {visualizacaoTexto && resultadoRaw && (
-                <div className="card card-default mb-25" style={{ border: '1px solid #edf0f5', borderRadius: 10, background: '#ffffff' }}>
-                  <div className="card-header py-12 px-20 bg-light border-bottom d-flex justify-content-between align-items-center">
-                    <strong className="color-dark" style={{ fontSize: 14 }}>
-                      <i className="la la-file-text text-primary mr-5"></i> Relatório Pericial Completo ({idiomaRelatorio === 'zh' ? '中文' : idiomaRelatorio === 'en' ? 'English' : 'Português'})
-                    </strong>
-                    <button
-                      type="button"
-                      className="btn btn-xs btn-outline-secondary"
-                      onClick={() => {
-                        navigator.clipboard.writeText(resultadoRaw);
-                        toast.info('Texto do relatório copiado para a área de transferência.');
-                      }}
-                    >
-                      <i className="la la-copy mr-1"></i> Copiar Texto
-                    </button>
-                  </div>
-                  <div className="card-body p-25" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: 13.5, color: '#272b41', background: '#fdfdfe', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-                    {resultadoRaw}
-                  </div>
-                </div>
-              )}
-
-              {/* 1. CARTÕES DE MÉTRICAS / KPIS */}
-              <div className="row mb-20" style={{ rowGap: 12 }}>
-                <div className="col-12 col-sm-6 col-lg-3">
-                  <div className="confronto-kpi-card h-100">
-                    <span className="text-muted fw-600 d-block mb-4" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
-                      PONTOS CONFRONTADOS
-                    </span>
-                    <div className="fw-700 color-dark" style={{ fontSize: 24 }}>
-                      {parsedData.totalPontos || parsedData.itensConfronto.length}{' '}
-                      <span className="fs-13 text-muted fw-normal">rubricas fiscais</span>
-                    </div>
-                    <span className="text-muted" style={{ fontSize: 11.5 }}>
-                      Balancete PGC vs Modelo 7
-                    </span>
+                  <div style={{ marginTop: 10, padding: '6px 12px', background: '#ffffff', fontSize: 10.5, color: '#334155', borderRadius: 4, border: '1px solid #cbd5e1' }}>
+                    <strong>Enquadramento Legal:</strong> Plano Geral de Contabilidade (Decreto Presidencial n.º 82/01), Código do IVA (Lei n.º 7/19) e Código Geral Tributário (Lei n.º 21/14).
                   </div>
                 </div>
 
-                <div className="col-12 col-sm-6 col-lg-3">
-                  <div className="confronto-kpi-card h-100">
-                    <span className="text-muted fw-600 d-block mb-4" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
-                      DADOS EM CONFORMIDADE (IGUAIS)
-                    </span>
-                    <div className="fw-700 color-success" style={{ fontSize: 24 }}>
-                      {parsedData.iguaisCount}{' '}
-                      <span className="fs-13 text-muted fw-normal">pontos conformes</span>
-                    </div>
-                    <span className="text-success fw-600" style={{ fontSize: 11.5 }}>
-                      <i className="la la-check-circle mr-1"></i> Valores 100% coincidentes
-                    </span>
-                  </div>
-                </div>
-
-                <div className="col-12 col-sm-6 col-lg-3">
-                  <div className="confronto-kpi-card h-100">
-                    <span className="text-muted fw-600 d-block mb-4" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
-                      DIVERGÊNCIAS APURADAS
-                    </span>
-                    <div
-                      className={`fw-700 ${parsedData.diferencasCount > 0 ? 'color-danger' : 'color-success'}`}
-                      style={{ fontSize: 24 }}
-                    >
-                      {parsedData.diferencasCount}{' '}
-                      <span className="fs-13 text-muted fw-normal">diferenças</span>
-                    </div>
-                    <span className={parsedData.diferencasCount > 0 ? 'text-danger fw-600' : 'text-success'} style={{ fontSize: 11.5 }}>
-                      {parsedData.diferencasCount > 0 ? '⚠️ Requer regularização prévia' : 'Nenhuma divergência apurada'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="col-12 col-sm-6 col-lg-3">
-                  <div className="confronto-kpi-card h-100">
-                    <span className="text-muted fw-600 d-block mb-4" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
-                      DIAGNÓSTICO GERAL DE RISCO
-                    </span>
-                    <div
-                      className={`fw-700 ${parsedData.diferencasCount > 0 ? 'color-warning' : 'color-success'}`}
-                      style={{ fontSize: 18 }}
-                    >
-                      {parsedData.diferencasCount > 0 ? 'ATENÇÃO REQUERIDA' : 'CONFORME'}
-                    </div>
-                    <span className="text-muted" style={{ fontSize: 11.5 }}>
-                      Segundo Código do IVA e CGT
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* QUADRO DE DESTAQUE: APURAMENTO DO IVA (LEI N.º 7/19 - CIVA) */}
-              <div className="card card-default mb-25" style={{ border: '1px solid #e2e8f0', borderRadius: '12px', background: '#ffffff', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                <div style={{ background: '#ffffff', padding: '18px 24px', borderBottom: '1px solid #f1f5f9' }}>
-                  <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
-                    <div>
-                      <div className="d-flex align-items-center" style={{ gap: 10 }}>
-                        <i className="la la-balance-scale text-primary" style={{ fontSize: 22 }}></i>
-                        <strong className="color-dark" style={{ fontSize: 14.5, letterSpacing: '0.4px', textTransform: 'uppercase', color: '#0f172a' }}>
-                          Quadro Oficial de Apuramento do IVA (CIVA — Lei n.º 7/19)
+                {/* BARRA DE AÇÕES DO RELATÓRIO NO ECRÃ (FUNDO BRANCO + BOTÕES AZUIS ESPAÇADOS) */}
+                <div className="card card-default mb-25 no-print" style={{ border: '1px solid #e2e8f0', borderRadius: 12, background: '#ffffff' }}>
+                  <div className="card-body py-16 px-22">
+                    <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 14 }}>
+                      <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
+                        <span
+                          className="badge"
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 700,
+                            background: '#ffffff',
+                            color: '#2563eb',
+                            border: '1px solid #bfdbfe',
+                            padding: '6px 12px',
+                            borderRadius: 20,
+                          }}
+                        >
+                          ✓ Passo 3 Concluído
+                        </span>
+                        <strong style={{ fontSize: 14.5, color: '#0f172a' }}>
+                          Painel Numérico de Confronto Fiscal
                         </strong>
                       </div>
-                      <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
-                        Fórmula Legal Obrigatória: <strong>Apuramento = IVA Liquidado (Vendas) − IVA Dedutível (Compras)</strong>
+
+                      <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
+                        {/* Tradução com IA - Botões Azuis com Espaçamento */}
+                        <div
+                          className="d-flex align-items-center flex-wrap"
+                          style={{
+                            gap: 8,
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: 10,
+                            padding: '6px 12px',
+                          }}
+                        >
+                          <span className="fw-600" style={{ fontSize: 12, color: '#475569' }}>
+                            <i className="la la-language mr-1" style={{ color: '#2563eb' }}></i> Idioma:
+                          </span>
+                          <button
+                            type="button"
+                            className={`btn btn-xs ${idiomaRelatorio === 'pt' ? 'btn-primary' : 'btn-outline-primary'}`}
+                            onClick={() => handleTraduzirRelatorio('pt')}
+                            disabled={traduzindo}
+                            style={{ fontWeight: 700, borderRadius: 6, fontSize: 11.5, padding: '4px 10px' }}
+                            title="Português"
+                          >
+                            PT
+                          </button>
+                          <button
+                            type="button"
+                            className={`btn btn-xs ${idiomaRelatorio === 'en' ? 'btn-primary' : 'btn-outline-primary'}`}
+                            onClick={() => handleTraduzirRelatorio('en')}
+                            disabled={traduzindo}
+                            style={{ fontWeight: 700, borderRadius: 6, fontSize: 11.5, padding: '4px 10px' }}
+                            title="English"
+                          >
+                            EN
+                          </button>
+                          <button
+                            type="button"
+                            className={`btn btn-xs ${idiomaRelatorio === 'zh' ? 'btn-primary' : 'btn-outline-primary'}`}
+                            onClick={() => handleTraduzirRelatorio('zh')}
+                            disabled={traduzindo}
+                            style={{ fontWeight: 700, borderRadius: 6, fontSize: 11.5, padding: '4px 10px' }}
+                            title="中文"
+                          >
+                            中文
+                          </button>
+                          {traduzindo && (
+                            <span style={{ fontSize: 13, color: '#2563eb' }}>
+                              <i className="la la-spinner la-spin"></i>
+                            </span>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={handleExportarExcel}
+                          disabled={exportandoExcel}
+                          style={{ fontWeight: 700, padding: '8px 16px', fontSize: 13 }}
+                        >
+                          <i className={`la ${exportandoExcel ? 'la-spinner la-spin' : 'la-file-excel'} mr-1`}></i>
+                          {exportandoExcel ? 'A descarregar...' : 'Exportar Excel (.xlsx)'}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={handlePrint}
+                          style={{ fontWeight: 700, padding: '8px 16px', fontSize: 13 }}
+                        >
+                          <i className="la la-print mr-1"></i> Imprimir / PDF
+                        </button>
+
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={handleLimparNovoConfronto}
+                          style={{ fontWeight: 700, padding: '8px 16px', fontSize: 13 }}
+                        >
+                          <i className="la la-sync mr-1"></i> Novo Confronto
+                        </button>
                       </div>
                     </div>
-                    <span className="badge" style={{ fontSize: 11, padding: '7px 14px', fontWeight: 600, border: '1px solid #e2e8f0', color: '#475569', background: '#f8fafc', borderRadius: '6px' }}>
-                      Artigos 19.º e seguintes do CIVA
-                    </span>
                   </div>
                 </div>
 
-                <div style={{ background: '#ffffff', padding: '24px' }}>
-                  <div className="row" style={{ rowGap: 24 }}>
-                    {/* 1. VENDAS OU SERVIÇOS (INCIDÊNCIA + IVA LIQUIDADO) */}
-                    <div className="col-12 col-md-4 d-flex flex-column">
-                      <div style={{ textAlign: 'center', marginBottom: '14px', paddingTop: '4px' }}>
-                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#1e293b', letterSpacing: '0.6px', textTransform: 'uppercase', display: 'inline-block' }}>
-                          (VENDAS OU SERVIÇOS)
-                        </span>
-                      </div>
-                      <div style={{
-                        background: '#ffffff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '10px',
-                        padding: '20px 18px',
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        gap: '14px'
-                      }}>
-                        <div>
-                          {/* SUB-BLOCO A: INCIDÊNCIA DE VENDAS */}
-                          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px', marginBottom: '14px' }}>
-                            <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '8px' }}>
-                              <span style={{ fontSize: '11px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                                Incidência (Base de Vendas)
-                              </span>
-                              <span className="badge" style={{ fontSize: '9.5px', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1', fontWeight: 600, padding: '3px 6px' }}>
-                                Conta 61 vs Campo 1/1.2
-                              </span>
-                            </div>
-                            <div style={{ marginBottom: '6px' }}>
-                              <span style={{ fontSize: '10.5px', color: '#64748b', display: 'block', marginBottom: '1px' }}>Contabilidade (Balancete Conta 61):</span>
-                              <div style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
-                                {parsedData.apuramentoIva?.incidenciaVendas?.contabilidade || '—'}
-                              </div>
-                            </div>
-                            <div style={{ marginBottom: '8px' }}>
-                              <span style={{ fontSize: '10.5px', color: '#64748b', display: 'block', marginBottom: '1px' }}>Modelo 7 (Quadro 09 - Campos 1 e 1.2):</span>
-                              <div style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
-                                {parsedData.apuramentoIva?.incidenciaVendas?.agt || '—'}
-                              </div>
-                            </div>
-                            <div style={{ paddingTop: '6px', borderTop: '1px dashed #cbd5e1', display: 'flex', justifycontent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: '10.5px', color: '#64748b' }}>Diferença na Base:</span>
-                              <span style={{ fontSize: '11px', fontWeight: 700, color: parsedData.apuramentoIva?.incidenciaVendas?.status === 'IGUAIS' ? '#16a34a' : '#dc2626' }}>
-                                {parsedData.apuramentoIva?.incidenciaVendas?.status === 'IGUAIS' ? '✓ Conforme (0,00 Kz)' : parsedData.apuramentoIva?.incidenciaVendas?.diferenca}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* SUB-BLOCO B: IVA LIQUIDADO GERADO */}
-                          <div style={{ padding: '0 2px' }}>
-                            <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '10px' }}>
-                              <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
-                                (+) 1. IVA Liquidado (14%)
-                              </span>
-                              <span className="badge" style={{ fontSize: '10px', background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', fontWeight: 600, padding: '4px 8px' }}>
-                                Conta 34.5.3 · Campo 33
-                              </span>
-                            </div>
-                            <div style={{ marginBottom: '8px' }}>
-                              <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '2px' }}>Contabilidade (Conta 34.5.3):</span>
-                              <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>
-                                {parsedData.apuramentoIva?.liquidado.contabilidade || '—'}
-                              </div>
-                            </div>
-                            <div style={{ marginBottom: '10px' }}>
-                              <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '2px' }}>Declaração AGT (Campo 33):</span>
-                              <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>
-                                {parsedData.apuramentoIva?.liquidado.agt || '—'}
-                              </div>
-                            </div>
-                          </div>
+                {/* SECÇÃO 1: QUADRO OFICIAL DE APURAMENTO DO IVA (3 CARTÕES GRANDES EM DESTAQUE) */}
+                <div
+                  className="card card-default mb-30"
+                  style={{
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '16px',
+                    background: '#ffffff',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div style={{ background: '#ffffff', padding: '20px 26px', borderBottom: '1px solid #e2e8f0' }}>
+                    <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
+                      <div>
+                        <div className="d-flex align-items-center" style={{ gap: 10 }}>
+                          <i className="la la-balance-scale" style={{ fontSize: 24, color: '#2563eb' }}></i>
+                          <strong style={{ fontSize: 15.5, letterSpacing: '0.4px', textTransform: 'uppercase', color: '#0f172a', fontWeight: 800 }}>
+                            Quadro Oficial de Apuramento do IVA (CIVA — Lei n.º 7/19)
+                          </strong>
                         </div>
-
-                        <div style={{ paddingTop: '10px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontSize: '11.5px', color: '#64748b' }}>Diferença no IVA:</span>
-                          <span style={{ fontSize: '12.5px', fontWeight: 700, color: parsedData.apuramentoIva?.liquidado.status === 'IGUAIS' ? '#16a34a' : '#dc2626' }}>
-                            {parsedData.apuramentoIva?.liquidado.diferenca || '0,00 Kz'}
-                          </span>
+                        <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 4 }}>
+                          Apuramento = <strong>IVA Liquidado (Vendas) − IVA Dedutível (Compras)</strong>
                         </div>
                       </div>
-                    </div>
-
-                    {/* 2. COMPRAS OU DESPESAS (INCIDÊNCIA DE COMPRAS + IVA DEDUTÍVEL) */}
-                    <div className="col-12 col-md-4 d-flex flex-column">
-                      <div style={{ textAlign: 'center', marginBottom: '14px', paddingTop: '4px' }}>
-                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#1e293b', letterSpacing: '0.6px', textTransform: 'uppercase', display: 'inline-block' }}>
-                          (COMPRAS OU DESPESAS)
-                        </span>
-                      </div>
-                      <div style={{
-                        background: '#ffffff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '10px',
-                        padding: '20px 18px',
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        gap: '14px'
-                      }}>
-                        <div>
-                          {/* SUB-BLOCO A: INCIDÊNCIA DE COMPRAS E SERVIÇOS */}
-                          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px', marginBottom: '14px' }}>
-                            <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '8px' }}>
-                              <span style={{ fontSize: '11px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                                Incidência (Compras e FSE)
-                              </span>
-                              <span className="badge" style={{ fontSize: '9.5px', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1', fontWeight: 600, padding: '3px 6px' }}>
-                                Conta 21/752 vs Campo 22
-                              </span>
-                            </div>
-                            <div style={{ marginBottom: '6px' }}>
-                              <span style={{ fontSize: '10.5px', color: '#64748b', display: 'block', marginBottom: '1px' }}>Contabilidade (Balancete Conta 21):</span>
-                              <div style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
-                                {parsedData.apuramentoIva?.incidenciaCompras?.contabilidade || '—'}
-                              </div>
-                            </div>
-                            <div style={{ marginBottom: '8px' }}>
-                              <span style={{ fontSize: '10.5px', color: '#64748b', display: 'block', marginBottom: '1px' }}>Modelo 7 (Quadro 09 - Campo 22):</span>
-                              <div style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a' }}>
-                                {parsedData.apuramentoIva?.incidenciaCompras?.agt || '—'}
-                              </div>
-                            </div>
-                            <div style={{ paddingTop: '6px', borderTop: '1px dashed #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: '10.5px', color: '#64748b' }}>Diferença nas Compras:</span>
-                              <span style={{ fontSize: '11px', fontWeight: 700, color: parsedData.apuramentoIva?.incidenciaCompras?.status === 'IGUAIS' ? '#16a34a' : '#dc2626' }}>
-                                {parsedData.apuramentoIva?.incidenciaCompras?.status === 'IGUAIS' ? '✓ Conforme (0,00 Kz)' : parsedData.apuramentoIva?.incidenciaCompras?.diferenca}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* SUB-BLOCO B: IVA DEDUTÍVEL */}
-                          <div style={{ padding: '0 2px' }}>
-                            <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '10px' }}>
-                              <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
-                                (−) 2. IVA Dedutível
-                              </span>
-                              <span className="badge" style={{ fontSize: '10px', background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', fontWeight: 600, padding: '4px 8px' }}>
-                                Conta 34.5.1/2 · Campo 32
-                              </span>
-                            </div>
-                            <div style={{ marginBottom: '8px' }}>
-                              <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '2px' }}>Contabilidade (Conta 34.5.1/34.5.2):</span>
-                              <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>
-                                {parsedData.apuramentoIva?.dedutivel.contabilidade || '—'}
-                              </div>
-                            </div>
-                            <div style={{ marginBottom: '10px' }}>
-                              <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '2px' }}>Declaração AGT (Campo 32):</span>
-                              <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>
-                                {parsedData.apuramentoIva?.dedutivel.agt || '—'}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div style={{ paddingTop: '10px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontSize: '11.5px', color: '#64748b' }}>Diferença no IVA:</span>
-                          <span style={{ fontSize: '12.5px', fontWeight: 700, color: parsedData.apuramentoIva?.dedutivel.status === 'IGUAIS' ? '#16a34a' : '#dc2626' }}>
-                            {parsedData.apuramentoIva?.dedutivel.diferenca || '0,00 Kz'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 3. APURAMENTO DO IVA (AMBOS OS DOCUMENTOS + CONFRONTO DIRETO) */}
-                    <div className="col-12 col-md-4 d-flex flex-column">
-                      <div style={{ textAlign: 'center', marginBottom: '14px', paddingTop: '4px' }}>
-                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.6px', textTransform: 'uppercase', display: 'inline-block' }}>
-                          APURAMENTO DO IVA
-                        </span>
-                      </div>
-                      <div
+                      <span
+                        className="badge"
                         style={{
+                          fontSize: 11.5,
+                          padding: '7px 14px',
+                          fontWeight: 700,
+                          border: '1px solid #bfdbfe',
+                          color: '#2563eb',
                           background: '#ffffff',
-                          border: '1px solid #e2e8f0',
-                          borderTop: `4px solid ${parsedData.apuramentoIva?.isRecuperar ? '#10b981' : parsedData.apuramentoIva?.isReembolso ? '#3b82f6' : '#ef4444'}`,
-                          borderRadius: '10px',
-                          padding: '20px 18px',
-                          boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-                          flex: 1,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between',
-                          gap: '14px'
+                          borderRadius: '8px',
                         }}
                       >
-                        <div>
-                          {/* HEADER SITUAÇÃO APURAMENTO */}
-                          <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '12px' }}>
-                            <span
-                              style={{
-                                fontSize: '12px',
-                                fontWeight: 800,
-                                color: '#0f172a',
-                                letterSpacing: '0.3px',
-                                textTransform: 'uppercase'
-                              }}
-                            >
-                              {parsedData.apuramentoIva?.tituloCard3 || '(=) 3. Apuramento do IVA'}
-                            </span>
-                            <span
-                              className="badge"
-                              style={{
-                                fontSize: '10px',
-                                fontWeight: 700,
-                                background: parsedData.apuramentoIva?.isRecuperar ? '#ecfdf5' : parsedData.apuramentoIva?.isReembolso ? '#eff6ff' : '#fef2f2',
-                                color: parsedData.apuramentoIva?.isRecuperar ? '#047857' : parsedData.apuramentoIva?.isReembolso ? '#1d4ed8' : '#b91c1c',
-                                border: `1px solid ${parsedData.apuramentoIva?.isRecuperar ? '#a7f3d0' : parsedData.apuramentoIva?.isReembolso ? '#bfdbfe' : '#fecaca'}`,
-                                padding: '4px 8px'
-                              }}
-                            >
-                              {parsedData.apuramentoIva?.rubricaCard3 || 'Conta 34.5'}
-                            </span>
-                          </div>
-
-                          {/* APURAMENTO DOCUMENTO 1: CONTABILIDADE (BALANCETE) */}
-                          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px', marginBottom: '10px' }}>
-                            <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '4px' }}>
-                              <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
-                                1. Contabilidade (Balancete)
-                              </span>
-                              <span className="badge" style={{ fontSize: '9px', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1', padding: '2px 5px' }}>
-                                {parsedData.apuramentoIva?.apuramentoContabilidade?.conta || 'Conta 34.5'}
-                              </span>
-                            </div>
-                            <div style={{ fontSize: '16px', fontWeight: 800, color: parsedData.apuramentoIva?.isRecuperar ? '#047857' : '#b91c1c', marginBottom: '2px' }}>
-                              {parsedData.apuramentoIva?.apuramentoContabilidade?.saldo || parsedData.apuramentoIva?.resultadoPrincipal?.contabilidade || '—'}
-                            </div>
-                            <span style={{ fontSize: '10px', color: '#64748b', display: 'block' }}>
-                              {parsedData.apuramentoIva?.apuramentoContabilidade?.rubrica || (parsedData.apuramentoIva?.isRecuperar ? 'IVA a Recuperar' : 'IVA a Pagar')} · (Liq − Ded)
-                            </span>
-                          </div>
-
-                          {/* APURAMENTO DOCUMENTO 2: AGT (MODELO 7) */}
-                          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px' }}>
-                            <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '4px' }}>
-                              <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155' }}>
-                                2. Declaração AGT (Modelo 7)
-                              </span>
-                              <span className="badge" style={{ fontSize: '9px', background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1', padding: '2px 5px' }}>
-                                {parsedData.apuramentoIva?.apuramentoAgt?.campo || 'Quadro 10'}
-                              </span>
-                            </div>
-                            <div style={{ fontSize: '16px', fontWeight: 800, color: parsedData.apuramentoIva?.isRecuperar ? '#047857' : '#b91c1c', marginBottom: '2px' }}>
-                              {parsedData.apuramentoIva?.apuramentoAgt?.saldoPeriodo || parsedData.apuramentoIva?.resultadoPrincipal?.agt || '—'}
-                            </div>
-                            {parsedData.apuramentoIva?.apuramentoAgt?.excessoAnterior && (
-                              <div style={{ fontSize: '10.5px', color: '#475569', marginTop: '4px', paddingTop: '4px', borderTop: '1px dashed #cbd5e1' }}>
-                                <div>(+) Excesso Período Anterior (C.36): <strong>{parsedData.apuramentoIva.apuramentoAgt.excessoAnterior}</strong></div>
-                                <div>(=) Posição Final Acumulada (C.39): <strong style={{ color: '#047857' }}>{parsedData.apuramentoIva.apuramentoAgt.posicaoFinal}</strong></div>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* AVISO LEGAL/CONTABILÍSTICO SÓBRIO E ELEGANTE COM PADDING ADEQUADO */}
-                          <div style={{ background: '#ffffff', border: `1px solid ${parsedData.apuramentoIva?.isRecuperar ? '#a7f3d0' : '#fecaca'}`, borderRadius: '8px', padding: '10px 12px', fontSize: '11px', color: '#334155', lineHeight: 1.5 }}>
-                            {parsedData.apuramentoIva?.isRecuperar ? (
-                              <>
-                                <strong style={{ color: '#047857' }}>✓ A empresa NÃO PAGA IVA neste período:</strong> O imposto dedutível supera o liquidado. O crédito apurado <strong>acumula e transita como crédito fiscal para o mês seguinte</strong> (Artigo 19.º do CIVA).
-                              </>
-                            ) : parsedData.apuramentoIva?.isReembolso ? (
-                              <>
-                                <strong style={{ color: '#1d4ed8' }}>ℹ️ Reembolso (Parcial ou Total):</strong> Pedido de devolução de crédito tributário submetido à AGT nos termos do regulamento do CIVA.
-                              </>
-                            ) : (
-                              <>
-                                <strong style={{ color: '#b91c1c' }}>⚠️ Imposto a pagar ao Estado:</strong> Valor apurado a liquidar perante a AGT através de DAR até ao último dia do mês legalmente fixado.
-                              </>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* CONFRONTO DIRETO DO APURAMENTO */}
-                        <div style={{ paddingTop: '10px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontSize: '11.5px', color: '#64748b' }}>Confronto do Período:</span>
-                          <span
-                            className="badge"
-                            style={{
-                              fontSize: '11px',
-                              fontWeight: 700,
-                              background: parsedData.apuramentoIva?.confrontoPeriodo?.status === 'IGUAIS' ? '#ecfdf5' : '#fef2f2',
-                              color: parsedData.apuramentoIva?.confrontoPeriodo?.status === 'IGUAIS' ? '#047857' : '#b91c1c',
-                              border: `1px solid ${parsedData.apuramentoIva?.confrontoPeriodo?.status === 'IGUAIS' ? '#a7f3d0' : '#fecaca'}`,
-                              padding: '6px 12px'
-                            }}
-                          >
-                            {parsedData.apuramentoIva?.confrontoPeriodo?.status === 'IGUAIS' ? '✓ IGUAIS (CONFORME)' : `⚠️ DIFERENÇA: ${parsedData.apuramentoIva?.confrontoPeriodo?.diferenca}`}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* OS TRÊS RESULTADOS OFICIAIS DO APURAMENTO DO IVA (PGC ANGOLANO · CONTAS 34.5) - SÓBRIO E CONFORME */}
-                  <div style={{ marginTop: '32px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '22px 22px' }}>
-                    <div className="d-flex justify-content-between align-items-center mb-15 flex-wrap" style={{ gap: 10 }}>
-                      <span className="fw-700 text-uppercase" style={{ fontSize: 12, color: '#334155', letterSpacing: '0.4px' }}>
-                        <i className="la la-book-open text-primary mr-1" style={{ fontSize: 15 }}></i>
-                        Quadro Regulamentar: Os Três Resultados Oficiais do Apuramento (PGC Angolano · Contas 34.5)
-                      </span>
-                      <span className="badge" style={{ fontSize: 10.5, background: '#ffffff', color: '#64748b', border: '1px solid #e2e8f0', fontWeight: 600, padding: '5px 10px' }}>
-                        Art. 19.º CIVA · Lei n.º 7/19
+                        Art. 19.º CIVA · PGC Contas 34.5
                       </span>
                     </div>
-
-                    <div className="row" style={{ rowGap: 14 }}>
-                      {/* Conta 34.5.6.1 */}
-                      <div className="col-12 col-md-4">
-                        <div
-                          style={{
-                            background: '#ffffff',
-                            border: `1px solid ${parsedData.apuramentoIva?.tipoApuramento === 'PAGAR' ? '#fecaca' : '#e2e8f0'}`,
-                            borderLeft: `4px solid ${parsedData.apuramentoIva?.tipoApuramento === 'PAGAR' ? '#ef4444' : '#cbd5e1'}`,
-                            borderRadius: '8px',
-                            padding: '16px 18px',
-                            height: '100%'
-                          }}
-                        >
-                          <div className="d-flex justify-content-between align-items-center mb-8">
-                            <strong style={{ fontSize: 12, color: parsedData.apuramentoIva?.tipoApuramento === 'PAGAR' ? '#b91c1c' : '#475569' }}>
-                              Conta 34.5.6.1
-                            </strong>
-                            {parsedData.apuramentoIva?.tipoApuramento === 'PAGAR' ? (
-                              <span className="badge" style={{ fontSize: 9.5, fontWeight: 700, background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', padding: '3px 8px' }}>
-                                SITUAÇÃO ATIVA
-                              </span>
-                            ) : (
-                              <span className="text-muted" style={{ fontSize: 10.5 }}>Inativa · Campo 37 AGT</span>
-                            )}
-                          </div>
-                          <div className="fw-700 mb-6" style={{ fontSize: 12, color: '#0f172a' }}>
-                            IVA a Pagar de Apuramento
-                          </div>
-                          <div className="text-muted" style={{ fontSize: 11, lineHeight: 1.45 }}>
-                            Aplica-se quando <strong>Liquidado &gt; Dedutível</strong>. Imposto exigível pelo Estado a entregar via DAR.
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Conta 34.5.7.1 */}
-                      <div className="col-12 col-md-4">
-                        <div
-                          style={{
-                            background: '#ffffff',
-                            border: `1px solid ${parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR' ? '#a7f3d0' : '#e2e8f0'}`,
-                            borderLeft: `4px solid ${parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR' ? '#10b981' : '#cbd5e1'}`,
-                            borderRadius: '8px',
-                            padding: '16px 18px',
-                            height: '100%'
-                          }}
-                        >
-                          <div className="d-flex justify-content-between align-items-center mb-8">
-                            <strong style={{ fontSize: 12, color: parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR' ? '#047857' : '#475569' }}>
-                              Conta 34.5.7.1
-                            </strong>
-                            {parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR' ? (
-                              <span className="badge" style={{ fontSize: 9.5, fontWeight: 700, background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 8px' }}>
-                                SITUAÇÃO ATIVA
-                              </span>
-                            ) : (
-                              <span className="text-muted" style={{ fontSize: 10.5 }}>Inativa · Campo 34/39 AGT</span>
-                            )}
-                          </div>
-                          <div className="fw-700 mb-6" style={{ fontSize: 12, color: '#0f172a' }}>
-                            IVA a Recuperar de Apuramentos
-                          </div>
-                          <div className="text-muted" style={{ fontSize: 11, lineHeight: 1.45 }}>
-                            Aplica-se quando <strong>Dedutível &gt; Liquidado</strong>. A empresa <strong>não paga IVA</strong>; o crédito <strong>acumula para o mês seguinte</strong>.
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Conta 34.5.8.1 */}
-                      <div className="col-12 col-md-4">
-                        <div
-                          style={{
-                            background: '#ffffff',
-                            border: `1px solid ${parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO' ? '#bfdbfe' : '#e2e8f0'}`,
-                            borderLeft: `4px solid ${parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO' ? '#3b82f6' : '#cbd5e1'}`,
-                            borderRadius: '8px',
-                            padding: '16px 18px',
-                            height: '100%'
-                          }}
-                        >
-                          <div className="d-flex justify-content-between align-items-center mb-8">
-                            <strong style={{ fontSize: 12, color: parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO' ? '#1d4ed8' : '#475569' }}>
-                              Conta 34.5.8.1
-                            </strong>
-                            {parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO' ? (
-                              <span className="badge" style={{ fontSize: 9.5, fontWeight: 700, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '3px 8px' }}>
-                                SITUAÇÃO ATIVA
-                              </span>
-                            ) : (
-                              <span className="text-muted" style={{ fontSize: 10.5 }}>Inativa · Campo 40 AGT</span>
-                            )}
-                          </div>
-                          <div className="fw-700 mb-6" style={{ fontSize: 12, color: '#0f172a' }}>
-                            IVA Reembolsos Pedidos
-                          </div>
-                          <div className="text-muted" style={{ fontSize: 11, lineHeight: 1.45 }}>
-                            <strong>Reembolso (Parcial ou Total)</strong> solicitado formalmente à AGT para restituição de saldo credor.
-                          </div>
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
-                  <div style={{ marginTop: '16px', padding: '12px 16px', borderRadius: '8px', background: '#f8fafc', fontSize: '11.5px', color: '#475569', border: '1px solid #edf0f5', lineHeight: 1.55 }}>
-                    <i className="la la-info-circle text-primary mr-1" style={{ fontSize: 13 }}></i>
-                    <strong>Regra Oficial do CIVA (Lei n.º 7/19):</strong> O apuramento do IVA resulta do confronto entre o imposto liquidado nas vendas ou prestações de serviços (Conta 34.5.3) e o imposto dedutível suportado nas compras ou despesas (Conta 34.5.1/34.5.2). Se o imposto liquidado for superior, apura-se imposto a pagar ao Estado (Conta 34.5.6.1). Se o imposto dedutível for superior, a empresa não paga IVA, transitando o saldo como crédito fiscal para dedução nos períodos seguintes (Conta 34.5.7.1) ou solicitando reembolso (Conta 34.5.8.1).
-                  </div>
-                </div>
-              </div>
-
-              {/* 2. TABELA COMPARATIVA DE CONFRONTO */}
-              <div className="row mb-25">
-                <div className="col-12">
-                  <div className="card card-default" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
-                    <div className="card-header py-12 px-20 bg-light border-bottom">
-                      <strong className="color-dark" style={{ fontSize: 14 }}>
-                        <i className="la la-table text-primary mr-5"></i> 2. Detalhe dos Dados Confrontados: Balancete vs Portal AGT
-                      </strong>
-                    </div>
-
-                    <div className="card-body p-0">
-                      <div className="table-responsive">
-                        <table className="table table-hover mb-0" style={{ fontSize: 13 }}>
-                          <thead style={{ backgroundColor: '#f9fafb' }}>
-                            <tr>
-                              <th style={{ width: '34%', fontWeight: 700, color: '#495057' }}>
-                                Ponto de Confronto / Rubrica Fiscal
-                              </th>
-                              <th style={{ width: '22%', fontWeight: 700, color: '#495057', textAlign: 'right' }}>
-                                Contabilidade (Balancete PGC)
-                              </th>
-                              <th style={{ width: '22%', fontWeight: 700, color: '#495057', textAlign: 'right' }}>
-                                Declaração AGT (Modelo 7)
-                              </th>
-                              <th style={{ width: '11%', fontWeight: 700, color: '#495057', textAlign: 'center' }}>
-                                Status
-                              </th>
-                              <th style={{ width: '11%', fontWeight: 700, color: '#495057', textAlign: 'right' }}>
-                                Diferença
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {parsedData.itensConfronto.map((item, idx) => {
-                              const isOk = item.status === 'IGUAIS' || item.status === 'OK' || item.status === 'CONFORME';
-                              return (
-                                <tr key={idx}>
-                                  <td style={{ verticalAlign: 'middle', fontWeight: 600 }}>
-                                    {item.campo}
-                                  </td>
-                                  <td style={{ verticalAlign: 'middle', color: '#272b41', fontWeight: 600, textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                    {item.contabilidade}
-                                  </td>
-                                  <td style={{ verticalAlign: 'middle', color: '#272b41', fontWeight: 600, textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                    {item.agt}
-                                  </td>
-                                  <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                                    <span className={isOk ? 'status-badge-conforme' : 'status-badge-divergencia'}>
-                                      <i className={isOk ? 'la la-check' : 'la la-exclamation-triangle'}></i>
-                                      {isOk ? 'IGUAIS' : 'DIFERENÇA'}
-                                    </span>
-                                  </td>
-                                  <td style={{ textAlign: 'right', verticalAlign: 'middle', fontWeight: 700, color: isOk ? '#00a854' : '#f5222d', whiteSpace: 'nowrap' }}>
-                                    {item.diferenca}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. ANÁLISE TÉCNICA DAS DIFERENÇAS E RECOMENDAÇÕES */}
-              <div className="row mb-25">
-                <div className="col-12 col-lg-7">
-                  <div className="card card-default h-100" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
-                    <div className="card-header py-12 px-20 bg-light border-bottom">
-                      <strong className="color-dark" style={{ fontSize: 14 }}>
-                        <i className="la la-stethoscope text-primary mr-5"></i> 3. Diagnóstico Técnico & Riscos Fiscais
-                      </strong>
-                    </div>
-
-                    <div className="card-body p-20">
-                      {parsedData.diferencasDetalhadas.length > 0 ? (
-                        parsedData.diferencasDetalhadas.map((dif, index) => (
-                          <div key={index} className="diff-box">
-                            <strong className="color-danger d-block mb-2" style={{ fontSize: 14 }}>
-                              <i className="la la-exclamation-circle mr-1"></i> {dif.titulo}
-                            </strong>
-                            {dif.balancete && (
-                              <div style={{ fontSize: 12.5 }} className="mb-1 text-muted">
-                                <strong>Balancete:</strong> {dif.balancete}
-                              </div>
-                            )}
-                            {dif.agt && (
-                              <div style={{ fontSize: 12.5 }} className="mb-2 text-muted">
-                                <strong>Modelo 7 AGT:</strong> {dif.agt}
-                              </div>
-                            )}
-                            {dif.causas && dif.causas.length > 0 && (
-                              <div style={{ fontSize: 12.5 }} className="mb-2">
-                                <span className="fw-600 text-dark">Causa Provável:</span>{' '}
-                                <span className="text-muted">{dif.causas.join(' ')}</span>
-                              </div>
-                            )}
-                            {dif.riscos && dif.riscos.length > 0 && (
-                              <div style={{ fontSize: 12.5 }} className="text-danger fw-600">
-                                <span>Risco Fiscal:</span> {dif.riscos.join(' ')}
-                              </div>
-                            )}
-                          </div>
-                        ))
-                      ) : (
-                        <div className="diff-box-ok">
-                          <strong className="text-success d-block mb-1">
-                            <i className="la la-check-circle mr-1"></i> Sem divergências críticas detetadas
-                          </strong>
-                          <p className="text-muted mb-0" style={{ fontSize: 13 }}>
-                            Os valores declarados no Modelo 7 coincidem com os registos apurados no Balancete de Verificação.
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Pontos Conformes */}
-                      {parsedData.pontosIguais.length > 0 && (
-                        <div className="mt-15 pt-15 border-top">
-                          <span className="fw-700 color-dark d-block mb-8" style={{ fontSize: 13 }}>
-                            <i className="la la-check-circle text-success mr-4"></i> Pontos em Perfeita Conformidade:
+                  <div style={{ background: '#ffffff', padding: '28px 26px' }}>
+                    <div className="row" style={{ rowGap: 26 }}>
+                      {/* CARTÃO GRANDE 1: (VENDAS OU SERVIÇOS) */}
+                      <div className="col-12 col-lg-4 d-flex flex-column">
+                        <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+                          <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+                            (VENDAS OU SERVIÇOS)
                           </span>
-                          <ul className="mb-0 pl-15" style={{ fontSize: 12.5 }}>
-                            {parsedData.pontosIguais.map((pt, pIdx) => (
-                              <li key={pIdx} className="text-muted mb-4">
-                                {pt}
-                              </li>
-                            ))}
-                          </ul>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                        <div className="confronto-big-card" style={{ borderTop: '4px solid #2563eb', padding: '26px 24px' }}>
+                          <div>
+                            {/* SUB-BLOCO A: INCIDÊNCIA DE VENDAS */}
+                            <div className="confronto-subbox" style={{ marginBottom: '20px' }}>
+                              <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 6, marginBottom: '12px' }}>
+                                <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                                  Incidência (Base de Vendas)
+                                </span>
+                                <span className="badge" style={{ fontSize: '10px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '4px 8px' }}>
+                                  Conta 61 · Campo 1/1.2
+                                </span>
+                              </div>
+                              <div style={{ marginBottom: '10px' }}>
+                                <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                                  Contabilidade (Balancete Conta 61):
+                                </span>
+                                <div style={{ fontSize: '18.5px', fontWeight: 800, color: '#0f172a' }}>
+                                  {parsedData.apuramentoIva?.incidenciaVendas?.contabilidade || '0,00 Kz'}
+                                </div>
+                              </div>
+                              <div style={{ marginBottom: '12px' }}>
+                                <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                                  Modelo 7 (Quadro 09 - Campos 1/1.2):
+                                </span>
+                                <div style={{ fontSize: '18.5px', fontWeight: 800, color: '#0f172a' }}>
+                                  {parsedData.apuramentoIva?.incidenciaVendas?.agt || '0,00 Kz'}
+                                </div>
+                              </div>
+                              <div style={{ paddingTop: '10px', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>Diferença na Base:</span>
+                                <span style={{ fontSize: '12.5px', fontWeight: 800, color: parsedData.apuramentoIva?.incidenciaVendas?.status === 'IGUAIS' ? '#15803d' : '#dc2626' }}>
+                                  {parsedData.apuramentoIva?.incidenciaVendas?.status === 'IGUAIS' ? '✓ 0,00 Kz' : desvioVendasTexto}
+                                </span>
+                              </div>
+                            </div>
 
-                <div className="col-12 col-lg-5">
-                  <div className="card card-default h-100" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
-                    <div className="card-header py-12 px-20 bg-light border-bottom">
-                      <strong className="color-dark" style={{ fontSize: 14 }}>
-                        <i className="la la-tasks text-primary mr-5"></i> 4. O que Fazer para Resolver (Recomendações)
-                      </strong>
-                    </div>
+                            {/* SUB-BLOCO B: IVA LIQUIDADO GERADO */}
+                            <div style={{ padding: '0 4px' }}>
+                              <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 6, marginBottom: '14px' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+                                  (+) 1. IVA Liquidado (14%)
+                                </span>
+                                <span className="badge" style={{ fontSize: '10.5px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '4px 8px' }}>
+                                  Conta 34.5.3 · C.33
+                                </span>
+                              </div>
+                              <div style={{ marginBottom: '12px' }}>
+                                <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '3px' }}>
+                                  Contabilidade (Conta 34.5.3):
+                                </span>
+                                <div style={{ fontSize: '23px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
+                                  {parsedData.apuramentoIva?.liquidado?.contabilidade || '0,00 Kz'}
+                                </div>
+                              </div>
+                              <div>
+                                <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '3px' }}>
+                                  Declaração AGT (Campo 33):
+                                </span>
+                                <div style={{ fontSize: '23px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
+                                  {parsedData.apuramentoIva?.liquidado?.agt || '0,00 Kz'}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
 
-                    <div className="card-body p-20">
-                      {parsedData.recomendacoes && parsedData.recomendacoes.length > 0 ? (
-                        parsedData.recomendacoes.map((rec, rIdx) => (
-                          <div key={rIdx} className="rec-item-card">
-                            <div className="rec-badge-number">{rec.numero || rIdx + 1}</div>
-                            <div style={{ minWidth: 0 }}>
-                              <strong className="color-dark d-block mb-1" style={{ fontSize: 13 }}>
-                                {rec.titulo}
-                              </strong>
-                              {rec.detalhes && rec.detalhes.length > 0 && (
-                                <p className="text-muted mb-0" style={{ fontSize: 12 }}>
-                                  {rec.detalhes.join(' ')}
-                                </p>
+                          <div style={{ paddingTop: '14px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '12.5px', color: '#475569', fontWeight: 700 }}>Diferença no IVA:</span>
+                            <span className={parsedData.apuramentoIva?.liquidado?.status === 'IGUAIS' ? 'status-badge-conforme' : 'status-badge-divergencia'}>
+                              {parsedData.apuramentoIva?.liquidado?.status === 'IGUAIS' ? '✓ 0,00 Kz' : desvioLiqTexto}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* CARTÃO GRANDE 2: (COMPRAS OU DESPESAS) */}
+                      <div className="col-12 col-lg-4 d-flex flex-column">
+                        <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+                          <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+                            (COMPRAS OU DESPESAS)
+                          </span>
+                        </div>
+                        <div className="confronto-big-card" style={{ borderTop: '4px solid #2563eb', padding: '26px 24px' }}>
+                          <div>
+                            {/* SUB-BLOCO A: INCIDÊNCIA DE COMPRAS */}
+                            <div className="confronto-subbox" style={{ marginBottom: '20px' }}>
+                              <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 6, marginBottom: '12px' }}>
+                                <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                                  Incidência (Compras e FSE)
+                                </span>
+                                <span className="badge" style={{ fontSize: '10px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '4px 8px' }}>
+                                  Conta 21/752 · C.22
+                                </span>
+                              </div>
+                              <div style={{ marginBottom: '10px' }}>
+                                <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                                  Contabilidade (Balancete Conta 21):
+                                </span>
+                                <div style={{ fontSize: '18.5px', fontWeight: 800, color: '#0f172a' }}>
+                                  {parsedData.apuramentoIva?.incidenciaCompras?.contabilidade || '0,00 Kz'}
+                                </div>
+                              </div>
+                              <div style={{ marginBottom: '12px' }}>
+                                <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                                  Modelo 7 (Quadro 09 - Campo 22):
+                                </span>
+                                <div style={{ fontSize: '18.5px', fontWeight: 800, color: '#0f172a' }}>
+                                  {parsedData.apuramentoIva?.incidenciaCompras?.agt || '0,00 Kz'}
+                                </div>
+                              </div>
+                              <div style={{ paddingTop: '10px', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>Diferença nas Compras:</span>
+                                <span style={{ fontSize: '12.5px', fontWeight: 800, color: parsedData.apuramentoIva?.incidenciaCompras?.status === 'IGUAIS' ? '#15803d' : '#dc2626' }}>
+                                  {parsedData.apuramentoIva?.incidenciaCompras?.status === 'IGUAIS' ? '✓ 0,00 Kz' : desvioComprasTexto}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* SUB-BLOCO B: IVA DEDUTÍVEL */}
+                            <div style={{ padding: '0 4px' }}>
+                              <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 6, marginBottom: '14px' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+                                  (−) 2. IVA Dedutível
+                                </span>
+                                <span className="badge" style={{ fontSize: '10.5px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '4px 8px' }}>
+                                  Conta 34.5.1/2 · C.32
+                                </span>
+                              </div>
+                              <div style={{ marginBottom: '12px' }}>
+                                <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '3px' }}>
+                                  Contabilidade (Conta 34.5.1/34.5.2):
+                                </span>
+                                <div style={{ fontSize: '23px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
+                                  {parsedData.apuramentoIva?.dedutivel?.contabilidade || '0,00 Kz'}
+                                </div>
+                              </div>
+                              <div>
+                                <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '3px' }}>
+                                  Declaração AGT (Campo 32):
+                                </span>
+                                <div style={{ fontSize: '23px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
+                                  {parsedData.apuramentoIva?.dedutivel?.agt || '0,00 Kz'}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ paddingTop: '14px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '12.5px', color: '#475569', fontWeight: 700 }}>Diferença no IVA:</span>
+                            <span className={parsedData.apuramentoIva?.dedutivel?.status === 'IGUAIS' ? 'status-badge-conforme' : 'status-badge-divergencia'}>
+                              {parsedData.apuramentoIva?.dedutivel?.status === 'IGUAIS' ? '✓ 0,00 Kz' : desvioDedTexto}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* CARTÃO GRANDE 3: APURAMENTO DO IVA */}
+                      <div className="col-12 col-lg-4 d-flex flex-column">
+                        <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+                          <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+                            APURAMENTO DO IVA
+                          </span>
+                        </div>
+                        <div
+                          className="confronto-big-card"
+                          style={{
+                            borderTop: `4px solid ${corApuramentoPrincipal}`,
+                            padding: '26px 24px',
+                          }}
+                        >
+                          <div>
+                            <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 6, marginBottom: '16px' }}>
+                              <span style={{ fontSize: '12.5px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+                                {parsedData.apuramentoIva?.tituloCard3 || '(=) 3. Apuramento do IVA'}
+                              </span>
+                              <span
+                                className="badge"
+                                style={{
+                                  fontSize: '10.5px',
+                                  fontWeight: 700,
+                                  background: '#ffffff',
+                                  color: corApuramentoPrincipal,
+                                  border: `1px solid ${parsedData.apuramentoIva?.isRecuperar ? '#86efac' : parsedData.apuramentoIva?.isReembolso ? '#bfdbfe' : '#fca5a5'}`,
+                                  padding: '4px 10px',
+                                }}
+                              >
+                                {parsedData.apuramentoIva?.rubricaCard3 || 'Conta 34.5'}
+                              </span>
+                            </div>
+
+                            {/* APURAMENTO DOCUMENTO 1: CONTABILIDADE */}
+                            <div className="confronto-subbox" style={{ marginBottom: '14px' }}>
+                              <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '6px' }}>
+                                <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                                  1. Contabilidade (Balancete)
+                                </span>
+                                <span className="badge" style={{ fontSize: '10px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '3px 7px' }}>
+                                  {parsedData.apuramentoIva?.apuramentoContabilidade?.conta || 'Conta 34.5'}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '23px', fontWeight: 800, color: corApuramentoPrincipal, letterSpacing: '-0.3px' }}>
+                                {parsedData.apuramentoIva?.apuramentoContabilidade?.saldo || parsedData.apuramentoIva?.resultadoPrincipal?.contabilidade || '0,00 Kz'}
+                              </div>
+                              <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginTop: '2px' }}>
+                                {parsedData.apuramentoIva?.isRecuperar ? 'Crédito Fiscal do Período' : parsedData.apuramentoIva?.isReembolso ? 'Reembolso Pedido' : 'IVA a Pagar do Período'}
+                              </span>
+                            </div>
+
+                            {/* APURAMENTO DOCUMENTO 2: AGT (MODELO 7) */}
+                            <div className="confronto-subbox">
+                              <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '6px' }}>
+                                <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                                  2. Declaração AGT (Modelo 7)
+                                </span>
+                                <span className="badge" style={{ fontSize: '10px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '3px 7px' }}>
+                                  {parsedData.apuramentoIva?.apuramentoAgt?.campo || 'Quadro 10'}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '23px', fontWeight: 800, color: corApuramentoPrincipal, letterSpacing: '-0.3px' }}>
+                                {parsedData.apuramentoIva?.apuramentoAgt?.saldoPeriodo || parsedData.apuramentoIva?.resultadoPrincipal?.agt || '0,00 Kz'}
+                              </div>
+                              {parsedData.apuramentoIva?.apuramentoAgt?.excessoAnterior && (
+                                <div style={{ fontSize: '11.5px', color: '#334155', marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed #e2e8f0' }}>
+                                  <div className="d-flex justify-content-between mb-4">
+                                    <span style={{ color: '#64748b' }}>(+) Excesso Anterior (C.36):</span>
+                                    <strong>{parsedData.apuramentoIva.apuramentoAgt.excessoAnterior}</strong>
+                                  </div>
+                                  <div className="d-flex justify-content-between">
+                                    <span style={{ color: '#64748b' }}>(=) Acumulado Final (C.39):</span>
+                                    <strong style={{ color: '#15803d', fontSize: '13px' }}>{parsedData.apuramentoIva.apuramentoAgt.posicaoFinal}</strong>
+                                  </div>
+                                </div>
                               )}
                             </div>
                           </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-20 text-muted" style={{ fontSize: 13 }}>
-                          Nenhuma ação corretiva adicional necessária para este período.
-                        </div>
-                      )}
 
-                      {/* Resultado Esperado */}
-                      {parsedData.resultadoEsperado && parsedData.resultadoEsperado.length > 0 && (
-                        <div className="mt-15 p-12 bg-light rounded" style={{ border: '1px solid #e2e8f0' }}>
-                          <span className="fw-700 color-primary d-block mb-4" style={{ fontSize: 12 }}>
-                            <i className="la la-bullseye mr-3"></i> RESULTADO ESPERADO
+                          <div style={{ paddingTop: '14px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '12.5px', color: '#475569', fontWeight: 700 }}>Confronto do Período:</span>
+                            <span className={parsedData.apuramentoIva?.confrontoPeriodo?.status === 'IGUAIS' ? 'status-badge-conforme' : 'status-badge-divergencia'}>
+                              {parsedData.apuramentoIva?.confrontoPeriodo?.status === 'IGUAIS'
+                                ? '✓ IGUAIS (0,00 Kz)'
+                                : `⚠️ ${desvioApuramentoTexto}`}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SECÇÃO 2: ANÁLISE NUMÉRICA EXECUTIVA (3 CARTÕES GRANDES EM BAIXO — ZERO TEXTOS LONGOS) */}
+                <div
+                  className="card card-default mb-30"
+                  style={{
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '16px',
+                    background: '#ffffff',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div style={{ background: '#ffffff', padding: '20px 26px', borderBottom: '1px solid #e2e8f0' }}>
+                    <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
+                      <div>
+                        <div className="d-flex align-items-center" style={{ gap: 10 }}>
+                          <i className="la la-chart-bar" style={{ fontSize: 24, color: '#2563eb' }}></i>
+                          <strong style={{ fontSize: 15.5, letterSpacing: '0.4px', textTransform: 'uppercase', color: '#0f172a', fontWeight: 800 }}>
+                            Diagnóstico Numérico da Análise & Posição Contabilística
+                          </strong>
+                        </div>
+                        <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 4 }}>
+                          Síntese quantitativa de conformidade, desvios financeiros em Kwanzas e saldos das contas 34.5
+                        </div>
+                      </div>
+                      <span
+                        className="badge"
+                        style={{
+                          fontSize: 11.5,
+                          padding: '7px 14px',
+                          fontWeight: 700,
+                          border: '1px solid #bfdbfe',
+                          color: '#2563eb',
+                          background: '#ffffff',
+                          borderRadius: '8px',
+                        }}
+                      >
+                        {totalRubricas} Rubricas Auditadas
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#ffffff', padding: '28px 26px' }}>
+                    <div className="row" style={{ rowGap: 26 }}>
+                      {/* CARTÃO NUMÉRICO 4: (ÍNDICE DE CONFORMIDADE) */}
+                      <div className="col-12 col-lg-4 d-flex flex-column">
+                        <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+                          <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+                            (ÍNDICE DE CONFORMIDADE)
                           </span>
-                          <p className="text-muted mb-0" style={{ fontSize: 12 }}>
-                            {parsedData.resultadoEsperado.join(' ')}
-                          </p>
                         </div>
-                      )}
+                        <div className="confronto-big-card" style={{ borderTop: `4px solid ${rubricasDivergentes === 0 ? '#15803d' : '#dc2626'}`, padding: '26px 24px' }}>
+                          <div>
+                            <div className="confronto-subbox" style={{ marginBottom: '20px', textAlign: 'center' }}>
+                              <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.4px', display: 'block', marginBottom: '6px' }}>
+                                Taxa de Precisão Contabilística
+                              </span>
+                              <div style={{ fontSize: '36px', fontWeight: 800, color: rubricasDivergentes === 0 ? '#15803d' : '#2563eb', lineHeight: 1.1 }}>
+                                {indiceConformidade}%
+                              </div>
+                              <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginTop: '6px' }}>
+                                {rubricasConformes} de {totalRubricas} rubricas coincidentes
+                              </span>
+                            </div>
+
+                            <div style={{ padding: '0 4px' }}>
+                              <div className="d-flex justify-content-between align-items-center" style={{ padding: '10px 0', borderBottom: '1px dashed #e2e8f0' }}>
+                                <span style={{ fontSize: '13px', color: '#475569', fontWeight: 600 }}>Total Confrontado:</span>
+                                <span style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>{totalRubricas}</span>
+                              </div>
+                              <div className="d-flex justify-content-between align-items-center" style={{ padding: '10px 0', borderBottom: '1px dashed #e2e8f0' }}>
+                                <span style={{ fontSize: '13px', color: '#475569', fontWeight: 600 }}>Rubricas Iguais:</span>
+                                <span style={{ fontSize: '20px', fontWeight: 800, color: '#15803d' }}>{rubricasConformes}</span>
+                              </div>
+                              <div className="d-flex justify-content-between align-items-center" style={{ padding: '10px 0' }}>
+                                <span style={{ fontSize: '13px', color: '#475569', fontWeight: 600 }}>Rubricas com Diferença:</span>
+                                <span style={{ fontSize: '20px', fontWeight: 800, color: rubricasDivergentes > 0 ? '#dc2626' : '#15803d' }}>
+                                  {rubricasDivergentes}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ paddingTop: '14px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '12.5px', color: '#475569', fontWeight: 700 }}>Risco Fiscal:</span>
+                            <span className={rubricasDivergentes === 0 ? 'status-badge-conforme' : 'status-badge-divergencia'}>
+                              {rubricasDivergentes === 0 ? '✓ NULO (CONFORME)' : `⚠️ ${rubricasDivergentes} ALERTA(S)`}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* CARTÃO NUMÉRICO 5: (DESVIOS FINANCEIROS EM KWANZAS) */}
+                      <div className="col-12 col-lg-4 d-flex flex-column">
+                        <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+                          <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+                            (DESVIOS EM KWANZAS)
+                          </span>
+                        </div>
+                        <div className="confronto-big-card" style={{ borderTop: '4px solid #2563eb', padding: '26px 24px' }}>
+                          <div>
+                            <div className="confronto-subbox" style={{ marginBottom: '20px' }}>
+                              <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', display: 'block', marginBottom: '10px' }}>
+                                Diferenças nas Bases Tributáveis
+                              </span>
+                              <div className="d-flex justify-content-between align-items-center mb-8">
+                                <span style={{ fontSize: '12px', color: '#64748b' }}>Base Vendas (Conta 61):</span>
+                                <strong style={{ fontSize: '15.5px', color: desvioVendasTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
+                                  {desvioVendasTexto}
+                                </strong>
+                              </div>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <span style={{ fontSize: '12px', color: '#64748b' }}>Base Compras (Conta 21):</span>
+                                <strong style={{ fontSize: '15.5px', color: desvioComprasTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
+                                  {desvioComprasTexto}
+                                </strong>
+                              </div>
+                            </div>
+
+                            <div style={{ padding: '0 4px' }}>
+                              <div style={{ marginBottom: '14px' }}>
+                                <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '3px' }}>
+                                  Desvio no IVA Liquidado (C.33):
+                                </span>
+                                <div style={{ fontSize: '21px', fontWeight: 800, color: desvioLiqTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
+                                  {desvioLiqTexto}
+                                </div>
+                              </div>
+                              <div>
+                                <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '3px' }}>
+                                  Desvio no IVA Dedutível (C.32):
+                                </span>
+                                <div style={{ fontSize: '21px', fontWeight: 800, color: desvioDedTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
+                                  {desvioDedTexto}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ paddingTop: '14px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '12.5px', color: '#475569', fontWeight: 700 }}>Desvio no Apuramento:</span>
+                            <span className={desvioApuramentoTexto === '0,00 Kz' ? 'status-badge-conforme' : 'status-badge-divergencia'}>
+                              {desvioApuramentoTexto === '0,00 Kz' ? '✓ 0,00 Kz' : desvioApuramentoTexto}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* CARTÃO NUMÉRICO 6: (SALDOS PGC 34.5 & OBRIGAÇÃO FISCAL) */}
+                      <div className="col-12 col-lg-4 d-flex flex-column">
+                        <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+                          <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+                            (SALDOS CONTAS PGC 34.5)
+                          </span>
+                        </div>
+                        <div className="confronto-big-card" style={{ borderTop: `4px solid ${corApuramentoPrincipal}`, padding: '26px 24px' }}>
+                          <div>
+                            <div className="confronto-subbox" style={{ marginBottom: '20px' }}>
+                              <div className="d-flex justify-content-between align-items-center mb-10">
+                                <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>34.5.6.1 · IVA a Pagar:</span>
+                                <strong style={{ fontSize: '15.5px', color: parsedData.apuramentoIva?.tipoApuramento === 'PAGAR' ? '#dc2626' : '#64748b' }}>
+                                  {parsedData.apuramentoIva?.tipoApuramento === 'PAGAR'
+                                    ? (parsedData.apuramentoIva?.pagar?.agt || '0,00 Kz')
+                                    : '0,00 Kz'}
+                                </strong>
+                              </div>
+                              <div className="d-flex justify-content-between align-items-center mb-10">
+                                <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>34.5.7.1 · IVA a Recuperar:</span>
+                                <strong style={{ fontSize: '15.5px', color: parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR' ? '#15803d' : '#64748b' }}>
+                                  {parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR'
+                                    ? (parsedData.apuramentoIva?.recuperar?.agt || '0,00 Kz')
+                                    : '0,00 Kz'}
+                                </strong>
+                              </div>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>34.5.8.1 · Reembolsos:</span>
+                                <strong style={{ fontSize: '15.5px', color: parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO' ? '#2563eb' : '#64748b' }}>
+                                  {parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO'
+                                    ? (parsedData.apuramentoIva?.reembolso?.agt || '0,00 Kz')
+                                    : '0,00 Kz'}
+                                </strong>
+                              </div>
+                            </div>
+
+                            <div style={{ padding: '0 4px' }}>
+                              <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '4px' }}>
+                                {parsedData.apuramentoIva?.isRecuperar
+                                  ? 'Crédito Fiscal Acumulado p/ Mês Seguinte (C.39):'
+                                  : parsedData.apuramentoIva?.isReembolso
+                                  ? 'Reembolso Solicitado à AGT (C.40):'
+                                  : 'Valor Líquido a Pagar via DAR (C.37):'}
+                              </span>
+                              <div style={{ fontSize: '25px', fontWeight: 800, color: corApuramentoPrincipal, letterSpacing: '-0.3px' }}>
+                                {parsedData.apuramentoIva?.apuramentoAgt?.posicaoFinal ||
+                                  parsedData.apuramentoIva?.resultadoPrincipal?.agt ||
+                                  '0,00 Kz'}
+                              </div>
+                              <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginTop: '4px' }}>
+                                DAR a Pagar neste mês:{' '}
+                                <strong style={{ color: '#0f172a' }}>
+                                  {parsedData.apuramentoIva?.isRecuperar || parsedData.apuramentoIva?.isReembolso
+                                    ? '0,00 Kz'
+                                    : (parsedData.apuramentoIva?.apuramentoAgt?.posicaoFinal || parsedData.apuramentoIva?.pagar?.agt || '0,00 Kz')}
+                                </strong>
+                              </span>
+                            </div>
+                          </div>
+
+                          <div style={{ paddingTop: '14px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '12.5px', color: '#475569', fontWeight: 700 }}>Conta Ativa:</span>
+                            <span
+                              className="badge"
+                              style={{
+                                background: '#ffffff',
+                                color: '#2563eb',
+                                border: '1px solid #bfdbfe',
+                                fontWeight: 800,
+                                fontSize: '12px',
+                                padding: '5px 12px',
+                                borderRadius: '20px',
+                              }}
+                            >
+                              {parsedData.apuramentoIva?.apuramentoContabilidade?.conta || 'Conta 34.5'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                  </div>
+                </div>
+
+                {/* SECÇÃO 3: TODAS AS RUBRICAS CONFRONTADAS EM CARTÕES NUMÉRICOS INDIVIDUAIS */}
+                {parsedData.itensConfronto && parsedData.itensConfronto.length > 0 && (
+                  <div
+                    className="card card-default mb-30"
+                    style={{
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '16px',
+                      background: '#ffffff',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div style={{ background: '#ffffff', padding: '18px 26px', borderBottom: '1px solid #e2e8f0' }}>
+                      <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
+                        <div className="d-flex align-items-center" style={{ gap: 10 }}>
+                          <i className="la la-th-large" style={{ fontSize: 22, color: '#2563eb' }}></i>
+                          <strong style={{ fontSize: 15, letterSpacing: '0.3px', textTransform: 'uppercase', color: '#0f172a', fontWeight: 800 }}>
+                            Rubricas Confrontadas (Balancete PGC vs Modelo 7 AGT)
+                          </strong>
+                        </div>
+                        <span
+                          className="badge"
+                          style={{
+                            fontSize: 11.5,
+                            padding: '6px 12px',
+                            fontWeight: 700,
+                            border: '1px solid #e2e8f0',
+                            color: '#475569',
+                            background: '#ffffff',
+                            borderRadius: '8px',
+                          }}
+                        >
+                          Comparação Rubrica a Rubrica
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#ffffff', padding: '24px 26px' }}>
+                      <div className="row" style={{ rowGap: 20 }}>
+                        {parsedData.itensConfronto.map((item, idx) => {
+                          const isOk = item.status === 'IGUAIS' || item.status === 'OK' || item.status === 'CONFORME';
+                          return (
+                            <div key={idx} className="col-12 col-md-6 col-xl-4 d-flex">
+                              <div
+                                style={{
+                                  background: '#ffffff',
+                                  border: `1px solid ${isOk ? '#e2e8f0' : '#fca5a5'}`,
+                                  borderTop: `3px solid ${isOk ? '#2563eb' : '#dc2626'}`,
+                                  borderRadius: '12px',
+                                  padding: '20px',
+                                  width: '100%',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  justifyContent: 'space-between',
+                                  gap: '14px',
+                                }}
+                              >
+                                <div>
+                                  <div className="d-flex justify-content-between align-items-start" style={{ gap: 10, marginBottom: '14px' }}>
+                                    <strong style={{ fontSize: '13.5px', color: '#0f172a', fontWeight: 800, lineHeight: 1.35 }}>
+                                      {item.campo}
+                                    </strong>
+                                    <span className={isOk ? 'status-badge-conforme' : 'status-badge-divergencia'} style={{ flexShrink: 0 }}>
+                                      {isOk ? '✓ IGUAIS' : '⚠️ DIFERENÇA'}
+                                    </span>
+                                  </div>
+
+                                  <div className="d-flex justify-content-between align-items-center" style={{ padding: '8px 0', borderBottom: '1px dashed #e2e8f0' }}>
+                                    <span style={{ fontSize: '12px', color: '#64748b' }}>Contabilidade (PGC):</span>
+                                    <strong style={{ fontSize: '16px', color: '#0f172a', fontWeight: 800 }}>{item.contabilidade}</strong>
+                                  </div>
+
+                                  <div className="d-flex justify-content-between align-items-center" style={{ padding: '8px 0' }}>
+                                    <span style={{ fontSize: '12px', color: '#64748b' }}>Modelo 7 (AGT):</span>
+                                    <strong style={{ fontSize: '16px', color: '#0f172a', fontWeight: 800 }}>{item.agt}</strong>
+                                  </div>
+                                </div>
+
+                                <div style={{ paddingTop: '10px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <span style={{ fontSize: '12px', color: '#475569', fontWeight: 700 }}>Diferença:</span>
+                                  <strong style={{ fontSize: '14.5px', fontWeight: 800, color: isOk ? '#15803d' : '#dc2626' }}>
+                                    {isOk ? '0,00 Kz' : item.diferenca}
+                                  </strong>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* BOTÃO OPCIONAL E DISCRETO PARA PARECER TÉCNICO EM TEXTO (SE O CONTABILISTA QUISER CONSULTAR) */}
+                {resultadoRaw && (
+                  <div className="mb-30 no-print">
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => setVisualizacaoTexto(!visualizacaoTexto)}
+                        style={{ fontWeight: 700, padding: '10px 22px', fontSize: 13, borderRadius: 10 }}
+                      >
+                        <i className={`la ${visualizacaoTexto ? 'la-chevron-up' : 'la-file-alt'} mr-2`}></i>
+                        {visualizacaoTexto
+                          ? 'Ocultar Parecer Técnico Detalhado da IA'
+                          : 'Ver Fundamentação Legal e Parecer Detalhado da IA (Opcional)'}
+                      </button>
+                    </div>
+
+                    {visualizacaoTexto && (
+                      <div
+                        className="card card-default mt-15"
+                        style={{ border: '1px solid #e2e8f0', borderRadius: 12, background: '#ffffff' }}
+                      >
+                        <div
+                          className="card-header py-14 px-22 border-bottom d-flex justify-content-between align-items-center"
+                          style={{ background: '#ffffff' }}
+                        >
+                          <strong style={{ fontSize: 14, color: '#0f172a' }}>
+                            <i className="la la-file-text mr-2" style={{ color: '#2563eb' }}></i>
+                            Parecer Pericial Completo ({idiomaRelatorio === 'zh' ? '中文' : idiomaRelatorio === 'en' ? 'English' : 'Português'})
+                          </strong>
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-outline-primary"
+                            onClick={() => {
+                              navigator.clipboard.writeText(resultadoRaw);
+                              toast.info('Parecer copiado para a área de transferência.');
+                            }}
+                          >
+                            <i className="la la-copy mr-1"></i> Copiar Parecer
+                          </button>
+                        </div>
+                        <div
+                          className="card-body p-25"
+                          style={{
+                            whiteSpace: 'pre-wrap',
+                            lineHeight: 1.7,
+                            fontSize: 13.5,
+                            color: '#1e293b',
+                            background: '#ffffff',
+                          }}
+                        >
+                          {resultadoRaw}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* BLOCO DE ASSINATURAS OFICIAIS (IMPRESSÃO / PDF) */}
+                <div className="print-only mt-40 pt-20" style={{ pageBreakInside: 'avoid', borderTop: '1px solid #cbd5e1' }}>
+                  <div className="row" style={{ marginTop: 20 }}>
+                    <div className="col-6 text-center">
+                      <div style={{ borderTop: '1px solid #0f172a', width: '85%', margin: '0 auto', paddingTop: 8 }}>
+                        <strong style={{ fontSize: 12, display: 'block', color: '#0f172a' }}>
+                          O CONTABILISTA CERTIFICADO
+                        </strong>
+                        <span style={{ fontSize: 10.5, color: '#475569', display: 'block' }}>
+                          Ordem dos Contabilistas e Peritos Contabilistas de Angola (OCPCA)
+                        </span>
+                        <span style={{ fontSize: 10, color: '#64748b', display: 'block', marginTop: 4 }}>
+                          Cédula Profissional N.º: ___________________________
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="col-6 text-center">
+                      <div style={{ borderTop: '1px solid #0f172a', width: '85%', margin: '0 auto', paddingTop: 8 }}>
+                        <strong style={{ fontSize: 12, display: 'block', color: '#0f172a' }}>
+                          A GERÊNCIA / CONSELHO DE ADMINISTRAÇÃO
+                        </strong>
+                        <span style={{ fontSize: 10.5, color: '#475569', display: 'block' }}>
+                          {empresaAtual?.nome || 'A Empresa Contribuinte'}
+                        </span>
+                        <span style={{ fontSize: 10, color: '#64748b', display: 'block', marginTop: 4 }}>
+                          (Assinatura e Carimbo Oficial)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-center mt-30" style={{ fontSize: 9.5, color: '#64748b' }}>
+                    Documento emitido eletronicamente pela Plataforma de Reconciliação Contabilística & Fiscal de Angola — Cópia autêntica para integração no Dossier Fiscal da Empresa.
                   </div>
                 </div>
               </div>
-
-              {/* BLOCO DE ASSINATURAS OFICIAIS (IMPRESSÃO / PDF) */}
-              <div className="print-only mt-40 pt-20" style={{ pageBreakInside: 'avoid', borderTop: '1px solid #cbd5e1' }}>
-                <div className="row" style={{ marginTop: 20 }}>
-                  <div className="col-6 text-center">
-                    <div style={{ borderTop: '1px solid #1a3353', width: '85%', margin: '0 auto', paddingTop: 8 }}>
-                      <strong style={{ fontSize: 12, display: 'block', color: '#1a3353' }}>
-                        O CONTABILISTA CERTIFICADO
-                      </strong>
-                      <span style={{ fontSize: 10.5, color: '#555', display: 'block' }}>
-                        Ordem dos Contabilistas e Peritos Contabilistas de Angola (OCPCA)
-                      </span>
-                      <span style={{ fontSize: 10, color: '#777', display: 'block', marginTop: 4 }}>
-                        Cédula Profissional N.º: ___________________________
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="col-6 text-center">
-                    <div style={{ borderTop: '1px solid #1a3353', width: '85%', margin: '0 auto', paddingTop: 8 }}>
-                      <strong style={{ fontSize: 12, display: 'block', color: '#1a3353' }}>
-                        A GERÊNCIA / CONSELHO DE ADMINISTRAÇÃO
-                      </strong>
-                      <span style={{ fontSize: 10.5, color: '#555', display: 'block' }}>
-                        {empresaAtual?.nome || 'A Empresa Contribuinte'}
-                      </span>
-                      <span style={{ fontSize: 10, color: '#777', display: 'block', marginTop: 4 }}>
-                        (Assinatura e Carimbo Oficial)
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-center mt-30" style={{ fontSize: 9.5, color: '#888' }}>
-                  Documento emitido eletronicamente pela Plataforma de Reconciliação Contabilística & Fiscal de Angola — Cópia autêntica para integração no Dossier Fiscal da Empresa.
-                </div>
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </>
       )}
     </>

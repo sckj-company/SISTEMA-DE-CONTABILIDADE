@@ -80,12 +80,13 @@ const AdminSidebar = ({ collapsed, abaAtiva, onMudarAba, estatisticas, onLogout 
                       <span
                         className="nav-icon"
                         style={{
-                          backgroundColor: isActive ? 'rgba(255, 255, 255, 0.22)' : 'rgba(95, 99, 242, 0.06)',
+                          backgroundColor: isActive ? 'rgba(255, 255, 255, 0.22)' : '#ffffff',
+                          border: isActive ? 'none' : '1px solid #bfdbfe',
                         }}
                       >
                         <i
                           className={item.icon}
-                          style={{ color: isActive ? '#ffffff' : '#5f63f2' }}
+                          style={{ color: isActive ? '#ffffff' : '#2563eb' }}
                         ></i>
                       </span>
                       <span className="menu-text">

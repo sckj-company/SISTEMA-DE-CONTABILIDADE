@@ -205,7 +205,7 @@ const Relatorios = () => {
           color: #272b41;
         }
         .relatorio-tab-btn.active {
-          background: #5f63f2;
+          background: #2563eb;
           color: #ffffff;
           box-shadow: 0 3px 8px rgba(95, 99, 242, 0.25);
         }

@@ -79,13 +79,16 @@ export const PeriodoProvider = ({ children }) => {
     };
   }, [carregarEmpresas]);
 
-  // Se o utilizador estiver autenticado mas a lista de empresas ainda estiver vazia, tenta recarregar ao navegar
+  const estadoEmpresasRef = React.useRef({ count: 0, loading: false });
+  estadoEmpresasRef.current = { count: empresas.length, loading: carregandoEmpresas };
+
+  // Se o utilizador estiver autenticado mas a lista de empresas ainda estiver vazia, tenta recarregar uma única vez ao mudar de rota
   useEffect(() => {
     const user = localStorage.getItem('user');
-    if (user && empresas.length === 0 && !carregandoEmpresas) {
+    if (user && estadoEmpresasRef.current.count === 0 && !estadoEmpresasRef.current.loading) {
       carregarEmpresas();
     }
-  }, [location.pathname, empresas.length, carregandoEmpresas, carregarEmpresas]);
+  }, [location.pathname, carregarEmpresas]);
 
   useEffect(() => {
     try {

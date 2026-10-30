@@ -4,15 +4,15 @@ import { toast } from 'react-toastify';
 import { pgcService } from '../../services/api';
 
 const CLASSES_PGC = [
-  { id: 'TODAS', nome: 'Todas as Classes' },
-  { id: '1', nome: '1 - Meios Fixos' },
-  { id: '2', nome: '2 - Existências' },
-  { id: '3', nome: '3 - Terceiros' },
-  { id: '4', nome: '4 - Meios Monetários' },
-  { id: '5', nome: '5 - Capital & Reservas' },
-  { id: '6', nome: '6 - Proveitos (Vendas)' },
-  { id: '7', nome: '7 - Custos (Gastos)' },
-  { id: '8', nome: '8 - Resultados' },
+  { id: 'TODAS', nome: 'Todas as Classes', key: 'filterAllClasses' },
+  { id: '1', nome: '1 - Meios Fixos', key: 'filterClass1' },
+  { id: '2', nome: '2 - Existências', key: 'filterClass2' },
+  { id: '3', nome: '3 - Terceiros', key: 'filterClass3' },
+  { id: '4', nome: '4 - Meios Monetários', key: 'filterClass4' },
+  { id: '5', nome: '5 - Capital & Reservas', key: 'filterClass5' },
+  { id: '6', nome: '6 - Proveitos (Vendas)', key: 'filterClass6' },
+  { id: '7', nome: '7 - Custos (Gastos)', key: 'filterClass7' },
+  { id: '8', nome: '8 - Resultados', key: 'filterClass8' },
 ];
 
 const PgcView = () => {
@@ -131,7 +131,7 @@ const PgcView = () => {
                 {t('admin.pgc.title', 'Plano Geral de Contabilidade de Angola (PGC)')}
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13.5 }}>
-                Decreto n.º 82/01 de 16 de Novembro · Catálogo oficial de contas, dinâmica de débito/crédito e demonstrações financeiras.
+                {t('pgcUi.bannerSubtitle', 'Decreto n.º 82/01 de 16 de Novembro · Catálogo oficial de contas, dinâmica de débito/crédito e demonstrações financeiras.')}
               </p>
             </div>
 
@@ -142,7 +142,7 @@ const PgcView = () => {
                 onClick={imprimirPgcPdf}
                 style={{ fontWeight: 600, fontSize: 13, border: '1px solid #dcdfe5' }}
               >
-                <i className="la la-print mr-4"></i> Imprimir / PDF
+                <i className="la la-print mr-4"></i> {t('pgcUi.btnPrintPdf', 'Imprimir / PDF')}
               </button>
               <button
                 type="button"
@@ -152,7 +152,7 @@ const PgcView = () => {
                 style={{ fontWeight: 700, fontSize: 13, backgroundColor: '#2563eb', borderColor: '#2563eb' }}
               >
                 <i className={`la ${baixandoExcelPgc ? 'la-spinner la-spin' : 'la-file-excel'} mr-4`}></i>
-                {baixandoExcelPgc ? 'A gerar...' : 'Baixar PGC Completo em Excel (.xlsx)'}
+                {baixandoExcelPgc ? t('pgcUi.generating', 'A gerar...') : t('pgcUi.btnDownloadExcel', 'Baixar PGC Completo em Excel (.xlsx)')}
               </button>
             </div>
           </div>
@@ -181,20 +181,20 @@ const PgcView = () => {
               </div>
               <div>
                 <strong className="color-dark d-block" style={{ fontSize: 14 }}>
-                  Decreto n.º 82/01 · Diário da República Iª Série, N.º 53
+                  {t('pgcUi.bannerOfficialBadge', 'Decreto n.º 82/01 · Diário da República Iª Série, N.º 53')}
                 </strong>
                 <span className="text-muted" style={{ fontSize: 12 }}>
-                  Enquadramento legal para todas as empresas em território angolano e conciliação com o Modelo 7 da AGT.
+                  {t('pgcUi.bannerOfficialDesc', 'Enquadramento legal para todas as empresas em território angolano e conciliação com o Modelo 7 da AGT.')}
                 </span>
               </div>
             </div>
 
             <div className="d-flex align-items-center" style={{ gap: 8 }}>
               <span className="badge badge-light border p-2" style={{ fontSize: 12, fontWeight: 700, color: '#1a3353' }}>
-                <i className="la la-check-circle text-success mr-1"></i> 8 Classes Normalizadas
+                <i className="la la-check-circle text-success mr-1"></i> {t('pgcUi.badge8Classes', '8 Classes Normalizadas')}
               </span>
               <span className="badge badge-light border p-2" style={{ fontSize: 12, fontWeight: 700, color: '#2563eb' }}>
-                <i className="la la-calculator mr-1"></i> SAF-T Angola
+                <i className="la la-calculator mr-1"></i> {t('pgcUi.badgeSaft', 'SAF-T Angola')}
               </span>
             </div>
           </div>
@@ -206,14 +206,14 @@ const PgcView = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Catálogo de Contas
+              {t('pgcUi.kpiCatalogTitle', 'Catálogo de Contas')}
             </span>
             <div className="fw-800 color-dark" style={{ fontSize: 24 }}>
               {contasExibidas.length}{' '}
-              <span className="fs-13 text-muted fw-normal">contas</span>
+              <span className="fs-13 text-muted fw-normal">{t('pgcUi.kpiAccountsUnit', 'contas')}</span>
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              Estrutura oficial Decreto 82/01
+              {t('pgcUi.kpiCatalogSub', 'Estrutura oficial Decreto 82/01')}
             </span>
           </div>
         </div>
@@ -221,13 +221,13 @@ const PgcView = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #52c41a' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Meios Fixos & Existências
+              {t('pgcUi.kpiFixedAssetsTitle', 'Meios Fixos & Existências')}
             </span>
             <div className="fw-800" style={{ fontSize: 24, color: '#52c41a' }}>
-              Classe 1 & 2
+              {t('pgcUi.kpiFixedAssetsClasses', 'Classe 1 & 2')}
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              Investimentos e stocks
+              {t('pgcUi.kpiFixedAssetsSub', 'Investimentos e stocks')}
             </span>
           </div>
         </div>
@@ -235,13 +235,13 @@ const PgcView = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #1890ff' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Terceiros & Meios Monetários
+              {t('pgcUi.kpiThirdPartiesTitle', 'Terceiros & Meios Monetários')}
             </span>
             <div className="fw-800" style={{ fontSize: 24, color: '#1890ff' }}>
-              Classe 3 & 4
+              {t('pgcUi.kpiThirdPartiesClasses', 'Classe 3 & 4')}
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              Estado (IVA Conta 34), Clientes e Caixa
+              {t('pgcUi.kpiThirdPartiesSub', 'Estado (IVA Conta 34), Clientes e Caixa')}
             </span>
           </div>
         </div>
@@ -249,13 +249,13 @@ const PgcView = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #fa8b0c' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Demonstração de Resultados
+              {t('pgcUi.kpiIncomeStatementTitle', 'Demonstração de Resultados')}
             </span>
             <div className="fw-800" style={{ fontSize: 24, color: '#fa8b0c' }}>
-              Classe 6, 7 & 8
+              {t('pgcUi.kpiIncomeStatementClasses', 'Classe 6, 7 & 8')}
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              Vendas, custos e apuramento do lucro
+              {t('pgcUi.kpiIncomeStatementSub', 'Vendas, custos e apuramento do lucro')}
             </span>
           </div>
         </div>
@@ -268,21 +268,21 @@ const PgcView = () => {
           className={`step-pill ${abaAtiva === 'contas' ? 'active' : ''}`}
           onClick={() => setAbaAtiva('contas')}
         >
-          <i className="la la-list-ol"></i> 1. Quadro de Contas & Dinâmica
+          <i className="la la-list-ol"></i> {t('pgcUi.tabAccountsChart', '1. Quadro de Contas & Dinâmica')}
         </button>
         <button
           type="button"
           className={`step-pill ${abaAtiva === 'principios' ? 'active' : ''}`}
           onClick={() => setAbaAtiva('principios')}
         >
-          <i className="la la-balance-scale"></i> 2. Princípios Contabilísticos
+          <i className="la la-balance-scale"></i> {t('pgcUi.tabPrinciples', '2. Princípios Contabilísticos')}
         </button>
         <button
           type="button"
           className={`step-pill ${abaAtiva === 'demonstracoes' ? 'active' : ''}`}
           onClick={() => setAbaAtiva('demonstracoes')}
         >
-          <i className="la la-chart-bar"></i> 3. Demonstrações Oficiais (Balanço & DRN)
+          <i className="la la-chart-bar"></i> {t('pgcUi.tabOfficialStatements', '3. Demonstrações Oficiais (Balanço & DRN)')}
         </button>
       </div>
 
@@ -303,7 +303,7 @@ const PgcView = () => {
                     <input
                       type="text"
                       className="form-control border-left-0"
-                      placeholder="Pesquisar conta por código (ex: 31, 34, 61, 71) ou descrição..."
+                      placeholder={t('pgcUi.searchAccountsPlaceholder', 'Pesquisar conta por código (ex: 31, 34, 61, 71) ou descrição...')}
                       value={pesquisaPgc}
                       onChange={(e) => setPesquisaPgc(e.target.value)}
                       style={{ height: 40, fontSize: 13.5 }}
@@ -312,7 +312,7 @@ const PgcView = () => {
                 </div>
                 <div className="col-12 col-md-4 text-md-right mt-10 mt-md-0">
                   <span className="text-muted" style={{ fontSize: 13 }}>
-                    A exibir <strong className="color-dark">{contasExibidas.length}</strong> contas
+                    {t('pgcUi.showingAccountsCount', { count: contasExibidas.length, defaultValue: `A exibir ${contasExibidas.length} contas` })}
                   </span>
                 </div>
               </div>
@@ -328,7 +328,7 @@ const PgcView = () => {
                       className={`class-filter-btn ${isActive ? 'active' : ''}`}
                       onClick={() => setFiltroClassePgc(cItem.id)}
                     >
-                      {cItem.nome}
+                      {cItem.key ? t(`pgcUi.${cItem.key}`, cItem.nome) : cItem.nome}
                     </button>
                   );
                 })}
@@ -343,16 +343,16 @@ const PgcView = () => {
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
                   <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
-                      <th style={{ width: 110, padding: '12px 18px', fontWeight: 700, color: '#495057' }}>Código</th>
-                      <th style={{ width: 280, padding: '12px 18px', fontWeight: 700, color: '#495057' }}>Designação Oficial</th>
-                      <th style={{ width: 100, padding: '12px 18px', fontWeight: 700, color: '#495057', textAlign: 'center' }}>Natureza</th>
+                      <th style={{ width: 110, padding: '12px 18px', fontWeight: 700, color: '#495057' }}>{t('pgcUi.thCode', 'Código')}</th>
+                      <th style={{ width: 280, padding: '12px 18px', fontWeight: 700, color: '#495057' }}>{t('pgcUi.thOfficialName', 'Designação Oficial')}</th>
+                      <th style={{ width: 100, padding: '12px 18px', fontWeight: 700, color: '#495057', textAlign: 'center' }}>{t('pgcUi.thNature', 'Natureza')}</th>
                       <th style={{ minWidth: 230, padding: '12px 18px', fontWeight: 700, color: '#16a34a' }}>
-                        <i className="la la-plus-circle mr-1"></i> Debita-se por...
+                        <i className="la la-plus-circle mr-1"></i> {t('pgcUi.thDebitedFor', 'Debita-se por...')}
                       </th>
                       <th style={{ minWidth: 230, padding: '12px 18px', fontWeight: 700, color: '#dc2626' }}>
-                        <i className="la la-minus-circle mr-1"></i> Credita-se por...
+                        <i className="la la-minus-circle mr-1"></i> {t('pgcUi.thCreditedFor', 'Credita-se por...')}
                       </th>
-                      <th style={{ width: 90, padding: '12px 18px', fontWeight: 700, color: '#495057', textAlign: 'center' }}>Ficha</th>
+                      <th style={{ width: 90, padding: '12px 18px', fontWeight: 700, color: '#495057', textAlign: 'center' }}>{t('pgcUi.thFile', 'Ficha')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -414,7 +414,13 @@ const PgcView = () => {
                                 }`}
                                 style={{ fontSize: 11 }}
                               >
-                                {c.natureza || '-'}
+                                {c.natureza === 'Devedora'
+                                  ? t('pgcUi.natureDebit', 'Devedora')
+                                  : c.natureza === 'Credora'
+                                  ? t('pgcUi.natureCredit', 'Credora')
+                                  : c.natureza
+                                  ? t('pgcUi.natureMixed', c.natureza)
+                                  : '-'}
                               </span>
                             </td>
                             <td style={{ padding: '12px 18px', verticalAlign: 'middle', color: '#15803d', fontSize: 12.5 }}>
@@ -433,7 +439,7 @@ const PgcView = () => {
                                 }}
                                 style={{ borderRadius: 6, fontWeight: 700, padding: '3px 8px' }}
                               >
-                                Ver
+                                {t('pgcUi.btnView', 'Ver')}
                               </button>
                             </td>
                           </tr>
@@ -455,10 +461,10 @@ const PgcView = () => {
         <div className="card card-default" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
           <div className="card-header bg-white py-14 px-20 border-bottom">
             <h5 className="fw-700 text-dark mb-0">
-              Princípios Contabilísticos Fundamentais (Decreto n.º 82/01)
+              {t('pgcUi.principlesCardTitle', 'Princípios Contabilísticos Fundamentais (Decreto n.º 82/01)')}
             </h5>
             <span className="text-muted" style={{ fontSize: 12.5 }}>
-              Pilares oficiais que regem a elaboração das contas e das declarações fiscais em Angola
+              {t('pgcUi.principlesCardSubtitle', 'Pilares oficiais que regem a elaboração das contas e das declarações fiscais em Angola')}
             </span>
           </div>
           <div className="card-body p-20">
@@ -487,7 +493,7 @@ const PgcView = () => {
                     </p>
                     {p.exemplo && (
                       <div className="p-10 rounded" style={{ backgroundColor: '#f0fdf4', borderLeft: '3px solid #16a34a', fontSize: 12 }}>
-                        <strong style={{ color: '#166534' }}>Exemplo Prático:</strong>{' '}
+                        <strong style={{ color: '#166534' }}>{t('pgcUi.practicalExample', 'Exemplo Prático:')}</strong>{' '}
                         <span style={{ color: '#14532d' }}>{p.exemplo}</span>
                       </div>
                     )}
@@ -511,7 +517,7 @@ const PgcView = () => {
               onClick={() => setTipoDemonstracao('balanco')}
               style={{ fontWeight: 700, borderRadius: 6 }}
             >
-              <i className="la la-balance-scale mr-1"></i> Balanço Sintético Oficial
+              <i className="la la-balance-scale mr-1"></i> {t('pgcUi.btnBalanceSheet', 'Balanço Sintético Oficial')}
             </button>
             <button
               type="button"
@@ -519,19 +525,19 @@ const PgcView = () => {
               onClick={() => setTipoDemonstracao('drn')}
               style={{ fontWeight: 700, borderRadius: 6 }}
             >
-              <i className="la la-chart-line mr-1"></i> Demonstração dos Resultados por Natureza (DRN)
+              <i className="la la-chart-line mr-1"></i> {t('pgcUi.btnDrn', 'Demonstração dos Resultados por Natureza (DRN)')}
             </button>
           </div>
 
           <div className="card card-default" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
             <div className="card-header bg-white py-14 px-20 border-bottom">
               <h5 className="fw-700 text-dark mb-0">
-                {tipoDemonstracao === 'balanco' ? 'Estrutura Oficial do Balanço (Decreto 82/01)' : 'Demonstração dos Resultados por Natureza (DRN)'}
+                {tipoDemonstracao === 'balanco' ? t('pgcUi.statementsHeaderBalance', 'Estrutura Oficial do Balanço (Decreto 82/01)') : t('pgcUi.statementsHeaderDrn', 'Demonstração dos Resultados por Natureza (DRN)')}
               </h5>
               <span className="text-muted" style={{ fontSize: 12.5 }}>
                 {tipoDemonstracao === 'balanco'
-                  ? 'Quadro comparativo de Ativo (Recursos) e Passivo + Capital Próprio (Obrigações e Fundos)'
-                  : 'Apuramento em cascata da Margem Bruta, Resultados Operacionais, Financeiros e Líquidos'}
+                  ? t('pgcUi.statementsSubBalance', 'Quadro comparativo de Ativo (Recursos) e Passivo + Capital Próprio (Obrigações e Fundos)')
+                  : t('pgcUi.statementsSubDrn', 'Apuramento em cascata da Margem Bruta, Resultados Operacionais, Financeiros e Líquidos')}
               </span>
             </div>
             <div className="card-body p-20">

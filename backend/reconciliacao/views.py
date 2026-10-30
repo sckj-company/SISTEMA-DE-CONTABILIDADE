@@ -38,6 +38,7 @@ from . import validacao_documental
 from . import dossie_service
 from . import regra_engine
 from . import calendario_service
+from .storage_utils import obter_caminho_local_documento
 from . import numeros_service
 from . import taxas
 from . import auditoria_trace
@@ -752,70 +753,71 @@ def upload_documento_view(request):
         nome_arquivo=request.data.get('nome') or arquivo.name,
     )
 
-    resultado = extracao_service.extrair_conteudo(documento.arquivo.path, arquivo.name)
-    texto = resultado['texto']
+    with obter_caminho_local_documento(documento.arquivo) as caminho_local:
+        resultado = extracao_service.extrair_conteudo(caminho_local, arquivo.name)
+        texto = resultado['texto']
 
-    sugestao = classificador_service.classificar(documento.nome_arquivo, texto)
-    documento.tipo_sugerido = sugestao['tipo']
-    if not tipo:
-        documento.tipo = sugestao['tipo']
-        duplicado = _documento_duplicado(
-            empresa, ano, mes, documento.tipo, nome_arquivo=documento.nome_arquivo, excluir_pk=documento.pk
+        sugestao = classificador_service.classificar(documento.nome_arquivo, texto)
+        documento.tipo_sugerido = sugestao['tipo']
+        if not tipo:
+            documento.tipo = sugestao['tipo']
+            duplicado = _documento_duplicado(
+                empresa, ano, mes, documento.tipo, nome_arquivo=documento.nome_arquivo, excluir_pk=documento.pk
+            )
+            if duplicado is not None:
+                if substituir:
+                    duplicado.delete()
+                else:
+                    tipo_efetivo = documento.tipo
+                    arquivo_salvo = documento.arquivo
+                    documento.delete()
+                    arquivo_salvo.delete(save=False)
+                    return _resposta_duplicado(duplicado, tipo_efetivo, ano, mes)
+
+        if resultado['erro'] or (texto or '').startswith('Erro ao extrair texto'):
+            documento.estado = 'ERRO'
+        elif not (texto or '').strip():
+            documento.estado = 'ILEGIVEL'
+        else:
+            documento.estado = 'VALIDADO'
+
+        # Processamento especial de Dossiê Mensal Completo (Envelope Fiscal multi-documentos)
+        is_dossie = (tipo == 'DOSSIE_MENSAL') or (
+            extensao == '.pdf' and dossie_service.is_dossie_mensal(caminho_local)
         )
-        if duplicado is not None:
-            if substituir:
-                duplicado.delete()
-            else:
-                tipo_efetivo = documento.tipo
-                arquivo_salvo = documento.arquivo
-                documento.delete()
-                arquivo_salvo.delete(save=False)
-                return _resposta_duplicado(duplicado, tipo_efetivo, ano, mes)
-
-    if resultado['erro'] or (texto or '').startswith('Erro ao extrair texto'):
-        documento.estado = 'ERRO'
-    elif not (texto or '').strip():
-        documento.estado = 'ILEGIVEL'
-    else:
-        documento.estado = 'VALIDADO'
-
-    # Processamento especial de Dossiê Mensal Completo (Envelope Fiscal multi-documentos)
-    is_dossie = (tipo == 'DOSSIE_MENSAL') or (
-        extensao == '.pdf' and dossie_service.is_dossie_mensal(documento.arquivo.path)
-    )
-    if is_dossie and documento.estado == 'VALIDADO':
-        documento.tipo = 'DOSSIE_MENSAL'
-        documento.tipo_sugerido = 'DOSSIE_MENSAL'
-        documento.texto_extraido = texto
-        documento.save()
-        res_dossie = dossie_service.desmembrar_e_processar_dossie(
-            documento.arquivo.path, empresa, ano, mes
-        )
-        return Response({
-            'success': True,
-            'is_dossie': True,
-            'mensagem': res_dossie['mensagem'],
-            'ano': res_dossie.get('ano') or documento.ano,
-            'mes': res_dossie.get('mes') or documento.mes,
-            'empresa_id': empresa.id,
-            'documento': {
-                'id': documento.id,
-                'tipo': 'DOSSIE_MENSAL',
-                'tipo_sugerido': 'DOSSIE_MENSAL',
-                'classificado_automaticamente': not bool(tipo),
-                'formato': resultado['formato'],
-                'estado': 'VALIDADO',
-                'empresa': empresa.id,
-                'empresa_nome': empresa.nome,
+        if is_dossie and documento.estado == 'VALIDADO':
+            documento.tipo = 'DOSSIE_MENSAL'
+            documento.tipo_sugerido = 'DOSSIE_MENSAL'
+            documento.texto_extraido = texto
+            documento.save()
+            res_dossie = dossie_service.desmembrar_e_processar_dossie(
+                caminho_local, empresa, ano, mes
+            )
+            return Response({
+                'success': True,
+                'is_dossie': True,
+                'mensagem': res_dossie['mensagem'],
                 'ano': res_dossie.get('ano') or documento.ano,
                 'mes': res_dossie.get('mes') or documento.mes,
-                'nome_arquivo': documento.nome_arquivo,
-            },
-            'documentos_criados': res_dossie['documentos_criados'],
-            'auditoria': res_dossie.get('auditoria'),
-            'reconciliacao': res_dossie.get('reconciliacao'),
-            'analise_ia_id': res_dossie.get('analise_ia_id'),
-        })
+                'empresa_id': empresa.id,
+                'documento': {
+                    'id': documento.id,
+                    'tipo': 'DOSSIE_MENSAL',
+                    'tipo_sugerido': 'DOSSIE_MENSAL',
+                    'classificado_automaticamente': not bool(tipo),
+                    'formato': resultado['formato'],
+                    'estado': 'VALIDADO',
+                    'empresa': empresa.id,
+                    'empresa_nome': empresa.nome,
+                    'ano': res_dossie.get('ano') or documento.ano,
+                    'mes': res_dossie.get('mes') or documento.mes,
+                    'nome_arquivo': documento.nome_arquivo,
+                },
+                'documentos_criados': res_dossie['documentos_criados'],
+                'auditoria': res_dossie.get('auditoria'),
+                'reconciliacao': res_dossie.get('reconciliacao'),
+                'analise_ia_id': res_dossie.get('analise_ia_id'),
+            })
 
     # Validação estrita de conteúdo para BALANCETE e MODELO7 em documentos validados
     if documento.estado == 'VALIDADO' and documento.tipo in ('BALANCETE', 'MODELO7'):
@@ -1078,19 +1080,21 @@ def analisar_documentos_view(request):
     # Re-extrair texto se vazio
     if not (doc_contab.texto_extraido or '').strip() and doc_contab.arquivo:
         try:
-            res_c = extracao_service.extrair_conteudo(doc_contab.arquivo.path, doc_contab.nome_arquivo)
-            if res_c.get('texto'):
-                doc_contab.texto_extraido = res_c['texto']
-                doc_contab.save(update_fields=['texto_extraido'])
+            with obter_caminho_local_documento(doc_contab.arquivo) as c_path:
+                res_c = extracao_service.extrair_conteudo(c_path, doc_contab.nome_arquivo)
+                if res_c.get('texto'):
+                    doc_contab.texto_extraido = res_c['texto']
+                    doc_contab.save(update_fields=['texto_extraido'])
         except Exception as e:
             logger.warning(f"Erro ao extrair contab: {e}")
 
     if not (doc_agt.texto_extraido or '').strip() and doc_agt.arquivo:
         try:
-            res_a = extracao_service.extrair_conteudo(doc_agt.arquivo.path, doc_agt.nome_arquivo)
-            if res_a.get('texto'):
-                doc_agt.texto_extraido = res_a['texto']
-                doc_agt.save(update_fields=['texto_extraido'])
+            with obter_caminho_local_documento(doc_agt.arquivo) as a_path:
+                res_a = extracao_service.extrair_conteudo(a_path, doc_agt.nome_arquivo)
+                if res_a.get('texto'):
+                    doc_agt.texto_extraido = res_a['texto']
+                    doc_agt.save(update_fields=['texto_extraido'])
         except Exception as e:
             logger.warning(f"Erro ao extrair agt: {e}")
 

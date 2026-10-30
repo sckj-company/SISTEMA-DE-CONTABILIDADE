@@ -13,14 +13,14 @@ const BADGE_REGIME = {
 };
 
 const TIPOS_ENTIDADE = [
-  { value: 'SQ', label: 'Sociedade por Quotas (Lda / SU)' },
-  { value: 'SA', label: 'Sociedade Anónima (S.A.)' },
-  { value: 'ENI', label: 'Empresário em Nome Individual (ENI)' },
-  { value: 'PS', label: 'Pessoa Singular' },
-  { value: 'COOP', label: 'Cooperativa' },
-  { value: 'ASS', label: 'Associação' },
-  { value: 'FUND', label: 'Fundação' },
-  { value: 'OUTRO', label: 'Outro' },
+  { value: 'SQ', label: 'Sociedade por Quotas (Lda / SU)', key: 'entityTypeSQ' },
+  { value: 'SA', label: 'Sociedade Anónima (S.A.)', key: 'entityTypeSA' },
+  { value: 'ENI', label: 'Empresário em Nome Individual (ENI)', key: 'entityTypeENI' },
+  { value: 'PS', label: 'Pessoa Singular', key: 'entityTypePS' },
+  { value: 'COOP', label: 'Cooperativa', key: 'entityTypeCOOP' },
+  { value: 'ASS', label: 'Associação', key: 'entityTypeASS' },
+  { value: 'FUND', label: 'Fundação', key: 'entityTypeFUND' },
+  { value: 'OUTRO', label: 'Outro', key: 'entityTypeOUTRO' },
 ];
 
 const PROVINCIAS_ANGOLA = [
@@ -497,10 +497,10 @@ const Configuracoes = () => {
                           whiteSpace: 'nowrap',
                           fontSize: 13,
                         }}
-                        title="Cadastrar Nova Empresa"
+                        title={t('definicoesUi.newCompanyTooltip', 'Cadastrar Nova Empresa')}
                       >
                         <i className="la la-plus" style={{ fontSize: 15 }}></i>
-                        <span>Nova Empresa</span>
+                        <span>{t('definicoesUi.newCompanyBtn', 'Nova Empresa')}</span>
                       </button>
                     </>
                   ) : (
@@ -517,7 +517,7 @@ const Configuracoes = () => {
                     >
                       <i className="la la-building" style={{ fontSize: 15 }}></i>
                       <span>
-                        Empresa Ativa: <strong>{empresaSelecionada?.nome || 'Minha Empresa'}</strong>
+                        {t('definicoesUi.activeCompanyPill', 'Empresa Ativa:')} <strong>{empresaSelecionada?.nome || t('definicoesUi.myCompanyFallback', 'Minha Empresa')}</strong>
                       </span>
                     </div>
                   )}
@@ -531,13 +531,13 @@ const Configuracoes = () => {
             <div className="col-12 col-sm-6 col-lg-3">
               <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
                 <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  NIF da Empresa
+                  {t('definicoesUi.kpiNif', 'NIF da Empresa')}
                 </span>
                 <div className="fw-800 color-dark" style={{ fontSize: 22 }}>
                   {empresaSelecionada?.nif || '---'}
                 </div>
                 <span className="text-muted" style={{ fontSize: 12 }}>
-                  Contribuinte Fiscal AGT
+                  {t('definicoesUi.kpiNifSub', 'Contribuinte Fiscal AGT')}
                 </span>
               </div>
             </div>
@@ -545,17 +545,17 @@ const Configuracoes = () => {
             <div className="col-12 col-sm-6 col-lg-3">
               <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
                 <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Regime de IVA
+                  {t('definicoesUi.kpiRegime', 'Regime de IVA')}
                 </span>
                 <div className="fw-800" style={{ fontSize: 22, color: '#2563eb' }}>
                   {empresaSelecionada?.regime_iva || 'GERAL'}
                 </div>
                 <span className="text-muted" style={{ fontSize: 12 }}>
                   {empresaSelecionada?.regime_iva === 'SIMPLIFICADO'
-                    ? 'Regime Simplificado (7%)'
+                    ? t('definicoesUi.kpiRegimeSimplified', 'Regime Simplificado (7%)')
                     : empresaSelecionada?.regime_iva === 'EXCLUSAO'
-                    ? 'Regime de Exclusão'
-                    : 'Taxa Geral 14%'}
+                    ? t('definicoesUi.kpiRegimeExclusion', 'Regime de Exclusão')
+                    : t('definicoesUi.kpiRegimeGeneral', 'Taxa Geral 14%')}
                 </span>
               </div>
             </div>
@@ -563,13 +563,13 @@ const Configuracoes = () => {
             <div className="col-12 col-sm-6 col-lg-3">
               <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
                 <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Localização
+                  {t('definicoesUi.kpiLocation', 'Localização')}
                 </span>
                 <div className="fw-800 color-dark" style={{ fontSize: 22 }}>
                   {empresaSelecionada?.provincia || 'Luanda'}
                 </div>
                 <span className="text-muted" style={{ fontSize: 12 }}>
-                  Município de {empresaSelecionada?.municipio || 'Luanda'}
+                  {t('definicoesUi.kpiLocationSub', { mun: empresaSelecionada?.municipio || 'Luanda', defaultValue: `Município de ${empresaSelecionada?.municipio || 'Luanda'}` })}
                 </span>
               </div>
             </div>
@@ -577,7 +577,7 @@ const Configuracoes = () => {
             <div className="col-12 col-sm-6 col-lg-3">
               <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
                 <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Atividade Económica
+                  {t('definicoesUi.kpiActivity', 'Atividade Económica')}
                 </span>
                 <div
                   className="fw-800 text-truncate color-dark"
@@ -587,7 +587,7 @@ const Configuracoes = () => {
                   CAE {empresaSelecionada?.cae_principal || '46900'}
                 </div>
                 <span className="text-muted text-truncate d-block" style={{ fontSize: 12 }}>
-                  {empresaSelecionada?.atividade_principal || 'Comércio e Serviços'}
+                  {empresaSelecionada?.atividade_principal || t('definicoesUi.kpiActivitySub', 'Comércio e Serviços')}
                 </span>
               </div>
             </div>
@@ -600,21 +600,21 @@ const Configuracoes = () => {
               className={`step-pill ${abaAtiva === 'empresa' ? 'active' : ''}`}
               onClick={() => mudarAba('empresa')}
             >
-              <i className="la la-building"></i> 1. Dados da Empresa
+              <i className="la la-building"></i> {t('definicoesUi.tabCompany', '1. Dados da Empresa')}
             </button>
             <button
               type="button"
               className={`step-pill ${abaAtiva === 'perfil' ? 'active' : ''}`}
               onClick={() => mudarAba('perfil')}
             >
-              <i className="la la-user-lock"></i> 2. O Meu Perfil, Nome & Palavra-passe
+              <i className="la la-user-lock"></i> {t('definicoesUi.tabProfile', '2. O Meu Perfil, Nome & Palavra-passe')}
             </button>
             <button
               type="button"
               className={`step-pill ${abaAtiva === 'parametros' ? 'active' : ''}`}
               onClick={() => mudarAba('parametros')}
             >
-              <i className="la la-balance-scale"></i> 3. Parâmetros Fiscais (AGT)
+              <i className="la la-balance-scale"></i> {t('definicoesUi.tabTaxParams', '3. Parâmetros Fiscais (AGT)')}
             </button>
           </div>
         </>
@@ -627,7 +627,7 @@ const Configuracoes = () => {
             <div className="card card-default mb-20" style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff' }}>
               <div className="card-header bg-white py-14 px-20 border-bottom">
                 <span className="fw-700 color-dark" style={{ fontSize: 14 }}>
-                  Resumo da Empresa Ativa
+                  {t('definicoesUi.activeCompanySummary', 'Resumo da Empresa Ativa')}
                 </span>
               </div>
               <div className="card-body p-20">
@@ -656,14 +656,14 @@ const Configuracoes = () => {
                           {empresaSelecionada.nome}
                         </strong>
                         <span className="text-muted" style={{ fontSize: 12 }}>
-                          NIF: {empresaSelecionada.nif}
+                          {t('definicoesUi.labelCompanyNif', 'NIF')}: {empresaSelecionada.nif}
                         </span>
                       </div>
                     </div>
 
                     <div className="pt-10 border-top d-flex justify-content-between align-items-center">
                       <span className="text-muted" style={{ fontSize: 12 }}>
-                        Regime de IVA:
+                        {t('definicoesUi.regimeIvaLabel', 'Regime de IVA:')}
                       </span>
                       <span className={`badge ${BADGE_REGIME[empresaSelecionada.regime_iva] || 'badge-primary'}`}>
                         {empresaSelecionada.regime_nome || empresaSelecionada.regime_iva}
@@ -672,17 +672,17 @@ const Configuracoes = () => {
 
                     <div className="pt-8 d-flex justify-content-between align-items-center">
                       <span className="text-muted" style={{ fontSize: 12 }}>
-                        Estado Cadastral:
+                        {t('definicoesUi.cadastralStatusLabel', 'Estado Cadastral:')}
                       </span>
                       <span className="badge badge-success">
-                        {empresaSelecionada.estado || 'ATIVA'}
+                        {empresaSelecionada.estado || t('definicoesUi.statusActive', 'ATIVA')}
                       </span>
                     </div>
 
                     {empresaSelecionada.email && (
                       <div className="pt-8 d-flex justify-content-between align-items-center">
                         <span className="text-muted" style={{ fontSize: 12 }}>
-                          Email:
+                          {t('definicoesUi.emailLabel', 'Email:')}
                         </span>
                         <span className="fw-600 color-dark text-truncate ml-8" style={{ fontSize: 12 }}>
                           {empresaSelecionada.email}
@@ -693,7 +693,7 @@ const Configuracoes = () => {
                     {empresaSelecionada.telefone && (
                       <div className="pt-8 d-flex justify-content-between align-items-center">
                         <span className="text-muted" style={{ fontSize: 12 }}>
-                          Telefone:
+                          {t('definicoesUi.phoneLabel', 'Telefone:')}
                         </span>
                         <span className="fw-600 color-dark" style={{ fontSize: 12 }}>
                           {empresaSelecionada.telefone}
@@ -702,7 +702,7 @@ const Configuracoes = () => {
                     )}
                   </div>
                 ) : (
-                  <p className="text-muted mb-0">Nenhuma empresa selecionada.</p>
+                  <p className="text-muted mb-0">{t('definicoesUi.noCompanySelected', 'Nenhuma empresa selecionada.')}</p>
                 )}
 
                 <div className="mt-16 pt-16 border-top">
@@ -713,7 +713,7 @@ const Configuracoes = () => {
                     style={{ borderRadius: 8, fontWeight: 700, padding: '8px 14px', gap: 6 }}
                   >
                     <i className="la la-key" style={{ fontSize: 16 }}></i>
-                    <span>Alterar Minha Senha ou Nome de Conta</span>
+                    <span>{t('definicoesUi.changePasswordOrNameBtn', 'Alterar Minha Senha ou Nome de Conta')}</span>
                   </button>
                 </div>
               </div>
@@ -728,10 +728,10 @@ const Configuracoes = () => {
               >
                 <div>
                   <h5 className="fw-700 color-dark mb-0" style={{ fontSize: 15 }}>
-                    Ficha Cadastral, Nomes & Contactos da Empresa
+                    {t('definicoesUi.formCardTitle', 'Ficha Cadastral, Nomes & Contactos da Empresa')}
                   </h5>
                   <span className="text-muted" style={{ fontSize: 12.5 }}>
-                    Edite a denominação, nome comercial, contactos, endereço, atividade e contabilista responsável.
+                    {t('definicoesUi.formCardSubtitle', 'Edite a denominação, nome comercial, contactos, endereço, atividade e contabilista responsável.')}
                   </span>
                 </div>
                 {isAdmin && (
@@ -742,20 +742,20 @@ const Configuracoes = () => {
                     style={{ borderRadius: 6, fontWeight: 600, padding: '6px 12px', fontSize: 12, gap: 5 }}
                   >
                     <i className="la la-building"></i>
-                    <span>Gestão Global de Empresas</span>
+                    <span>{t('definicoesUi.globalCompaniesManagement', 'Gestão Global de Empresas')}</span>
                   </button>
                 )}
               </div>
 
               <div className="card-body p-20">
                 {carregandoEmpresa ? (
-                  <p className="text-muted text-center py-30">A carregar dados da empresa...</p>
+                  <p className="text-muted text-center py-30">{t('definicoesUi.loadingCompanyData', 'A carregar dados da empresa...')}</p>
                 ) : empresaSelecionada ? (
                   <form onSubmit={handleSalvarEmpresa}>
                     <div className="row" style={{ rowGap: 16 }}>
                       <div className="col-12 col-md-8">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          RAZÃO SOCIAL / NOME DA EMPRESA *
+                          {t('definicoesUi.labelCompanyName', 'RAZÃO SOCIAL / NOME DA EMPRESA *')}
                         </label>
                         <input
                           type="text"
@@ -770,7 +770,7 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-4">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          NIF (CONTRIBUINTE AGT) *
+                          {t('definicoesUi.labelCompanyNif', 'NIF (CONTRIBUINTE AGT) *')}
                         </label>
                         <input
                           type="text"
@@ -785,13 +785,13 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-6">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          NOME COMERCIAL / FANTASIA
+                          {t('definicoesUi.labelTradeName', 'NOME COMERCIAL / FANTASIA')}
                         </label>
                         <input
                           type="text"
                           className="form-control"
                           readOnly={isSomenteConsulta}
-                          placeholder="Ex: SCKJ Comércio & Serviços"
+                          placeholder={t('definicoesUi.tradeNamePlaceholder', 'Ex: SCKJ Comércio & Serviços')}
                           value={empresaForm.nome_comercial}
                           onChange={(e) => setEmpresaForm({ ...empresaForm, nome_comercial: e.target.value })}
                           style={{ background: '#ffffff' }}
@@ -800,7 +800,7 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-6">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          TIPO DE ENTIDADE
+                          {t('definicoesUi.labelEntityType', 'TIPO DE ENTIDADE')}
                         </label>
                         <select
                           className="form-control"
@@ -811,7 +811,7 @@ const Configuracoes = () => {
                         >
                           {TIPOS_ENTIDADE.map((item) => (
                             <option key={item.value} value={item.value}>
-                              {item.label}
+                              {item.key ? t(`definicoesUi.${item.key}`, item.label) : item.label}
                             </option>
                           ))}
                         </select>
@@ -819,13 +819,13 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-8">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          ATIVIDADE PRINCIPAL
+                          {t('definicoesUi.labelMainActivity', 'ATIVIDADE PRINCIPAL')}
                         </label>
                         <input
                           type="text"
                           className="form-control"
                           readOnly={isSomenteConsulta}
-                          placeholder="Ex: Comércio Geral e Prestação de Serviços"
+                          placeholder={t('definicoesUi.mainActivityPlaceholder', 'Ex: Comércio Geral e Prestação de Serviços')}
                           value={empresaForm.atividade_principal}
                           onChange={(e) => setEmpresaForm({ ...empresaForm, atividade_principal: e.target.value })}
                           style={{ background: '#ffffff' }}
@@ -834,13 +834,13 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-4">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          CÓDIGO CAE
+                          {t('definicoesUi.labelCaeCode', 'CÓDIGO CAE')}
                         </label>
                         <input
                           type="text"
                           className="form-control"
                           readOnly={isSomenteConsulta}
-                          placeholder="Ex: 46900"
+                          placeholder={t('definicoesUi.caePlaceholder', 'Ex: 46900')}
                           value={empresaForm.cae_principal}
                           onChange={(e) => setEmpresaForm({ ...empresaForm, cae_principal: e.target.value })}
                           style={{ background: '#ffffff' }}
@@ -849,7 +849,7 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-6">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          REGIME DE IVA (CIVA ANGOLA)
+                          {t('definicoesUi.labelIvaRegime', 'REGIME DE IVA (CIVA ANGOLA)')}
                         </label>
                         <select
                           className="form-control"
@@ -858,21 +858,21 @@ const Configuracoes = () => {
                           onChange={(e) => setEmpresaForm({ ...empresaForm, regime_iva: e.target.value })}
                           style={{ background: '#ffffff' }}
                         >
-                          <option value="GERAL">Regime Geral (14%)</option>
-                          <option value="SIMPLIFICADO">Regime Simplificado (7%)</option>
-                          <option value="EXCLUSAO">Regime de Exclusão / Não Sujeição</option>
+                          <option value="GERAL">{t('definicoesUi.kpiRegimeGeneral', 'Regime Geral (14%)')}</option>
+                          <option value="SIMPLIFICADO">{t('definicoesUi.kpiRegimeSimplified', 'Regime Simplificado (7%)')}</option>
+                          <option value="EXCLUSAO">{t('definicoesUi.kpiRegimeExclusion', 'Regime de Exclusão / Não Sujeição')}</option>
                         </select>
                       </div>
 
                       <div className="col-12 col-md-6">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          REPARTIÇÃO FISCAL
+                          {t('definicoesUi.labelTaxOffice', 'REPARTIÇÃO FISCAL')}
                         </label>
                         <input
                           type="text"
                           className="form-control"
                           readOnly={isSomenteConsulta}
-                          placeholder="Ex: 1.ª Repartição Fiscal de Luanda"
+                          placeholder={t('definicoesUi.taxOfficePlaceholder', 'Ex: 1.ª Repartição Fiscal de Luanda')}
                           value={empresaForm.reparticao_fiscal}
                           onChange={(e) => setEmpresaForm({ ...empresaForm, reparticao_fiscal: e.target.value })}
                           style={{ background: '#ffffff' }}
@@ -881,7 +881,7 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-4">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          PROVÍNCIA
+                          {t('definicoesUi.labelProvince', 'PROVÍNCIA')}
                         </label>
                         <select
                           className="form-control"
@@ -900,13 +900,13 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-4">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          MUNICÍPIO
+                          {t('definicoesUi.labelMunicipality', 'MUNICÍPIO')}
                         </label>
                         <input
                           type="text"
                           className="form-control"
                           readOnly={isSomenteConsulta}
-                          placeholder="Ex: Luanda / Belas / Viana"
+                          placeholder={t('definicoesUi.municipalityPlaceholder', 'Ex: Luanda / Belas / Viana')}
                           value={empresaForm.municipio}
                           onChange={(e) => setEmpresaForm({ ...empresaForm, municipio: e.target.value })}
                           style={{ background: '#ffffff' }}
@@ -915,13 +915,13 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-4">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          TELEFONE DA EMPRESA
+                          {t('definicoesUi.labelCompanyPhone', 'TELEFONE DA EMPRESA')}
                         </label>
                         <input
                           type="text"
                           className="form-control"
                           readOnly={isSomenteConsulta}
-                          placeholder="+244 9..."
+                          placeholder={t('definicoesUi.companyPhonePlaceholder', '+244 9...')}
                           value={empresaForm.telefone}
                           onChange={(e) => setEmpresaForm({ ...empresaForm, telefone: e.target.value })}
                           style={{ background: '#ffffff' }}
@@ -930,13 +930,13 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-6">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          EMAIL CORPORATIVO
+                          {t('definicoesUi.labelCompanyEmail', 'EMAIL CORPORATIVO')}
                         </label>
                         <input
                           type="email"
                           className="form-control"
                           readOnly={isSomenteConsulta}
-                          placeholder="geral@empresa.co.ao"
+                          placeholder={t('definicoesUi.companyEmailPlaceholder', 'geral@empresa.co.ao')}
                           value={empresaForm.email}
                           onChange={(e) => setEmpresaForm({ ...empresaForm, email: e.target.value })}
                           style={{ background: '#ffffff' }}
@@ -945,13 +945,13 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-6">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          ENDEREÇO / SEDE SOCIAL
+                          {t('definicoesUi.labelCompanyAddress', 'ENDEREÇO / SEDE SOCIAL')}
                         </label>
                         <input
                           type="text"
                           className="form-control"
                           readOnly={isSomenteConsulta}
-                          placeholder="Rua, Bairro, Edifício, N.º"
+                          placeholder={t('definicoesUi.addressPlaceholder', 'Rua, Bairro, Edifício, N.º')}
                           value={empresaForm.endereco}
                           onChange={(e) => setEmpresaForm({ ...empresaForm, endereco: e.target.value })}
                           style={{ background: '#ffffff' }}
@@ -960,13 +960,13 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-6">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          CONTABILISTA RESPONSÁVEL (NOME)
+                          {t('definicoesUi.labelAccountantName', 'CONTABILISTA RESPONSÁVEL (NOME)')}
                         </label>
                         <input
                           type="text"
                           className="form-control"
                           readOnly={isSomenteConsulta}
-                          placeholder="Nome completo do Contabilista (OCPCA)"
+                          placeholder={t('definicoesUi.accountantNamePlaceholder', 'Nome completo do Contabilista (OCPCA)')}
                           value={empresaForm.contabilista_nome}
                           onChange={(e) => setEmpresaForm({ ...empresaForm, contabilista_nome: e.target.value })}
                           style={{ background: '#ffffff' }}
@@ -975,13 +975,13 @@ const Configuracoes = () => {
 
                       <div className="col-12 col-md-6">
                         <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                          CONTACTO DO CONTABILISTA
+                          {t('definicoesUi.labelAccountantContact', 'CONTACTO DO CONTABILISTA')}
                         </label>
                         <input
                           type="text"
                           className="form-control"
                           readOnly={isSomenteConsulta}
-                          placeholder="Telefone ou email do Contabilista"
+                          placeholder={t('definicoesUi.accountantContactPlaceholder', 'Telefone ou email do Contabilista')}
                           value={empresaForm.contabilista_contacto}
                           onChange={(e) => setEmpresaForm({ ...empresaForm, contabilista_contacto: e.target.value })}
                           style={{ background: '#ffffff' }}
@@ -1004,7 +1004,7 @@ const Configuracoes = () => {
                             }}
                           >
                             <i className="la la-save" style={{ fontSize: 16 }}></i>
-                            <span>{salvandoEmpresa ? 'A Guardar...' : 'Guardar Dados da Empresa'}</span>
+                            <span>{salvandoEmpresa ? t('definicoesUi.btnSavingCompany', 'A Guardar...') : t('definicoesUi.btnSaveCompany', 'Guardar Dados da Empresa')}</span>
                           </button>
 
                           <button
@@ -1015,14 +1015,14 @@ const Configuracoes = () => {
                             style={{ fontWeight: 600, padding: '9px 18px', borderRadius: 8, gap: 6 }}
                           >
                             <i className="la la-undo" style={{ fontSize: 15 }}></i>
-                            <span>Repor Valores</span>
+                            <span>{t('definicoesUi.btnResetValues', 'Repor Valores')}</span>
                           </button>
                         </div>
                       )}
                     </div>
                   </form>
                 ) : (
-                  <p className="text-muted text-center py-30">Nenhuma empresa selecionada.</p>
+                  <p className="text-muted text-center py-30">{t('definicoesUi.noCompanySelected', 'Nenhuma empresa selecionada.')}</p>
                 )}
               </div>
             </div>
@@ -1087,10 +1087,10 @@ const Configuracoes = () => {
               <div className="card-header bg-white py-15 px-20 border-bottom d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 10 }}>
                 <div>
                   <h5 className="fw-700 color-dark mb-0" style={{ fontSize: 15 }}>
-                    Dados Pessoais, Nome de Utilizador & Alteração de Palavra-passe
+                    {t('definicoesUi.profileCardTitle', 'Dados Pessoais, Nome de Utilizador & Alteração de Palavra-passe')}
                   </h5>
                   <span className="text-muted" style={{ fontSize: 12.5 }}>
-                    Altere o seu nome próprio, apelido, nome de acesso (login), email e palavra-passe diretamente na base de dados.
+                    {t('definicoesUi.profileCardSubtitle', 'Altere o seu nome próprio, apelido, nome de acesso (login), email e palavra-passe diretamente na base de dados.')}
                   </span>
                 </div>
                 <button
@@ -1100,7 +1100,7 @@ const Configuracoes = () => {
                   style={{ borderRadius: 6, fontWeight: 600, padding: '6px 12px', fontSize: 12, gap: 5 }}
                 >
                   <i className={`la ${mostrarSenhas ? 'la-eye-slash' : 'la-eye'}`}></i>
-                  <span>{mostrarSenhas ? 'Ocultar Senhas' : 'Mostrar Senhas'}</span>
+                  <span>{mostrarSenhas ? t('definicoesUi.btnHidePasswords', 'Ocultar Senhas') : t('definicoesUi.btnShowPasswords', 'Mostrar Senhas')}</span>
                 </button>
               </div>
 
@@ -1109,12 +1109,12 @@ const Configuracoes = () => {
                   <div className="row" style={{ rowGap: 16 }}>
                     <div className="col-12 col-md-6">
                       <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                        PRIMEIRO NOME
+                        {t('definicoesUi.labelFirstName', 'PRIMEIRO NOME')}
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Ex: João"
+                        placeholder={t('definicoesUi.firstNamePlaceholder', 'Ex: João')}
                         value={perfilForm.first_name}
                         onChange={(e) => setPerfilForm({ ...perfilForm, first_name: e.target.value })}
                         style={{ background: '#ffffff' }}
@@ -1123,12 +1123,12 @@ const Configuracoes = () => {
 
                     <div className="col-12 col-md-6">
                       <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                        SOBRENOME / APELIDO
+                        {t('definicoesUi.labelLastName', 'SOBRENOME / APELIDO')}
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Ex: Silva"
+                        placeholder={t('definicoesUi.lastNamePlaceholder', 'Ex: Silva')}
                         value={perfilForm.last_name}
                         onChange={(e) => setPerfilForm({ ...perfilForm, last_name: e.target.value })}
                         style={{ background: '#ffffff' }}
@@ -1137,7 +1137,7 @@ const Configuracoes = () => {
 
                     <div className="col-12 col-md-6">
                       <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                        NOME DE UTILIZADOR (LOGIN) *
+                        {t('definicoesUi.labelUsername', 'NOME DE UTILIZADOR (LOGIN) *')}
                       </label>
                       <input
                         type="text"
@@ -1151,12 +1151,12 @@ const Configuracoes = () => {
 
                     <div className="col-12 col-md-6">
                       <label className="fw-600 text-muted mb-4" style={{ fontSize: 12 }}>
-                        EMAIL DE CONTA & NOTIFICAÇÕES
+                        {t('definicoesUi.labelProfileEmail', 'EMAIL DE CONTA & NOTIFICAÇÕES')}
                       </label>
                       <input
                         type="email"
                         className="form-control"
-                        placeholder="utilizador@empresa.co.ao"
+                        placeholder={t('definicoesUi.profileEmailPlaceholder', 'utilizador@empresa.co.ao')}
                         value={perfilForm.email}
                         onChange={(e) => setPerfilForm({ ...perfilForm, email: e.target.value })}
                         style={{ background: '#ffffff' }}
@@ -1167,18 +1167,18 @@ const Configuracoes = () => {
                       <div className="p-16 rounded" style={{ background: '#ffffff', border: '1px solid #bfdbfe' }}>
                         <div className="fw-700 mb-12 d-flex align-items-center" style={{ fontSize: 13.5, color: '#1e3a8a', gap: 6 }}>
                           <i className="la la-lock text-primary" style={{ fontSize: 17 }}></i>
-                          <span>Alterar Palavra-passe (deixe em branco se quiser manter a atual)</span>
+                          <span>{t('definicoesUi.changePasswordSection', 'Alterar Palavra-passe (deixe em branco se quiser manter a atual)')}</span>
                         </div>
 
                         <div className="row" style={{ rowGap: 14 }}>
                           <div className="col-12 col-md-4">
                             <label className="fw-600 text-muted mb-4" style={{ fontSize: 11.5 }}>
-                              PALAVRA-PASSE ATUAL
+                              {t('definicoesUi.labelCurrentPassword', 'PALAVRA-PASSE ATUAL')}
                             </label>
                             <input
                               type={mostrarSenhas ? 'text' : 'password'}
                               className="form-control"
-                              placeholder="Senha atual"
+                              placeholder={t('definicoesUi.currentPasswordPlaceholder', 'Senha atual')}
                               autoComplete="current-password"
                               value={perfilForm.currentPassword}
                               onChange={(e) => setPerfilForm({ ...perfilForm, currentPassword: e.target.value })}
@@ -1188,12 +1188,12 @@ const Configuracoes = () => {
 
                           <div className="col-12 col-md-4">
                             <label className="fw-600 text-muted mb-4" style={{ fontSize: 11.5 }}>
-                              NOVA PALAVRA-PASSE
+                              {t('definicoesUi.labelNewPassword', 'NOVA PALAVRA-PASSE')}
                             </label>
                             <input
                               type={mostrarSenhas ? 'text' : 'password'}
                               className="form-control"
-                              placeholder="Mínimo 6 caracteres"
+                              placeholder={t('definicoesUi.newPasswordPlaceholder', 'Mínimo 6 caracteres')}
                               autoComplete="new-password"
                               value={perfilForm.password}
                               onChange={(e) => setPerfilForm({ ...perfilForm, password: e.target.value })}
@@ -1203,12 +1203,12 @@ const Configuracoes = () => {
 
                           <div className="col-12 col-md-4">
                             <label className="fw-600 text-muted mb-4" style={{ fontSize: 11.5 }}>
-                              CONFIRMAR NOVA PALAVRA-PASSE
+                              {t('definicoesUi.labelConfirmNewPassword', 'CONFIRMAR NOVA PALAVRA-PASSE')}
                             </label>
                             <input
                               type={mostrarSenhas ? 'text' : 'password'}
                               className="form-control"
-                              placeholder="Repita a nova senha"
+                              placeholder={t('definicoesUi.confirmPasswordPlaceholder', 'Repita a nova senha')}
                               autoComplete="new-password"
                               value={perfilForm.confirmPassword}
                               onChange={(e) => setPerfilForm({ ...perfilForm, confirmPassword: e.target.value })}
@@ -1234,7 +1234,7 @@ const Configuracoes = () => {
                         }}
                       >
                         <i className="la la-save" style={{ fontSize: 16 }}></i>
-                        <span>{salvandoPerfil ? 'A Guardar...' : 'Guardar Perfil & Credenciais'}</span>
+                        <span>{salvandoPerfil ? t('definicoesUi.btnUpdatingProfile', 'A Atualizar...') : t('definicoesUi.btnUpdateProfile', 'Atualizar Perfil & Palavra-passe')}</span>
                       </button>
 
                       {(perfilForm.currentPassword || perfilForm.password || perfilForm.confirmPassword) && (

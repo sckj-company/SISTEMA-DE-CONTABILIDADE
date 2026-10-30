@@ -196,7 +196,7 @@ const LegislacaoView = () => {
                 {t('legislacao.title', 'Legislação Fiscal & Códigos Tributários de Angola')}
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13.5 }}>
-                Compêndio oficial dos regimes tributários em vigor: CIVA, Imposto Industrial, IRT, Selo e Segurança Social.
+                {t('legislacaoUi.headerSubtitle', 'Compêndio oficial dos regimes tributários em vigor: CIVA, Imposto Industrial, IRT, Selo e Segurança Social.')}
               </p>
             </div>
 
@@ -207,7 +207,7 @@ const LegislacaoView = () => {
                 onClick={imprimirPdf}
                 style={{ fontWeight: 600, fontSize: 13, border: '1px solid #dcdfe5' }}
               >
-                <i className="la la-print mr-4"></i> Imprimir / PDF
+                <i className="la la-print mr-4"></i> {t('legislacaoUi.btnPrintPdf', 'Imprimir / PDF')}
               </button>
               <button
                 type="button"
@@ -217,7 +217,7 @@ const LegislacaoView = () => {
                 style={{ fontWeight: 700, fontSize: 13, backgroundColor: '#2563eb', borderColor: '#2563eb' }}
               >
                 <i className={`la ${baixandoExcel ? 'la-spinner la-spin' : 'la-file-excel'} mr-4`}></i>
-                {baixandoExcel ? 'A gerar...' : 'Baixar Legislação (.xlsx)'}
+                {baixandoExcel ? t('legislacaoUi.generating', 'A gerar...') : t('legislacaoUi.btnDownloadExcel', 'Baixar Legislação (.xlsx)')}
               </button>
             </div>
           </div>
@@ -246,20 +246,20 @@ const LegislacaoView = () => {
               </div>
               <div>
                 <strong className="color-dark d-block" style={{ fontSize: 14 }}>
-                  Administração Geral Tributária (AGT) · Códigos em Vigor
+                  {t('legislacaoUi.bannerTitle', 'Administração Geral Tributária (AGT) · Códigos em Vigor')}
                 </strong>
                 <span className="text-muted" style={{ fontSize: 12 }}>
-                  Base legal utilizada nas reconciliações, auditorias fiscais e conferência do Modelo 7.
+                  {t('legislacaoUi.bannerSubtitle', 'Base legal utilizada nas reconciliações, auditorias fiscais e conferência do Modelo 7.')}
                 </span>
               </div>
             </div>
 
             <div className="d-flex align-items-center" style={{ gap: 8 }}>
               <span className="badge badge-light border p-2" style={{ fontSize: 12, fontWeight: 700, color: '#1a3353' }}>
-                <i className="la la-check-circle text-success mr-1"></i> Legislação Atualizada
+                <i className="la la-check-circle text-success mr-1"></i> {t('legislacaoUi.badgeUpdated', 'Legislação Atualizada')}
               </span>
               <span className="badge badge-light border p-2" style={{ fontSize: 12, fontWeight: 700, color: '#2563eb' }}>
-                <i className="la la-gavel mr-1"></i> Leis 2025 / 2026
+                <i className="la la-gavel mr-1"></i> {t('legislacaoUi.badgeLaws', 'Leis 2025 / 2026')}
               </span>
             </div>
           </div>
@@ -271,13 +271,13 @@ const LegislacaoView = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Taxa Geral de IVA
+              {t('legislacaoUi.kpiVatTitle', 'Taxa Geral de IVA')}
             </span>
             <div className="fw-800" style={{ fontSize: 24, color: '#2563eb' }}>
-              14% <span className="fs-13 text-muted fw-normal">CIVA</span>
+              {t('legislacaoUi.kpiVatRate', '14% CIVA')}
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              Modelo 7 até fim do mês
+              {t('legislacaoUi.kpiVatSub', 'Modelo 7 até fim do mês')}
             </span>
           </div>
         </div>
@@ -285,13 +285,13 @@ const LegislacaoView = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #52c41a' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Imposto Industrial
+              {t('legislacaoUi.kpiIndustrialTitle', 'Imposto Industrial')}
             </span>
             <div className="fw-800" style={{ fontSize: 24, color: '#52c41a' }}>
-              25% <span className="fs-13 text-muted fw-normal">Geral</span>
+              {t('legislacaoUi.kpiIndustrialRate', '25% Geral')}
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              15% Agricultura · 35% Banca
+              {t('legislacaoUi.kpiIndustrialSub', '15% Agricultura · 35% Banca')}
             </span>
           </div>
         </div>
@@ -299,13 +299,13 @@ const LegislacaoView = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #1890ff' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Retenção na Fonte
+              {t('legislacaoUi.kpiWithholdingTitle', 'Retenção na Fonte')}
             </span>
             <div className="fw-800" style={{ fontSize: 24, color: '#1890ff' }}>
-              6,5% <span className="fs-13 text-muted fw-normal">Serviços</span>
+              {t('legislacaoUi.kpiWithholdingRate', '6,5% Serviços')}
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              Prestadores de serviços
+              {t('legislacaoUi.kpiWithholdingSub', 'Prestadores de serviços')}
             </span>
           </div>
         </div>
@@ -313,13 +313,13 @@ const LegislacaoView = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #fa8b0c' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Segurança Social
+              {t('legislacaoUi.kpiSocialSecurityTitle', 'Segurança Social')}
             </span>
             <div className="fw-800" style={{ fontSize: 24, color: '#fa8b0c' }}>
-              11% <span className="fs-13 text-muted fw-normal">Global</span>
+              {t('legislacaoUi.kpiSocialSecurityRate', '11% Global')}
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              8% Empresa + 3% Trabalhador
+              {t('legislacaoUi.kpiSocialSecuritySub', '8% Empresa + 3% Trabalhador')}
             </span>
           </div>
         </div>
@@ -367,7 +367,7 @@ const LegislacaoView = () => {
             <input
               type="text"
               className="form-control border-left-0"
-              placeholder={`Pesquisar artigos em ${diplomaAtivo?.codigo || 'Legislação'} (ex: isenção, dedução, taxa, retenção, prazos)...`}
+              placeholder={t('legislacaoUi.searchPlaceholder', { code: diplomaAtivo?.codigo || 'Legislação', defaultValue: `Pesquisar artigos em ${diplomaAtivo?.codigo || 'Legislação'} (ex: isenção, dedução, taxa, retenção, prazos)...` })}
               value={pesquisa}
               onChange={(e) => setPesquisa(e.target.value)}
               style={{ height: 38, fontSize: 13 }}
@@ -380,7 +380,7 @@ const LegislacaoView = () => {
       {carregando ? (
         <div className="card card-default p-40 text-center mb-25" style={{ borderRadius: 10 }}>
           <i className="la la-spinner la-spin text-primary mb-10" style={{ fontSize: 32 }}></i>
-          <p className="text-muted mb-0">A carregar compêndio da legislação fiscal...</p>
+          <p className="text-muted mb-0">{t('legislacaoUi.loadingLegislation', 'A carregar compêndio da legislação fiscal...')}</p>
         </div>
       ) : diplomaAtivo && (
         <div className="card card-default mb-25" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
@@ -402,7 +402,7 @@ const LegislacaoView = () => {
 
               <div className="d-flex align-items-center" style={{ gap: 8 }}>
                 <span className="badge badge-light border p-2" style={{ fontSize: 12 }}>
-                  <strong>Taxa Geral:</strong> <span className="text-primary font-weight-bold">{diplomaAtivo.taxa_geral}</span>
+                  <strong>{t('legislacaoUi.generalRateLabel', 'Taxa Geral:')}</strong> <span className="text-primary font-weight-bold">{diplomaAtivo.taxa_geral}</span>
                 </span>
                 {diplomaAtivo.prazo && (
                   <span className="badge badge-light border p-2 text-muted" style={{ fontSize: 12 }}>
@@ -417,11 +417,11 @@ const LegislacaoView = () => {
             {/* RESUMO / ÂMBITO */}
             <div className="p-16 mb-20 rounded" style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: 13 }}>
               <div className="mb-8">
-                <strong className="color-dark">Âmbito de Aplicação:</strong>{' '}
+                <strong className="color-dark">{t('legislacaoUi.scopeLabel', 'Âmbito de Aplicação:')}</strong>{' '}
                 <span className="text-muted">{diplomaAtivo.ambito}</span>
               </div>
               <div>
-                <strong className="color-dark">Enquadramento Fiscal:</strong>{' '}
+                <strong className="color-dark">{t('legislacaoUi.fiscalFrameworkLabel', 'Enquadramento Fiscal:')}</strong>{' '}
                 <span className="text-muted">{diplomaAtivo.resumo}</span>
               </div>
             </div>
@@ -429,13 +429,13 @@ const LegislacaoView = () => {
             {/* ARTIGOS-CHAVE */}
             <h6 className="fw-700 text-dark mb-15">
               <i className="la la-gavel text-primary mr-1"></i>
-              Artigos-Chave ({artigosFiltrados.length})
+              {t('legislacaoUi.keyArticlesHeader', { count: artigosFiltrados.length, defaultValue: `Artigos-Chave (${artigosFiltrados.length})` })}
             </h6>
 
             {artigosFiltrados.length === 0 ? (
               <div className="text-center py-30 text-muted">
                 <i className="la la-search mb-2 d-block" style={{ fontSize: 32 }}></i>
-                Nenhum artigo encontrado para o termo pesquisado.
+                {t('legislacaoUi.noArticlesFound', 'Nenhum artigo encontrado para o termo pesquisado.')}
               </div>
             ) : (
               <div className="row" style={{ rowGap: 14 }}>

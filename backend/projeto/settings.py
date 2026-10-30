@@ -95,11 +95,62 @@ FRONTEND_BUILD_DIR = BASE_DIR.parent / 'frontend' / 'build'
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [d for d in [FRONTEND_BUILD_DIR / 'static'] if d.exists()]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' if not DEBUG else 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# STATICFILES_STORAGE é definido no dict STORAGES (Django 4.2+)
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Cloudinary Storage para persistência de ficheiros e documentos na nuvem
+CLOUDINARY_CLOUD_NAME = config('CLOUDINARY_CLOUD_NAME', default='').strip()
+CLOUDINARY_API_KEY = config('CLOUDINARY_API_KEY', default='').strip()
+CLOUDINARY_API_SECRET = config('CLOUDINARY_API_SECRET', default='').strip()
+CLOUDINARY_URL = config('CLOUDINARY_URL', default='').strip()
+
+USAR_CLOUDINARY = bool(
+    CLOUDINARY_URL or (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)
+)
+
+STATICFILES_STORAGE_BACKEND = 'whitenoise.storage.CompressedManifestStaticFilesStorage' if not DEBUG else 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+if USAR_CLOUDINARY:
+    INSTALLED_APPS += [
+        'cloudinary_storage',
+        'cloudinary',
+    ]
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
+        'API_KEY': CLOUDINARY_API_KEY,
+        'API_SECRET': CLOUDINARY_API_SECRET,
+        'SECURE': True,
+    }
+    import cloudinary
+    if CLOUDINARY_URL:
+        cloudinary.config(cloudinary_url=CLOUDINARY_URL, secure=True)
+    else:
+        cloudinary.config(
+            cloud_name=CLOUDINARY_CLOUD_NAME,
+            api_key=CLOUDINARY_API_KEY,
+            api_secret=CLOUDINARY_API_SECRET,
+            secure=True
+        )
+    STORAGES = {
+        "default": {
+            "BACKEND": "reconciliacao.cloudinary_storage_backend.SmartMediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": STATICFILES_STORAGE_BACKEND,
+        },
+    }
+    MEDIA_URL = f'https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/' if CLOUDINARY_CLOUD_NAME else '/media/'
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": STATICFILES_STORAGE_BACKEND,
+        },
+    }
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True

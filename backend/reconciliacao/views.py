@@ -166,6 +166,59 @@ def _inteiro_opcional(valor):
         return None
 
 
+def _serializar_utilizador_sessao(user, token_key=None):
+    """Serializa os dados completos da conta autenticada para sessão no frontend."""
+    if not token_key:
+        token, _ = Token.objects.get_or_create(user=user)
+        token_key = token.key
+
+    grupos = list(user.groups.values_list('name', flat=True))
+    is_admin = bool(
+        user.is_superuser
+        or user.is_staff
+        or any(g in ['Super Admin', 'Administrador', 'Auditor Chefe'] for g in grupos)
+    )
+    empresas_ids = list(empresas_acessiveis(user).values_list('id', flat=True))
+
+    perfis_vinculos = list(user.acessos_empresas.filter(ativo=True).values_list('perfil_acesso', flat=True))
+    is_operador_facturas = bool(
+        any(g in ['Operador de Facturação', 'Operador de Faturação', 'Digitalizador'] for g in grupos)
+        or ('OPERADOR_FACTURAS' in perfis_vinculos and not is_admin)
+    )
+
+    if user.is_superuser or 'Super Admin' in grupos:
+        papel = 'Super Admin'
+    elif is_admin:
+        papel = 'Administrador'
+    elif is_operador_facturas:
+        papel = 'Operador de Facturação'
+    elif any(g in ['Contabilista', 'Auditor'] for g in grupos):
+        papel = 'Contabilista'
+    elif 'Fiscalista' in grupos:
+        papel = 'Fiscalista'
+    else:
+        papel = 'Contabilista'
+
+    nome_completo = f"{user.first_name or ''} {user.last_name or ''}".strip()
+
+    return {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'nome_completo': nome_completo,
+        'token': token_key,
+        'is_superuser': user.is_superuser,
+        'is_staff': user.is_staff,
+        'is_admin': is_admin,
+        'is_operador_facturas': is_operador_facturas,
+        'papel': papel,
+        'grupos': grupos,
+        'empresas_acesso': empresas_ids,
+    }
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @authentication_classes([])
@@ -181,58 +234,79 @@ def login_view(request):
                 user = authenticate(username=user_by_email.username, password=password)
         if user is not None and user.is_active:
             token, _ = Token.objects.get_or_create(user=user)
-            grupos = list(user.groups.values_list('name', flat=True))
-            is_admin = bool(
-                user.is_superuser
-                or user.is_staff
-                or any(g in ['Super Admin', 'Administrador', 'Auditor Chefe'] for g in grupos)
-            )
-            empresas_ids = list(empresas_acessiveis(user).values_list('id', flat=True))
-
-            # Perfis nas empresas vinculadas
-            perfis_vinculos = list(user.acessos_empresas.filter(ativo=True).values_list('perfil_acesso', flat=True))
-            is_operador_facturas = bool(
-                any(g in ['Operador de Facturação', 'Operador de Faturação', 'Digitalizador'] for g in grupos)
-                or ('OPERADOR_FACTURAS' in perfis_vinculos and not is_admin)
-            )
-
-            # Papel descritivo do utilizador
-            if user.is_superuser or 'Super Admin' in grupos:
-                papel = 'Super Admin'
-            elif is_admin:
-                papel = 'Administrador'
-            elif is_operador_facturas:
-                papel = 'Operador de Facturação'
-            elif any(g in ['Contabilista', 'Auditor'] for g in grupos):
-                papel = 'Contabilista'
-            elif 'Fiscalista' in grupos:
-                papel = 'Fiscalista'
-            else:
-                papel = 'Contabilista'
-
             return Response({
                 'success': True,
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'email': user.email,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'token': token.key,
-                    'is_superuser': user.is_superuser,
-                    'is_staff': user.is_staff,
-                    'is_admin': is_admin,
-                    'is_operador_facturas': is_operador_facturas,
-                    'papel': papel,
-                    'grupos': grupos,
-                    'empresas_acesso': empresas_ids,
-                }
+                'user': _serializar_utilizador_sessao(user, token_key=token.key),
             })
         return Response({'error': 'Credenciais inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 login_view.cls.permission_classes = [AllowAny]
+
+
+@api_view(['GET', 'PUT', 'PATCH', 'POST'])
+@permission_classes([IsAuthenticated])
+def perfil_utilizador_view(request):
+    """Consulta e atualização do próprio perfil, nomes, email, username e palavra-passe."""
+    user = request.user
+
+    if request.method == 'GET':
+        return Response({
+            'success': True,
+            'user': _serializar_utilizador_sessao(user),
+        })
+
+    data = request.data or {}
+
+    if 'username' in data:
+        novo_username = str(data.get('username') or '').strip()
+        if not novo_username:
+            return Response({'error': 'O nome de utilizador não pode ficar vazio.'}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(username__iexact=novo_username).exclude(pk=user.pk).exists():
+            return Response(
+                {'error': 'Já existe outro utilizador registado com este nome de utilizador.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user.username = novo_username
+
+    if 'first_name' in data:
+        user.first_name = str(data.get('first_name') or '').strip()
+
+    if 'last_name' in data:
+        user.last_name = str(data.get('last_name') or '').strip()
+
+    if 'email' in data:
+        novo_email = str(data.get('email') or '').strip()
+        user.email = novo_email
+
+    nova_senha = data.get('new_password') or data.get('password')
+    if nova_senha:
+        nova_senha = str(nova_senha)
+        senha_atual = str(data.get('current_password') or '')
+        if not senha_atual:
+            return Response(
+                {'error': 'Informe a sua palavra-passe atual para definir uma nova palavra-passe.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not user.check_password(senha_atual):
+            return Response(
+                {'error': 'A palavra-passe atual está incorreta.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if len(nova_senha) < 6:
+            return Response(
+                {'error': 'A nova palavra-passe deve ter pelo menos 6 caracteres.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user.set_password(nova_senha)
+
+    user.save()
+    return Response({
+        'success': True,
+        'message': 'Perfil e credenciais atualizados com sucesso.',
+        'user': _serializar_utilizador_sessao(user),
+    })
 
 
 class EmpresaViewSet(viewsets.ModelViewSet):
@@ -274,13 +348,26 @@ class EmpresaViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         user = self.request.user
+        instance = serializer.instance
         is_admin = bool(
             user.is_superuser
             or user.is_staff
             or user.groups.filter(name__in=['Super Admin', 'Administrador']).exists()
         )
-        if not is_admin and not user.has_perm('reconciliacao.change_empresa'):
-            raise PermissionDenied('Apenas administradores podem alterar dados de empresas.')
+        tem_vinculo_edicao = EmpresaUtilizador.objects.filter(
+            empresa=instance,
+            utilizador=user,
+            ativo=True,
+            perfil_acesso__in=['ADMIN', 'CONTABILISTA', 'FISCALISTA', 'AUDITOR'],
+        ).exists()
+
+        if not is_admin and not user.has_perm('reconciliacao.change_empresa') and not tem_vinculo_edicao:
+            raise PermissionDenied('Sem permissão para alterar os dados desta empresa.')
+
+        # Apenas administradores globais podem alterar o estado administrativo da empresa (Ativa/Suspensa/Encerrada)
+        if not is_admin and 'estado' in serializer.validated_data:
+            serializer.validated_data['estado'] = instance.estado
+
         serializer.save()
 
     def destroy(self, request, *args, **kwargs):
@@ -1649,6 +1736,10 @@ def admin_utilizadores_view(request):
         data = []
         for u in users:
             vinculos = EmpresaUtilizador.objects.filter(utilizador=u, ativo=True).select_related('empresa')
+            lista_empresas = [
+                {'id': v.empresa.id, 'nome': v.empresa.nome, 'nif': v.empresa.nif, 'perfil': v.perfil_acesso}
+                for v in vinculos
+            ]
             data.append({
                 'id': u.id,
                 'username': u.username,
@@ -1659,10 +1750,8 @@ def admin_utilizadores_view(request):
                 'is_staff': u.is_staff,
                 'is_superuser': u.is_superuser,
                 'grupos': list(u.groups.values_list('name', flat=True)),
-                'empresas': [
-                    {'id': v.empresa.id, 'nome': v.empresa.nome, 'nif': v.empresa.nif, 'perfil': v.perfil_acesso}
-                    for v in vinculos
-                ]
+                'empresas': lista_empresas,
+                'empresas_vinculadas': lista_empresas,
             })
         return Response(data)
 
@@ -1749,6 +1838,11 @@ def admin_utilizador_detalhe_view(request, user_id):
 
     # PUT / PATCH - Atualização do utilizador
     data = request.data
+    if 'username' in data and str(data.get('username') or '').strip():
+        novo_username = str(data.get('username')).strip()
+        if User.objects.filter(username__iexact=novo_username).exclude(pk=alvo.pk).exists():
+            return Response({'error': 'Já existe outro utilizador com este nome de utilizador.'}, status=400)
+        alvo.username = novo_username
     if 'first_name' in data:
         alvo.first_name = data.get('first_name', '').strip()
     if 'last_name' in data:
@@ -1758,6 +1852,8 @@ def admin_utilizador_detalhe_view(request, user_id):
     if 'is_active' in data:
         alvo.is_active = bool(data.get('is_active'))
     if 'password' in data and data.get('password'):
+        if len(str(data.get('password'))) < 6:
+            return Response({'error': 'A palavra-passe deve ter pelo menos 6 caracteres.'}, status=400)
         alvo.set_password(data.get('password'))
 
     papel = data.get('papel')
@@ -1806,15 +1902,18 @@ def admin_utilizador_detalhe_view(request, user_id):
                     }
                 )
 
-    return Response({
+    resposta = {
         'success': True,
         'id': alvo.id,
         'username': alvo.username,
         'email': alvo.email,
         'first_name': alvo.first_name,
         'last_name': alvo.last_name,
-        'is_active': alvo.is_active
-    })
+        'is_active': alvo.is_active,
+    }
+    if alvo.id == user.id:
+        resposta['user_sessao'] = _serializar_utilizador_sessao(alvo)
+    return Response(resposta)
 
 
 

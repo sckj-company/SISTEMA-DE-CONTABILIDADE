@@ -13,6 +13,8 @@ router.register(r'mapeamento-contas', views.MapeamentoContaViewSet)
 urlpatterns = [
     path('auth/login/', views.login_view, name='login'),
     path('login/', views.login_view, name='login_alias'),
+    path('auth/perfil/', views.perfil_utilizador_view, name='auth-perfil'),
+    path('perfil/', views.perfil_utilizador_view, name='perfil-alias'),
     path('contabilidade/lancamentos/', views.listar_criar_lancamentos_view, name='contabilidade-lancamentos'),
     path('contabilidade/lancamentos/<int:lancamento_id>/', views.detalhe_lancamento_view, name='contabilidade-lancamento-detalhe'),
     path('contabilidade/razao/', views.razao_contabilistico_view, name='contabilidade-razao'),

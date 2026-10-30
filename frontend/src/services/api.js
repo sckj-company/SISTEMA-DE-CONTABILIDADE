@@ -91,6 +91,8 @@ export const authHeaders = () => {
 
 export const authService = {
   login: (username, password) => api.post('/auth/login/', { username, password }),
+  getPerfil: () => api.get('/auth/perfil/'),
+  updatePerfil: (data) => api.patch('/auth/perfil/', data),
 };
 
 export const empresaService = {

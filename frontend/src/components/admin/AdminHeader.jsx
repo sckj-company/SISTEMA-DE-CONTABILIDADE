@@ -18,8 +18,25 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
   const [empresaFiltro, setEmpresaFiltro] = useState('');
   const navRef = useRef(null);
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const initial = (user.username || user.nome || 'A').charAt(0).toUpperCase();
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
+  const nomeExibido = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || user.nome || 'Administrador';
+  const initial = (user.first_name || user.username || user.nome || 'A').charAt(0).toUpperCase();
+
+  useEffect(() => {
+    const syncUser = () => {
+      try {
+        setUser(JSON.parse(localStorage.getItem('user') || '{}'));
+      } catch {
+        setUser({});
+      }
+    };
+    window.addEventListener('auth-changed', syncUser);
+    window.addEventListener('storage', syncUser);
+    return () => {
+      window.removeEventListener('auth-changed', syncUser);
+      window.removeEventListener('storage', syncUser);
+    };
+  }, []);
 
   const currentLang =
     languages.find((l) => l.code === (i18n.language?.substring(0, 2) || 'pt')) || languages[0];
@@ -210,8 +227,9 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                           <span
                             className="badge badge-round"
                             style={{
-                              backgroundColor: emp.estado === 'ATIVA' ? '#ebfbf6' : '#f1f2f6',
-                              color: emp.estado === 'ATIVA' ? '#20c997' : '#8c90a4',
+                              backgroundColor: '#ffffff',
+                              border: emp.estado === 'ATIVA' ? '1px solid #a7f3d0' : '1px solid #cbd5e1',
+                              color: emp.estado === 'ATIVA' ? '#059669' : '#64748b',
                               fontSize: 9,
                             }}
                           >
@@ -290,12 +308,29 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                       <span className="author-initials">{initial}</span>
                     </div>
                     <div>
-                      <h6>{user.username || user.nome || 'Administrador'}</h6>
+                      <h6>{nomeExibido}</h6>
+                      {user.username && nomeExibido !== user.username && (
+                        <small className="text-muted d-block" style={{ fontSize: 11 }}>
+                          @{user.username}
+                        </small>
+                      )}
                       <span>{user.is_superuser ? 'Super Administrador' : 'Administrador'}</span>
                     </div>
                   </div>
                   <div className="nav-author__options">
                     <ul>
+                      <li>
+                        <a
+                          href="#meu-perfil"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setOpenMenu(null);
+                            navigate('/admin-gestao?aba=configuracoes');
+                          }}
+                        >
+                          <i className="la la-user-lock"></i> {t('navigation.profile', 'O Meu Perfil & Palavra-passe')}
+                        </a>
+                      </li>
                       <li>
                         <a
                           href="#configuracoes"

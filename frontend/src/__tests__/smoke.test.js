@@ -21,7 +21,11 @@ jest.mock('../services/api', () => ({
   },
   API_BASE: 'http://localhost:8000/api',
   authHeaders: () => ({}),
-  authService: { login: jest.fn() },
+  authService: {
+    login: jest.fn(),
+    getPerfil: jest.fn(() => Promise.resolve({ data: { user: { username: 'tester', is_admin: true } } })),
+    updatePerfil: jest.fn(() => Promise.resolve({ data: { user: { username: 'tester', is_admin: true } } })),
+  },
   empresaService: { getAll: jest.fn(), getById: jest.fn() },
   contabilidadeService: { getAll: jest.fn(), create: jest.fn(), importar: jest.fn() },
   declaracaoAgtService: { getAll: jest.fn(), create: jest.fn(), importar: jest.fn() },

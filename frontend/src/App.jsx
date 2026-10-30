@@ -167,9 +167,9 @@ function App() {
             <Route path="/motores/:codigo" element={<Navigate to="/confronto" replace />} />
             <Route path="/auditoria-periodo" element={<Navigate to="/confronto" replace />} />
             <Route path="/documentos" element={<Navigate to="/arquivo" replace />} />
-            <Route path="/empresas" element={<Navigate to="/definicoes" replace />} />
+            <Route path="/empresas" element={<Navigate to="/definicoes?aba=empresa" replace />} />
             <Route path="/configuracoes" element={<Navigate to="/definicoes" replace />} />
-            <Route path="/perfil" element={<Navigate to="/definicoes" replace />} />
+            <Route path="/perfil" element={<Pagina><Definicoes /></Pagina>} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

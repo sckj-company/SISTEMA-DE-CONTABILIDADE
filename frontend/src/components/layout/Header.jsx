@@ -18,9 +18,26 @@ const Header = ({ onToggleSidebar }) => {
   const navRef = useRef(null);
   const { empresaAtual, empresas, atualizar } = usePeriodo() || {};
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
   const isAdmin = Boolean(user.is_admin || user.is_superuser || user.is_staff);
-  const initial = (user.username || user.nome || 'U').charAt(0).toUpperCase();
+  const nomeExibido = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || user.nome || 'Utilizador';
+  const initial = (user.first_name || user.username || user.nome || 'U').charAt(0).toUpperCase();
+
+  useEffect(() => {
+    const syncUser = () => {
+      try {
+        setUser(JSON.parse(localStorage.getItem('user') || '{}'));
+      } catch {
+        setUser({});
+      }
+    };
+    window.addEventListener('auth-changed', syncUser);
+    window.addEventListener('storage', syncUser);
+    return () => {
+      window.removeEventListener('auth-changed', syncUser);
+      window.removeEventListener('storage', syncUser);
+    };
+  }, []);
 
   const currentLang =
     languages.find((l) => l.code === (i18n.language?.substring(0, 2) || 'pt')) || languages[0];
@@ -272,7 +289,12 @@ const Header = ({ onToggleSidebar }) => {
                       <span className="author-initials">{initial}</span>
                     </div>
                     <div>
-                      <h6>{user.username || user.nome || 'Utilizador'}</h6>
+                      <h6>{nomeExibido}</h6>
+                      {user.username && nomeExibido !== user.username && (
+                        <small className="text-muted d-block mb-1" style={{ fontSize: 11 }}>
+                          @{user.username}
+                        </small>
+                      )}
                       <span className="badge px-6 py-2" style={{ fontSize: 11, fontWeight: 700, background: '#ffffff', border: '1px solid #bfdbfe', color: '#2563eb' }}>
                         {user.papel || user.perfil || (isAdmin ? 'Administrador' : 'Contabilista')}
                       </span>
@@ -295,6 +317,17 @@ const Header = ({ onToggleSidebar }) => {
                           </a>
                         </li>
                       )}
+                      <li>
+                        <a
+                          href="#perfil"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            navigate('/perfil');
+                          }}
+                        >
+                          <i className="la la-user-lock"></i> {t('navigation.profile', 'O Meu Perfil & Senha')}
+                        </a>
+                      </li>
                       {(user.is_operador_facturas || user.papel === 'Operador de Facturação') ? (
                         <li>
                           <a
@@ -309,17 +342,6 @@ const Header = ({ onToggleSidebar }) => {
                         </li>
                       ) : (
                         <>
-                          <li>
-                            <a
-                              href="#perfil"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                navigate('/definicoes');
-                              }}
-                            >
-                              <i className="la la-user"></i> {t('navigation.profile', 'O Meu Perfil')}
-                            </a>
-                          </li>
                           <li>
                             <a
                               href="#documentos"
@@ -337,10 +359,10 @@ const Header = ({ onToggleSidebar }) => {
                               href="#configuracoes"
                               onClick={(e) => {
                                 e.preventDefault();
-                                navigate('/definicoes');
+                                navigate('/definicoes?aba=empresa');
                               }}
                             >
-                              <i className="la la-cog"></i> {t('navigation.settings', 'Configurações')}
+                              <i className="la la-cog"></i> {t('navigation.settings', 'Dados da Empresa & Configurações')}
                             </a>
                           </li>
                         </>

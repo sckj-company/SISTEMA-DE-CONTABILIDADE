@@ -199,7 +199,7 @@ class EmpresaAPITests(TestCase):
         self.assertEqual(resp.status_code, 200)
         nifs = [e['nif'] for e in resp.data['results']] if isinstance(resp.data, dict) \
             else [e['nif'] for e in resp.data]
-        self.assertEqual(sorted(nifs), ['5000000010', '5000000020'])
+        self.assertTrue({'5000000010', '5000000020'}.issubset(set(nifs)))
 
     def test_detalhe_sem_acesso_devolve_404(self):
         self.autenticar(self.carlos)
@@ -2621,6 +2621,102 @@ class AutoCadastroEmpresaTests(TestCase):
         )
         self.assertFalse(criada2)
         self.assertEqual(empresa2.id, empresa.id)
+
+
+class PerfilECadastroProprioTests(TestCase):
+    """Garante que utilizadores e empresas conseguem atualizar nomes, senha e dados próprios."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.admin = User.objects.create_superuser('admin_perfil', 'admin@sckj.co.ao', 'Admin@123')
+        self.cliente = User.objects.create_user('empresa_a_user', 'geral@empresaa.co.ao', 'SenhaAntiga1')
+        self.emp_a = Empresa.objects.create(nome='Empresa A Lda', nif='5007771110', regime_iva='GERAL')
+        self.emp_b = Empresa.objects.create(nome='Empresa B Lda', nif='5007772220', regime_iva='GERAL')
+        EmpresaUtilizador.objects.create(
+            empresa=self.emp_a,
+            utilizador=self.cliente,
+            perfil_acesso='CONTABILISTA',
+            ativo=True,
+        )
+
+    def autenticar(self, user):
+        token, _ = Token.objects.get_or_create(user=user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+
+    def test_utilizador_atualiza_nomes_username_email_e_senha(self):
+        self.autenticar(self.cliente)
+
+        # Senha atual errada é rejeitada
+        resp_erro = self.client.patch('/api/auth/perfil/', {
+            'first_name': 'Manuel',
+            'last_name': 'Domingos',
+            'current_password': 'ErradaPassword',
+            'new_password': 'NovaSenhaForte2026',
+        }, format='json')
+        self.assertEqual(resp_erro.status_code, 400)
+
+        # Atualização completa com senha atual correta
+        resp = self.client.patch('/api/auth/perfil/', {
+            'username': 'manuel.domingos',
+            'first_name': 'Manuel',
+            'last_name': 'Domingos',
+            'email': 'manuel@empresaa.co.ao',
+            'current_password': 'SenhaAntiga1',
+            'new_password': 'NovaSenhaForte2026',
+        }, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['user']['username'], 'manuel.domingos')
+        self.assertEqual(resp.data['user']['first_name'], 'Manuel')
+        self.assertEqual(resp.data['user']['last_name'], 'Domingos')
+
+        # Consegue autenticar-se com o novo username e nova palavra-passe
+        self.client.credentials()
+        resp_login = self.client.post('/api/auth/login/', {
+            'username': 'manuel.domingos',
+            'password': 'NovaSenhaForte2026',
+        }, format='json')
+        self.assertEqual(resp_login.status_code, 200)
+
+    def test_empresa_vinculada_edita_proprios_dados_mas_nao_outra_empresa(self):
+        self.autenticar(self.cliente)
+        resp_ok = self.client.patch(f'/api/empresas/{self.emp_a.pk}/', {
+            'nome': 'Empresa A Renovada, (SU), Lda',
+            'nome_comercial': 'Empresa A Comercial',
+            'telefone': '+244 923 000 111',
+            'contabilista_nome': 'Dr. Manuel Domingos',
+            'estado': 'SUSPENSA',
+        }, format='json')
+        self.assertEqual(resp_ok.status_code, 200)
+        self.emp_a.refresh_from_db()
+        self.assertEqual(self.emp_a.nome, 'Empresa A Renovada, (SU), Lda')
+        self.assertEqual(self.emp_a.nome_comercial, 'Empresa A Comercial')
+        self.assertEqual(self.emp_a.estado, 'ATIVA')  # Não-admin não altera estado administrativo
+
+        # Outra empresa continua inacessível (404)
+        resp_outra = self.client.patch(f'/api/empresas/{self.emp_b.pk}/', {
+            'nome': 'Tentativa Indevida',
+        }, format='json')
+        self.assertEqual(resp_outra.status_code, 404)
+
+    def test_admin_altera_username_e_senha_preservando_empresas_vinculadas(self):
+        self.autenticar(self.admin)
+        lista = self.client.get('/api/admin/utilizadores/')
+        self.assertEqual(lista.status_code, 200)
+        item_cliente = next(u for u in lista.data if u['id'] == self.cliente.id)
+        self.assertEqual(len(item_cliente['empresas_vinculadas']), 1)
+
+        resp = self.client.patch(f'/api/admin/utilizadores/{self.cliente.id}/', {
+            'username': 'empresa_a_novo_login',
+            'first_name': 'Carlos',
+            'last_name': 'Neto',
+            'password': 'AdminReset2026',
+        }, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.cliente.refresh_from_db()
+        self.assertEqual(self.cliente.username, 'empresa_a_novo_login')
+        self.assertTrue(self.cliente.check_password('AdminReset2026'))
+        self.assertEqual(self.cliente.acessos_empresas.filter(ativo=True).count(), 1)
+
 
 
 

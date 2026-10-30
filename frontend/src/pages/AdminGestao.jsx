@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import AdminLayout from '../components/admin/AdminLayout';
 import PgcView from '../components/pgc/PgcView';
-import { adminService, empresaService } from '../services/api';
+import { adminService, authService, empresaService } from '../services/api';
 import { usePeriodo } from '../context/PeriodoContext';
 import { kzComMoeda } from '../utils/formato';
 
@@ -199,6 +199,82 @@ const AdminGestao = () => {
     email_alertas_fiscal: 'auditoria@sckj.co.ao',
   });
   const [salvandoConfig, setSalvandoConfig] = useState(false);
+
+  // Conta Própria do Administrador (Nome, Utilizador, Email & Palavra-passe)
+  const adminSessaoInicial = JSON.parse(localStorage.getItem('user') || '{}');
+  const [perfilAdminForm, setPerfilAdminForm] = useState({
+    first_name: adminSessaoInicial.first_name || '',
+    last_name: adminSessaoInicial.last_name || '',
+    username: adminSessaoInicial.username || '',
+    email: adminSessaoInicial.email || '',
+    currentPassword: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [mostrarSenhasAdmin, setMostrarSenhasAdmin] = useState(false);
+  const [salvandoPerfilAdmin, setSalvandoPerfilAdmin] = useState(false);
+
+  const salvarMeuPerfilAdmin = async (e) => {
+    e.preventDefault();
+    if (!perfilAdminForm.username.trim()) {
+      toast.warning('O nome de utilizador não pode ficar vazio.');
+      return;
+    }
+    if (perfilAdminForm.password || perfilAdminForm.confirmPassword) {
+      if (!perfilAdminForm.currentPassword) {
+        toast.warning('Informe a sua palavra-passe atual para definir uma nova palavra-passe.');
+        return;
+      }
+      if (perfilAdminForm.password !== perfilAdminForm.confirmPassword) {
+        toast.error('A nova palavra-passe e a confirmação não coincidem.');
+        return;
+      }
+      if (perfilAdminForm.password.length < 6) {
+        toast.error('A nova palavra-passe deve ter pelo menos 6 caracteres.');
+        return;
+      }
+    }
+
+    setSalvandoPerfilAdmin(true);
+    try {
+      const payload = {
+        username: perfilAdminForm.username.trim(),
+        first_name: perfilAdminForm.first_name.trim(),
+        last_name: perfilAdminForm.last_name.trim(),
+        email: perfilAdminForm.email.trim(),
+      };
+      if (perfilAdminForm.password) {
+        payload.current_password = perfilAdminForm.currentPassword;
+        payload.new_password = perfilAdminForm.password;
+      }
+      const res = await authService.updatePerfil(payload);
+      const userServidor = res?.data?.user || payload;
+      const atualSessao = JSON.parse(localStorage.getItem('user') || '{}');
+      const novoUser = { ...atualSessao, ...userServidor, token: userServidor.token || atualSessao.token };
+      localStorage.setItem('user', JSON.stringify(novoUser));
+      window.dispatchEvent(new Event('auth-changed'));
+      setPerfilAdminForm((prev) => ({
+        ...prev,
+        first_name: novoUser.first_name || '',
+        last_name: novoUser.last_name || '',
+        username: novoUser.username || '',
+        email: novoUser.email || '',
+        currentPassword: '',
+        password: '',
+        confirmPassword: '',
+      }));
+      carregarDados();
+      toast.success(
+        perfilAdminForm.password
+          ? 'Dados pessoais e palavra-passe atualizados com sucesso!'
+          : 'Dados da sua conta atualizados com sucesso!'
+      );
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Erro ao atualizar perfil.');
+    } finally {
+      setSalvandoPerfilAdmin(false);
+    }
+  };
 
   // Carregar todos os dados do painel administrativo
   const carregarDados = async () => {
@@ -456,7 +532,8 @@ const AdminGestao = () => {
 
   const abrirModalEditarUser = (u) => {
     setUserEmEdicao(u);
-    const empresasIds = (u.empresas_vinculadas || []).map((e) => e.id);
+    const listaVinculos = u.empresas_vinculadas || u.empresas || [];
+    const empresasIds = listaVinculos.map((e) => e.id);
     const papelAtual = (u.grupos && u.grupos[0]) || (u.is_superuser ? 'Super Admin' : u.is_staff ? 'Administrador' : 'Contabilista');
     setFormUser({
       username: u.username,
@@ -485,9 +562,19 @@ const AdminGestao = () => {
     setSalvandoUser(true);
     try {
       if (userEmEdicao) {
-        const payload = { ...formUser };
+        const payload = { ...formUser, username: formUser.username.trim() };
         if (!payload.password) delete payload.password;
-        await adminService.updateUtilizador(userEmEdicao.id, payload);
+        const res = await adminService.updateUtilizador(userEmEdicao.id, payload);
+        if (res?.data?.user_sessao) {
+          const atual = JSON.parse(localStorage.getItem('user') || '{}');
+          const atualizado = {
+            ...atual,
+            ...res.data.user_sessao,
+            token: res.data.user_sessao.token || atual.token,
+          };
+          localStorage.setItem('user', JSON.stringify(atualizado));
+          window.dispatchEvent(new Event('auth-changed'));
+        }
         toast.success(`Utilizador "${formUser.username}" atualizado com sucesso!`);
       } else {
         await adminService.createUtilizador(formUser);
@@ -1414,13 +1501,13 @@ const AdminGestao = () => {
                               </span>
                             </td>
                             <td>
-                              {u.empresas_vinculadas && u.empresas_vinculadas.length > 0 ? (
+                              {(u.empresas_vinculadas || u.empresas || []).length > 0 ? (
                                 <div className="d-flex flex-wrap" style={{ gap: 4 }}>
-                                  {u.empresas_vinculadas.map((emp) => (
+                                  {(u.empresas_vinculadas || u.empresas || []).map((emp) => (
                                     <span
                                       key={emp.id}
-                                      className="badge badge-light border"
-                                      style={{ fontSize: 10 }}
+                                      className="badge border"
+                                      style={{ fontSize: 10, backgroundColor: '#ffffff', color: '#1e293b' }}
                                       title={`NIF: ${emp.nif}`}
                                     >
                                       {emp.nome}
@@ -2140,7 +2227,133 @@ const AdminGestao = () => {
       {/* ABA: CONFIGURAÇÕES GLOBAIS DO SISTEMA                */}
       {/* ==================================================== */}
       {abaAtiva === 'configuracoes' && (
-        <form onSubmit={salvarConfiguracoesSistema}>
+        <>
+          {/* CARD: A MINHA CONTA DE ADMINISTRADOR (NOMES, UTILIZADOR & PALAVRA-PASSE) */}
+          <div className="card card-default mb-25" style={{ borderRadius: 10, border: '1px solid #bfdbfe', background: '#ffffff' }}>
+            <div
+              className="card-header bg-white d-flex justify-content-between align-items-center flex-wrap"
+              style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', gap: 10 }}
+            >
+              <div>
+                <h5 style={{ margin: 0, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <i className="la la-user-lock" style={{ color: '#2563eb', fontSize: 22 }}></i>
+                  <span>A Minha Conta de Acesso (Nome, Utilizador, Email & Palavra-passe)</span>
+                </h5>
+                <small className="text-muted">
+                  Atualize os seus dados pessoais, nome de utilizador (login) e palavra-passe de administrador.
+                </small>
+              </div>
+              <button
+                type="button"
+                className="btn btn-outline-primary btn-xs d-flex align-items-center"
+                onClick={() => setMostrarSenhasAdmin((v) => !v)}
+                style={{ borderRadius: 6, fontWeight: 600, padding: '6px 12px', gap: 5 }}
+              >
+                <i className={`la ${mostrarSenhasAdmin ? 'la-eye-slash' : 'la-eye'}`}></i>
+                <span>{mostrarSenhasAdmin ? 'Ocultar Senhas' : 'Mostrar Senhas'}</span>
+              </button>
+            </div>
+            <div className="card-body" style={{ padding: '20px 24px' }}>
+              <form onSubmit={salvarMeuPerfilAdmin}>
+                <div className="row" style={{ rowGap: 14 }}>
+                  <div className="col-md-3">
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Primeiro Nome</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Primeiro nome"
+                      value={perfilAdminForm.first_name}
+                      onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, first_name: e.target.value })}
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Sobrenome / Apelido</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Sobrenome"
+                      value={perfilAdminForm.last_name}
+                      onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, last_name: e.target.value })}
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Nome de Utilizador (Login) *</label>
+                    <input
+                      type="text"
+                      className="form-control fw-600"
+                      required
+                      value={perfilAdminForm.username}
+                      onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, username: e.target.value })}
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Email</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      placeholder="admin@sckj.co.ao"
+                      value={perfilAdminForm.email}
+                      onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, email: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="col-md-4">
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
+                      Palavra-passe Atual (para mudar a senha)
+                    </label>
+                    <input
+                      type={mostrarSenhasAdmin ? 'text' : 'password'}
+                      className="form-control"
+                      placeholder="Senha atual"
+                      autoComplete="current-password"
+                      value={perfilAdminForm.currentPassword}
+                      onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, currentPassword: e.target.value })}
+                    />
+                  </div>
+                  <div className="col-md-4">
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
+                      Nova Palavra-passe (opcional)
+                    </label>
+                    <input
+                      type={mostrarSenhasAdmin ? 'text' : 'password'}
+                      className="form-control"
+                      placeholder="Mínimo 6 caracteres"
+                      autoComplete="new-password"
+                      value={perfilAdminForm.password}
+                      onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, password: e.target.value })}
+                    />
+                  </div>
+                  <div className="col-md-4">
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
+                      Confirmar Nova Palavra-passe
+                    </label>
+                    <input
+                      type={mostrarSenhasAdmin ? 'text' : 'password'}
+                      className="form-control"
+                      placeholder="Repita a nova senha"
+                      autoComplete="new-password"
+                      value={perfilAdminForm.confirmPassword}
+                      onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, confirmPassword: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="col-12 pt-6 d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-sm d-flex align-items-center"
+                      disabled={salvandoPerfilAdmin}
+                      style={{ borderRadius: 6, fontWeight: 700, padding: '8px 18px', gap: 6 }}
+                    >
+                      <i className="la la-save"></i>
+                      <span>{salvandoPerfilAdmin ? 'A guardar...' : 'Guardar Minha Conta & Palavra-passe'}</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <form onSubmit={salvarConfiguracoesSistema}>
           {/* CABEÇALHO DA SECÇÃO */}
           <div className="card card-default mb-25">
             <div className="card-body" style={{ padding: '24px' }}>
@@ -2256,8 +2469,8 @@ const AdminGestao = () => {
                   <div
                     className="p-3 mt-3"
                     style={{
-                      backgroundColor: configuracoes.modo_manutencao ? '#fff1f0' : '#f8f9fc',
-                      border: configuracoes.modo_manutencao ? '1px solid #ffa39e' : '1px solid #edf0f5',
+                      backgroundColor: '#ffffff',
+                      border: configuracoes.modo_manutencao ? '1px solid #ffa39e' : '1px solid #e2e8f0',
                       borderRadius: 8,
                     }}
                   >
@@ -2483,7 +2696,8 @@ const AdminGestao = () => {
                         width: 56,
                         height: 56,
                         borderRadius: '50%',
-                        backgroundColor: '#eff0f6',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #bfdbfe',
                         color: '#2563eb',
                         display: 'flex',
                         alignItems: 'center',
@@ -2497,16 +2711,20 @@ const AdminGestao = () => {
                     </div>
                     <div>
                       <h6 style={{ margin: 0, fontWeight: 700, color: '#272b41', fontSize: 16 }}>
-                        {userAtivo.first_name || userAtivo.username || 'Super Administrador'}
+                        {`${perfilAdminForm.first_name || ''} ${perfilAdminForm.last_name || ''}`.trim() ||
+                          perfilAdminForm.username ||
+                          userAtivo.username ||
+                          'Super Administrador'}
                       </h6>
                       <span className="text-muted" style={{ fontSize: 13 }}>
-                        {userAtivo.email || 'admin@sistema.local'}
+                        {perfilAdminForm.email || userAtivo.email || 'admin@sistema.local'}
                       </span>
                       <div className="mt-1">
                         <span
                           className="badge"
                           style={{
-                            backgroundColor: '#eff2f7',
+                            backgroundColor: '#ffffff',
+                            border: '1px solid #bfdbfe',
                             color: '#2563eb',
                             fontSize: 11,
                             fontWeight: 700,
@@ -2519,10 +2737,10 @@ const AdminGestao = () => {
                     </div>
                   </div>
 
-                  <div className="p-3 mb-3" style={{ backgroundColor: '#f8f9fc', border: '1px solid #edf0f5', borderRadius: 8 }}>
-                    <div style={{ fontSize: 12, color: '#5a5f7d', lineHeight: 1.6 }}>
+                  <div className="p-3 mb-3" style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8 }}>
+                    <div style={{ fontSize: 12, color: '#475569', lineHeight: 1.6 }}>
                       <i className="la la-info-circle mr-1 text-primary"></i>
-                      {t('admin.config.editInUsersTab', 'Para alterar a senha ou dados do seu utilizador, aceda à aba Utilizadores.')}
+                      Utilize o formulário no topo desta página para alterar o seu próprio nome, utilizador ou palavra-passe, ou aceda à aba Utilizadores para gerir todas as contas do sistema.
                     </div>
                   </div>
 
@@ -2532,7 +2750,7 @@ const AdminGestao = () => {
                     onClick={() => mudarAba('utilizadores')}
                     style={{ borderRadius: 6, fontWeight: 600 }}
                   >
-                    <i className="la la-users-cog mr-1"></i> Gerir Utilizadores & Credenciais
+                    <i className="la la-users-cog mr-1"></i> Gerir Todas as Contas de Utilizadores
                   </button>
                 </div>
               </div>
@@ -2544,8 +2762,8 @@ const AdminGestao = () => {
             <div className="card-body py-16 px-24 d-flex justify-content-end align-items-center" style={{ gap: 12 }}>
               <button
                 type="button"
-                className="btn btn-outline-lighten"
-                style={{ borderRadius: 6, fontWeight: 600, color: '#5a5f7d', borderColor: '#edf0f5' }}
+                className="btn btn-outline-primary"
+                style={{ borderRadius: 6, fontWeight: 600 }}
                 onClick={restaurarPadroesAgt}
               >
                 <i className="la la-undo mr-1"></i> Padrões AGT Angola 2026
@@ -2567,7 +2785,8 @@ const AdminGestao = () => {
               </button>
             </div>
           </div>
-        </form>
+          </form>
+        </>
       )}
 
       {/* ==================================================== */}
@@ -2879,10 +3098,10 @@ const AdminGestao = () => {
                   </div>
                 </div>
 
-                <div className="modal-footer bg-light py-12 px-24">
+                <div className="modal-footer bg-white py-12 px-24" style={{ gap: 10 }}>
                   <button
                     type="button"
-                    className="btn btn-secondary btn-sm"
+                    className="btn btn-outline-primary btn-sm"
                     onClick={() => setModalEmpresaAberto(false)}
                     disabled={salvandoEmpresa}
                   >
@@ -2972,7 +3191,6 @@ const AdminGestao = () => {
                       value={formUser.username}
                       onChange={(e) => setFormUser({ ...formUser, username: e.target.value })}
                       required
-                      disabled={Boolean(userEmEdicao)}
                       style={{ borderRadius: 6, fontSize: 13 }}
                     />
                   </div>
@@ -3071,10 +3289,10 @@ const AdminGestao = () => {
                   </div>
                 </div>
 
-                <div className="modal-footer bg-light py-12 px-24">
+                <div className="modal-footer bg-white py-12 px-24" style={{ gap: 10 }}>
                   <button
                     type="button"
-                    className="btn btn-secondary btn-sm"
+                    className="btn btn-outline-primary btn-sm"
                     onClick={() => setModalUserAberto(false)}
                     disabled={salvandoUser}
                   >

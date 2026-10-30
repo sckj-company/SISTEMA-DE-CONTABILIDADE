@@ -92,11 +92,11 @@ const Facturas = () => {
       setEstatisticas(res.data.estatisticas || null);
     } catch (err) {
       console.error('Erro ao listar facturas:', err);
-      toast.error('Não foi possível carregar as facturas.');
+      toast.error(t('facturasUi.loadError', 'Não foi possível carregar as facturas.'));
     } finally {
       setLoading(false);
     }
-  }, [empresaId, ano, filtroMes, filtroConformidade, busca]);
+  }, [empresaId, ano, filtroMes, filtroConformidade, busca, t]);
 
   useEffect(() => {
     carregarFacturas();
@@ -109,10 +109,15 @@ const Facturas = () => {
     setCameraErro(null);
     try {
       if (cameraStream) {
-        cameraStream.getTracks().forEach((t) => t.stop());
+        cameraStream.getTracks().forEach((tr) => tr.stop());
       }
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('O seu navegador não suporta captura direta por câmara. Use a opção de ficheiro ou câmara do dispositivo.');
+        throw new Error(
+          t(
+            'facturasUi.browserNoCameraSupport',
+            'O seu navegador não suporta captura direta por câmara. Use a opção de ficheiro ou câmara do dispositivo.'
+          )
+        );
       }
       let stream;
       try {
@@ -128,13 +133,13 @@ const Facturas = () => {
       setFacingMode(modo);
     } catch (err) {
       console.error('Erro ao aceder à câmara:', err);
-      setCameraErro(err.message || 'Não foi possível aceder à câmara do dispositivo.');
+      setCameraErro(err.message || t('facturasUi.cameraAccessError', 'Não foi possível aceder à câmara do dispositivo.'));
     }
   };
 
   const fecharCamera = () => {
     if (cameraStream) {
-      cameraStream.getTracks().forEach((t) => t.stop());
+      cameraStream.getTracks().forEach((tr) => tr.stop());
       setCameraStream(null);
     }
     setCameraAberta(false);
@@ -152,7 +157,7 @@ const Facturas = () => {
   useEffect(() => {
     return () => {
       if (cameraStream) {
-        cameraStream.getTracks().forEach((t) => t.stop());
+        cameraStream.getTracks().forEach((tr) => tr.stop());
       }
     };
   }, [cameraStream]);
@@ -186,18 +191,20 @@ const Facturas = () => {
   const handleUploadFile = async (file) => {
     if (!file) return;
     setScanning(true);
-    setScanProgresso('A ler documento e a extrair texto com motor óptico...');
+    setScanProgresso(t('facturasUi.scanStepOcr', 'A ler documento e a extrair texto com motor óptico...'));
 
     try {
       const formData = new FormData();
       formData.append('arquivo', file);
       if (empresaId) formData.append('empresa_id', empresaId);
 
-      setScanProgresso('A IA da AGT está a auditar o NIF, taxas de IVA, retenções e regras do CIVA...');
+      setScanProgresso(
+        t('facturasUi.scanStepAiAudit', 'A IA da AGT está a auditar o NIF, taxas de IVA, retenções e regras do CIVA...')
+      );
       const res = await facturaService.scanFactura(formData);
 
       if (res.data?.success) {
-        toast.success(`✨ ${res.data.mensagem || 'Fatura processada com sucesso!'}`);
+        toast.success(`✨ ${res.data.mensagem || t('facturasUi.scanSuccess', 'Fatura processada com sucesso!')}`);
         if (res.data.factura) {
           setFacturaDetalhe(res.data.factura);
           // Se identificou empresa diferente, sugere seleção
@@ -209,7 +216,7 @@ const Facturas = () => {
       }
     } catch (err) {
       console.error('Erro no scan da fatura:', err);
-      const msg = err.response?.data?.error || err.message || 'Falha ao processar fatura com IA.';
+      const msg = err.response?.data?.error || err.message || t('facturasUi.scanError', 'Falha ao processar fatura com IA.');
       toast.error(`❌ ${msg}`);
     } finally {
       setScanning(false);
@@ -224,7 +231,7 @@ const Facturas = () => {
     canvas.toBlob(
       async (blob) => {
         if (!blob) {
-          toast.error('Erro ao gerar foto da factura.');
+          toast.error(t('facturasUi.photoGenerateError', 'Erro ao gerar foto da factura.'));
           return;
         }
         const dataHora = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
@@ -259,14 +266,14 @@ const Facturas = () => {
     setLancandoId(factura.id);
     try {
       const res = await facturaService.lancarNoDiario(factura.id);
-      toast.success(`📘 ${res.data?.mensagem || 'Fatura escriturada no Diário de Compras!'}`);
+      toast.success(`📘 ${res.data?.mensagem || t('facturasUi.postJournalSuccess', 'Fatura escriturada no Diário de Compras!')}`);
       if (facturaDetalhe && facturaDetalhe.id === factura.id) {
         setFacturaDetalhe(res.data?.factura || { ...facturaDetalhe, lancado_na_contabilidade: true });
       }
       await carregarFacturas();
     } catch (err) {
       console.error('Erro ao lançar fatura:', err);
-      toast.error(err.response?.data?.error || 'Erro ao escriturar fatura.');
+      toast.error(err.response?.data?.error || t('facturasUi.postJournalError', 'Erro ao escriturar fatura.'));
     } finally {
       setLancandoId(null);
     }
@@ -277,13 +284,13 @@ const Facturas = () => {
     if (!facturaApagar) return;
     try {
       await facturaService.excluir(facturaApagar.id);
-      toast.success('Fatura eliminada com sucesso.');
+      toast.success(t('facturasUi.deleteSuccess', 'Fatura eliminada com sucesso.'));
       setFacturas((prev) => prev.filter((f) => f.id !== facturaApagar.id));
       if (facturaDetalhe?.id === facturaApagar.id) setFacturaDetalhe(null);
       setFacturaApagar(null);
       carregarFacturas();
     } catch (err) {
-      toast.error('Erro ao eliminar fatura.');
+      toast.error(t('facturasUi.deleteError', 'Erro ao eliminar fatura.'));
     }
   };
 
@@ -304,10 +311,10 @@ const Facturas = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      toast.success('📊 Mapa de Fornecedores da AGT exportado com sucesso em Excel!');
+      toast.success(t('facturasUi.exportExcelSuccess', '📊 Mapa de Fornecedores da AGT exportado com sucesso em Excel!'));
     } catch (err) {
       console.error('Erro ao exportar Excel:', err);
-      toast.error('Erro ao descarregar ficheiro Excel do mapa de fornecedores.');
+      toast.error(t('facturasUi.exportExcelError', 'Erro ao descarregar ficheiro Excel do mapa de fornecedores.'));
     } finally {
       setExportando(false);
     }
@@ -347,10 +354,16 @@ const Facturas = () => {
             </span>
             <div>
               <h6 className="fw-700 mb-2" style={{ color: '#0f172a', fontSize: 15 }}>
-                Portal de Digitalização & Entrada de Facturas ({user.first_name || user.username || 'Operador'})
+                {t('facturasUi.operatorBannerTitle', {
+                  name: user.first_name || user.username || t('facturasUi.operatorDefaultName', 'Operador'),
+                  defaultValue: 'Portal de Digitalização & Entrada de Facturas ({{name}})',
+                })}
               </h6>
               <p className="mb-0" style={{ fontSize: 12.5, color: '#475569' }}>
-                Carregue os ficheiros em PDF ou imagens das facturas físicas recebidas. A inteligência artificial extrai todos os dados e certificação AGT. O lançamento no Diário de Compras do PGC será efetuado pela equipa de Contabilidade.
+                {t(
+                  'facturasUi.operatorBannerDesc',
+                  'Carregue os ficheiros em PDF ou imagens das facturas físicas recebidas. A inteligência artificial extrai todos os dados e certificação AGT. O lançamento no Diário de Compras do PGC será efetuado pela equipa de Contabilidade.'
+                )}
               </p>
             </div>
           </div>
@@ -365,7 +378,7 @@ const Facturas = () => {
               flexShrink: 0,
             }}
           >
-            <i className="la la-user-check mr-4"></i> Perfil: Operador de Facturação
+            <i className="la la-user-check mr-4"></i> {t('facturasUi.operatorRoleBadge', 'Perfil: Operador de Facturação')}
           </span>
         </div>
       )}
@@ -416,7 +429,7 @@ const Facturas = () => {
               style={{ borderRadius: 8, height: 38, padding: '0 16px', fontWeight: 700 }}
             >
               <i className={`la ${exportando ? 'la-spinner la-spin' : 'la-file-excel'} mr-6`} style={{ fontSize: 16 }}></i>
-              {exportando ? t('common.loading', 'A Gerar Mapa...') : t('facturas.exportExcel', 'Exportar Mapa AGT (Excel)')}
+              {exportando ? t('facturasUi.generatingMap', 'A Gerar Mapa...') : t('facturas.exportExcel', 'Exportar Mapa AGT (Excel)')}
             </button>
           )}
           <button
@@ -425,7 +438,7 @@ const Facturas = () => {
             onClick={() => abrirCamera()}
             disabled={scanning}
             style={{ borderRadius: 8, height: 38, padding: '0 16px', fontWeight: 700 }}
-            title="Tirar fotografia da factura física com a câmara ou webcam"
+            title={t('facturasUi.takePhotoTooltip', 'Tirar fotografia da factura física com a câmara ou webcam')}
           >
             <i className="la la-camera mr-6" style={{ fontSize: 16 }}></i>
             {t('facturas.takePhoto', 'Tirar Foto (Câmara)')}
@@ -438,7 +451,7 @@ const Facturas = () => {
             style={{ borderRadius: 8, height: 38, padding: '0 16px', fontWeight: 700 }}
           >
             <i className={`la ${scanning ? 'la-spinner la-spin' : 'la-upload'} mr-6`} style={{ fontSize: 16 }}></i>
-            {scanning ? t('common.loading', 'A Analisar...') : t('facturas.newInvoice', 'Carregar Ficheiro (PDF/Foto)')}
+            {scanning ? t('facturasUi.analyzingBtn', 'A Analisar...') : t('facturasUi.uploadFileBtn', 'Carregar Ficheiro (PDF/Foto)')}
           </button>
           <input
             type="file"
@@ -468,9 +481,11 @@ const Facturas = () => {
         {scanning ? (
           <div className="py-20">
             <div className="spinner-border mb-15" role="status" style={{ width: '3rem', height: '3rem', color: '#2563eb' }}>
-              <span className="sr-only">A analisar...</span>
+              <span className="sr-only">{t('facturasUi.analyzingSr', 'A analisar...')}</span>
             </div>
-            <h5 className="fw-700 mb-6" style={{ color: '#2563eb' }}>A Processar Documento Fiscal com IA...</h5>
+            <h5 className="fw-700 mb-6" style={{ color: '#2563eb' }}>
+              {t('facturasUi.processingAiTitle', 'A Processar Documento Fiscal com IA...')}
+            </h5>
             <p className="text-muted mb-0" style={{ fontSize: 13.5 }}>
               {scanProgresso}
             </p>
@@ -480,9 +495,14 @@ const Facturas = () => {
             <div className="upload-icon-circle">
               <i className="la la-cloud-upload-alt"></i>
             </div>
-            <h5 className="fw-700 mb-6" style={{ color: '#0f172a' }}>Arraste a sua Factura para aqui (PDF ou Foto)</h5>
+            <h5 className="fw-700 mb-6" style={{ color: '#0f172a' }}>
+              {t('facturasUi.dropzoneTitle', 'Arraste a sua Factura para aqui (PDF ou Foto)')}
+            </h5>
             <p className="text-muted mb-15" style={{ fontSize: 13, maxWidth: 620, margin: '0 auto' }}>
-              A IA extrai automaticamente o NIF e dados do fornecedor, verifica a menção de certificação da AGT, calcula as retenções de IVA (7%) e Imposto Industrial (6.5%) e sugere a conta do PGC.
+              {t(
+                'facturasUi.dropzoneDesc',
+                'A IA extrai automaticamente o NIF e dados do fornecedor, verifica a menção de certificação da AGT, calcula as retenções de IVA (7%) e Imposto Industrial (6.5%) e sugere a conta do PGC.'
+              )}
             </p>
             <div
               className="d-flex flex-wrap justify-content-center align-items-center"
@@ -499,7 +519,8 @@ const Facturas = () => {
                   fontWeight: 700,
                 }}
               >
-                <i className="la la-camera mr-8" style={{ fontSize: 17 }}></i> Tirar Foto com a Câmara
+                <i className="la la-camera mr-8" style={{ fontSize: 17 }}></i>{' '}
+                {t('facturasUi.takePhotoWithCamera', 'Tirar Foto com a Câmara')}
               </button>
               <button
                 type="button"
@@ -512,12 +533,16 @@ const Facturas = () => {
                   fontWeight: 700,
                 }}
               >
-                <i className="la la-folder-open mr-8" style={{ fontSize: 17 }}></i> Selecionar Ficheiro do Computador
+                <i className="la la-folder-open mr-8" style={{ fontSize: 17 }}></i>{' '}
+                {t('facturasUi.selectFromComputer', 'Selecionar Ficheiro do Computador')}
               </button>
             </div>
             <div className="mt-14">
               <small className="text-muted" style={{ fontSize: 11.5 }}>
-                Formatos suportados: Fotografias tiradas por câmara ou telemóvel, PDFs com selo AGT, imagens (PNG/JPG) e facturas eletrónicas.
+                {t(
+                  'facturasUi.supportedFormats',
+                  'Formatos suportados: Fotografias tiradas por câmara ou telemóvel, PDFs com selo AGT, imagens (PNG/JPG) e facturas eletrónicas.'
+                )}
               </small>
             </div>
           </div>
@@ -536,7 +561,10 @@ const Facturas = () => {
                   </span>
                   <h4 className="fw-800 mb-0 mt-4" style={{ color: '#0f172a', fontSize: 22 }}>{estatisticas.total_contagem}</h4>
                   <small className="text-muted" style={{ fontSize: 11.5 }}>
-                    {estatisticas.lancadas} escrituradas no diário
+                    {t('facturasUi.postedInJournalCount', {
+                      count: estatisticas.lancadas,
+                      defaultValue: '{{count}} escrituradas no diário',
+                    })}
                   </small>
                 </div>
                 <div
@@ -568,7 +596,7 @@ const Facturas = () => {
                   </span>
                   <h4 className="fw-800 mb-0 mt-4" style={{ color: '#2563eb', fontSize: 20 }}>{formatarKz(estatisticas.total_base)}</h4>
                   <small className="text-muted" style={{ fontSize: 11.5 }}>
-                    Total líquido de compras
+                    {t('facturasUi.netPurchasesTotal', 'Total líquido de compras')}
                   </small>
                 </div>
                 <div
@@ -600,7 +628,7 @@ const Facturas = () => {
                   </span>
                   <h4 className="fw-800 mb-0 mt-4" style={{ color: '#15803d', fontSize: 20 }}>{formatarKz(estatisticas.total_iva_dedutivel)}</h4>
                   <small className="text-muted" style={{ fontSize: 11.5 }}>
-                    Suportado: {formatarKz(estatisticas.total_iva_suportado)}
+                    {t('facturasUi.supportedPrefix', 'Suportado')}: {formatarKz(estatisticas.total_iva_suportado)}
                   </small>
                 </div>
                 <div
@@ -628,13 +656,13 @@ const Facturas = () => {
               <div className="card-body p-18 d-flex align-items-center justify-content-between bg-white">
                 <div>
                   <span className="text-muted fw-700" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
-                    RETENÇÕES NA FONTE
+                    {t('facturasUi.withholdingTaxesTitle', 'RETENÇÕES NA FONTE')}
                   </span>
                   <h4 className="fw-800 mb-0 mt-4" style={{ color: '#0f172a', fontSize: 20 }}>
                     {formatarKz(estatisticas.total_retencao_iva + estatisticas.total_retencao_ii)}
                   </h4>
                   <small className="text-muted" style={{ fontSize: 11.5 }}>
-                    IVA 7%: {formatarKz(estatisticas.total_retencao_iva)} | II: {formatarKz(estatisticas.total_retencao_ii)}
+                    {t('facturasUi.vat7Short', 'IVA 7%')}: {formatarKz(estatisticas.total_retencao_iva)} | {t('facturasUi.iiShort', 'II')}: {formatarKz(estatisticas.total_retencao_ii)}
                   </small>
                 </div>
                 <div
@@ -706,10 +734,10 @@ const Facturas = () => {
                 onChange={(e) => setFiltroConformidade(e.target.value)}
                 style={{ height: 38, borderRadius: 8 }}
               >
-                <option value="todos">Todas as Conformidades AGT</option>
-                <option value="CONFORME">Apenas Conformes AGT</option>
-                <option value="AVISO">Com Alertas / Avisos</option>
-                <option value="IRREGULAR">Irregulares</option>
+                <option value="todos">{t('facturasUi.complianceAll', 'Todas as Conformidades AGT')}</option>
+                <option value="CONFORME">{t('facturasUi.complianceCompliantOnly', 'Apenas Conformes AGT')}</option>
+                <option value="AVISO">{t('facturasUi.complianceWarnings', 'Com Alertas / Avisos')}</option>
+                <option value="IRREGULAR">{t('facturasUi.complianceIrregular', 'Irregulares')}</option>
               </select>
             </div>
 
@@ -720,7 +748,7 @@ const Facturas = () => {
                 onClick={carregarFacturas}
                 style={{ height: 38, borderRadius: 8, fontWeight: 700 }}
               >
-                <i className="la la-sync-alt mr-4"></i> Atualizar
+                <i className="la la-sync-alt mr-4"></i> {t('facturasUi.refreshBtn', 'Atualizar')}
               </button>
             </div>
           </div>
@@ -731,7 +759,11 @@ const Facturas = () => {
       <div className="card" style={{ borderRadius: 14, border: '1px solid #e2e8f0', background: '#ffffff' }}>
         <div className="card-header bg-white py-15 px-20 border-bottom d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 8 }}>
           <h6 className="fw-700 mb-0" style={{ color: '#0f172a' }}>
-            <i className="la la-list-alt mr-6" style={{ color: '#2563eb' }}></i> Facturas Registadas & Auditadas ({facturas.length})
+            <i className="la la-list-alt mr-6" style={{ color: '#2563eb' }}></i>{' '}
+            {t('facturasUi.registeredInvoicesHeader', {
+              count: facturas.length,
+              defaultValue: 'Facturas Registadas & Auditadas ({{count}})',
+            })}
           </h6>
           {empresaAtual && (
             <span
@@ -746,7 +778,11 @@ const Facturas = () => {
                 fontWeight: 700,
               }}
             >
-              Empresa Ativa: {empresaAtual.nome} (NIF: {empresaAtual.nif})
+              {t('facturasUi.activeCompanyBadge', {
+                nome: empresaAtual.nome,
+                nif: empresaAtual.nif,
+                defaultValue: 'Empresa Ativa: {{nome}} (NIF: {{nif}})',
+              })}
             </span>
           )}
         </div>
@@ -755,18 +791,23 @@ const Facturas = () => {
           {loading ? (
             <div className="text-center py-40">
               <div className="spinner-border" role="status" style={{ color: '#2563eb' }}>
-                <span className="sr-only">A carregar...</span>
+                <span className="sr-only">{t('facturasUi.loadingSr', 'A carregar...')}</span>
               </div>
-              <p className="text-muted mt-10 mb-0">A carregar registo de facturas...</p>
+              <p className="text-muted mt-10 mb-0">{t('facturasUi.loadingInvoices', 'A carregar registo de facturas...')}</p>
             </div>
           ) : facturas.length === 0 ? (
             <div className="text-center py-50 px-20">
               <div className="upload-icon-circle">
                 <i className="la la-file-invoice"></i>
               </div>
-              <h6 className="fw-700 mt-10 mb-4" style={{ color: '#0f172a' }}>Nenhuma fatura encontrada neste período</h6>
+              <h6 className="fw-700 mt-10 mb-4" style={{ color: '#0f172a' }}>
+                {t('facturasUi.emptyPeriodTitle', 'Nenhuma fatura encontrada neste período')}
+              </h6>
               <p className="text-muted" style={{ fontSize: 12.5, maxWidth: 450, margin: '0 auto' }}>
-                Arraste um PDF ou imagem de fatura para a área superior para processar automaticamente com a inteligência artificial.
+                {t(
+                  'facturasUi.emptyPeriodDesc',
+                  'Arraste um PDF ou imagem de fatura para a área superior para processar automaticamente com a inteligência artificial.'
+                )}
               </p>
             </div>
           ) : (
@@ -779,20 +820,40 @@ const Facturas = () => {
                     <th className="py-12 px-15">{t('facturas.supplier', 'Fornecedor / Emitente')}</th>
                     <th className="py-12 px-15 text-right">{t('facturas.baseAmount', 'Base Incidência')}</th>
                     <th className="py-12 px-15 text-right">{t('facturas.vatAmount', 'IVA (Taxa)')}</th>
-                    <th className="py-12 px-15 text-right">Retenções</th>
+                    <th className="py-12 px-15 text-right">{t('facturasUi.thWithholdings', 'Retenções')}</th>
                     <th className="py-12 px-15 text-right">{t('facturas.total', 'Total Líquido')}</th>
-                    <th className="py-12 px-15 text-center">Conformidade AGT</th>
-                    <th className="py-12 px-15 text-center">Diário PGC</th>
+                    <th className="py-12 px-15 text-center">{t('facturasUi.thAgtCompliance', 'Conformidade AGT')}</th>
+                    <th className="py-12 px-15 text-center">{t('facturasUi.thPgcJournal', 'Diário PGC')}</th>
                     <th className="py-12 px-15 text-center">{t('facturas.actions', 'Ações')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {facturas.map((f) => {
                     const badgeConformidade = {
-                      CONFORME: { border: '#86efac', text: '#15803d', label: 'Conforme AGT', icon: 'la-check-circle' },
-                      AVISO: { border: '#fcd34d', text: '#b45309', label: 'Alerta Fiscal', icon: 'la-exclamation-triangle' },
-                      IRREGULAR: { border: '#fca5a5', text: '#dc2626', label: 'Irregular', icon: 'la-times-circle' },
-                    }[f.conformidade_agt] || { border: '#bfdbfe', text: '#2563eb', label: f.conformidade_agt, icon: 'la-info-circle' };
+                      CONFORME: {
+                        border: '#86efac',
+                        text: '#15803d',
+                        label: t('facturasUi.badgeCompliant', 'Conforme AGT'),
+                        icon: 'la-check-circle',
+                      },
+                      AVISO: {
+                        border: '#fcd34d',
+                        text: '#b45309',
+                        label: t('facturasUi.badgeWarning', 'Alerta Fiscal'),
+                        icon: 'la-exclamation-triangle',
+                      },
+                      IRREGULAR: {
+                        border: '#fca5a5',
+                        text: '#dc2626',
+                        label: t('facturasUi.badgeIrregular', 'Irregular'),
+                        icon: 'la-times-circle',
+                      },
+                    }[f.conformidade_agt] || {
+                      border: '#bfdbfe',
+                      text: '#2563eb',
+                      label: f.conformidade_agt,
+                      icon: 'la-info-circle',
+                    };
 
                     return (
                       <tr key={f.id}>
@@ -814,7 +875,7 @@ const Facturas = () => {
                           </div>
                           {f.hash_agt && (
                             <div className="text-muted" style={{ fontSize: 10.5 }}>
-                              Hash AGT: <code>{f.hash_agt}</code>
+                              {t('facturasUi.agtHash', 'Hash AGT')}: <code>{f.hash_agt}</code>
                             </div>
                           )}
                         </td>
@@ -824,7 +885,7 @@ const Facturas = () => {
                           <span className="text-nowrap">{f.data_emissao ? f.data_emissao.split('-').reverse().join('/') : '---'}</span>
                           {f.mes && f.ano && (
                             <div className="text-muted" style={{ fontSize: 10.5 }}>
-                              Período: {f.mes}/{f.ano}
+                              {t('facturasUi.periodLabel', 'Período')}: {f.mes}/{f.ano}
                             </div>
                           )}
                         </td>
@@ -832,10 +893,11 @@ const Facturas = () => {
                         {/* Fornecedor & NIF */}
                         <td className="px-15 py-12" style={{ maxWidth: 240 }}>
                           <div className="fw-600 text-truncate" style={{ color: '#0f172a' }} title={f.fornecedor_nome}>
-                            {f.fornecedor_nome || 'Não identificado'}
+                            {f.fornecedor_nome || t('facturasUi.unidentified', 'Não identificado')}
                           </div>
                           <div className="text-muted" style={{ fontSize: 11 }}>
-                            NIF: <span className="fw-600">{f.fornecedor_nif || 'Sem NIF'}</span>
+                            {t('facturasUi.nifLabel', 'NIF')}:{' '}
+                            <span className="fw-600">{f.fornecedor_nif || t('facturasUi.noNif', 'Sem NIF')}</span>
                           </div>
                         </td>
 
@@ -846,7 +908,10 @@ const Facturas = () => {
                         <td className="px-15 py-12 text-right">
                           <div className="fw-700" style={{ color: '#2563eb' }}>{formatarKz(f.valor_iva)}</div>
                           <small className="text-muted" style={{ fontSize: 10.5 }}>
-                            Taxa: {Number(f.taxa_iva)}% {f.iva_dedutivel ? '(Dedutível)' : '(Não dedutível)'}
+                            {t('facturasUi.rateLabel', 'Taxa')}: {Number(f.taxa_iva)}%{' '}
+                            {f.iva_dedutivel
+                              ? t('facturasUi.deductibleParen', '(Dedutível)')
+                              : t('facturasUi.nonDeductibleParen', '(Não dedutível)')}
                           </small>
                         </td>
 
@@ -858,8 +923,8 @@ const Facturas = () => {
                                 {formatarKz(Number(f.retencao_iva) + Number(f.retencao_ii))}
                               </span>
                               <div className="text-muted" style={{ fontSize: 10 }}>
-                                {Number(f.retencao_iva) > 0 ? `IVA 7%: ${formatarKz(f.retencao_iva)}` : ''}
-                                {Number(f.retencao_ii) > 0 ? ` II 6.5%: ${formatarKz(f.retencao_ii)}` : ''}
+                                {Number(f.retencao_iva) > 0 ? `${t('facturasUi.vat7Short', 'IVA 7%')}: ${formatarKz(f.retencao_iva)}` : ''}
+                                {Number(f.retencao_ii) > 0 ? ` ${t('facturasUi.ii65Short', 'II 6.5%')}: ${formatarKz(f.retencao_ii)}` : ''}
                               </div>
                             </div>
                           ) : (
@@ -904,7 +969,10 @@ const Facturas = () => {
                                 border: '1px solid #86efac',
                               }}
                             >
-                              <i className="la la-check mr-3"></i> {isOperador ? 'Escriturado' : `Lançado ${f.lancamento_numero ? `(${f.lancamento_numero})` : ''}`}
+                              <i className="la la-check mr-3"></i>{' '}
+                              {isOperador
+                                ? t('facturasUi.postedOperator', 'Escriturado')
+                                : `${t('facturasUi.postedAccountant', 'Lançado')}${f.lancamento_numero ? ` (${f.lancamento_numero})` : ''}`}
                             </span>
                           ) : isOperador ? (
                             <span
@@ -916,9 +984,13 @@ const Facturas = () => {
                                 color: '#475569',
                                 border: '1px solid #e2e8f0',
                               }}
-                              title="Aguardando validação e lançamento pela equipa de contabilidade"
+                              title={t(
+                                'facturasUi.awaitingAccountingTooltip',
+                                'Aguardando validação e lançamento pela equipa de contabilidade'
+                              )}
                             >
-                              <i className="la la-clock mr-3" style={{ color: '#2563eb' }}></i> Aguardando Contabilidade
+                              <i className="la la-clock mr-3" style={{ color: '#2563eb' }}></i>{' '}
+                              {t('facturasUi.awaitingAccounting', 'Aguardando Contabilidade')}
                             </span>
                           ) : (
                             <button
@@ -927,10 +999,13 @@ const Facturas = () => {
                               onClick={() => handleLancarNoDiario(f)}
                               disabled={lancandoId === f.id}
                               style={{ borderRadius: 8, fontSize: 11.5, fontWeight: 700 }}
-                              title="Criar lançamento automático no Livro Diário de Compras"
+                              title={t(
+                                'facturasUi.postToPurchasesTooltip',
+                                'Criar lançamento automático no Livro Diário de Compras'
+                              )}
                             >
                               <i className={`la ${lancandoId === f.id ? 'la-spinner la-spin' : 'la-book'} mr-3`}></i>
-                              {lancandoId === f.id ? 'A Lançar...' : 'Lançar'}
+                              {lancandoId === f.id ? t('facturasUi.postingBtn', 'A Lançar...') : t('facturasUi.postBtn', 'Lançar')}
                             </button>
                           )}
                         </td>
@@ -944,7 +1019,11 @@ const Facturas = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="btn btn-outline-primary btn-xs"
-                                title={f.is_imagem ? 'Ver Foto Original da Factura' : 'Ver Documento Original (PDF)'}
+                                title={
+                                  f.is_imagem
+                                    ? t('facturasUi.viewOriginalPhotoTooltip', 'Ver Foto Original da Factura')
+                                    : t('facturasUi.viewOriginalPdfTooltip', 'Ver Documento Original (PDF)')
+                                }
                                 style={{ width: 32, height: 32, borderRadius: 6, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                               >
                                 <i className={`la ${f.is_imagem ? 'la-camera' : 'la-file-pdf'}`} style={{ fontSize: 15 }}></i>
@@ -954,7 +1033,7 @@ const Facturas = () => {
                               type="button"
                               className="btn btn-outline-primary btn-xs"
                               onClick={() => setFacturaDetalhe(f)}
-                              title="Ver análise completa da IA e dados fiscais"
+                              title={t('facturasUi.viewAiAnalysisTooltip', 'Ver análise completa da IA e dados fiscais')}
                               style={{ width: 32, height: 32, borderRadius: 6, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                             >
                               <i className="la la-eye" style={{ fontSize: 15 }}></i>
@@ -963,7 +1042,7 @@ const Facturas = () => {
                               type="button"
                               className="btn btn-outline-primary btn-xs"
                               onClick={() => setFacturaApagar(f)}
-                              title="Eliminar fatura"
+                              title={t('facturasUi.deleteInvoiceTooltip', 'Eliminar fatura')}
                               style={{ width: 32, height: 32, borderRadius: 6, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                             >
                               <i className="la la-trash" style={{ fontSize: 15 }}></i>
@@ -1075,7 +1154,9 @@ const Facturas = () => {
                           fontWeight: 700,
                         }}
                       >
-                        {facturaDetalhe.tipo_operacao === 'COMPRA' ? 'Compra / Fornecedor' : 'Venda / Cliente'}
+                        {facturaDetalhe.tipo_operacao === 'COMPRA'
+                          ? t('facturasUi.opPurchaseSupplier', 'Compra / Fornecedor')
+                          : t('facturasUi.opSaleCustomer', 'Venda / Cliente')}
                       </span>
                       {facturaDetalhe.regime_emissor && (
                         <span
@@ -1106,21 +1187,36 @@ const Facturas = () => {
                             fontWeight: 600,
                           }}
                         >
-                          Via: {facturaDetalhe.metadados.via}
+                          {t('facturasUi.copyLabel', 'Via')}: {facturaDetalhe.metadados.via}
                         </span>
                       )}
                     </div>
                     <h5 className="modal-title fw-800 mb-0" style={{ fontSize: 17, color: '#0f172a' }}>
-                      Factura N.º {facturaDetalhe.numero_factura}
+                      {t('facturasUi.invoiceNumTitle', {
+                        num: facturaDetalhe.numero_factura,
+                        defaultValue: 'Factura N.º {{num}}',
+                      })}
                     </h5>
                     <div className="text-muted mt-2" style={{ fontSize: 12 }}>
-                      Data de Emissão: <strong style={{ color: '#0f172a' }}>{facturaDetalhe.data_emissao ? facturaDetalhe.data_emissao.split('-').reverse().join('/') : '---'}</strong>
+                      {t('facturasUi.issueDateLabel', 'Data de Emissão')}:{' '}
+                      <strong style={{ color: '#0f172a' }}>
+                        {facturaDetalhe.data_emissao ? facturaDetalhe.data_emissao.split('-').reverse().join('/') : '---'}
+                      </strong>
                       {facturaDetalhe.data_vencimento && (
-                        <> • Vencimento: <strong style={{ color: '#0f172a' }}>{facturaDetalhe.data_vencimento.split('-').reverse().join('/')}</strong></>
+                        <>
+                          {' '}• {t('facturasUi.dueDateLabel', 'Vencimento')}:{' '}
+                          <strong style={{ color: '#0f172a' }}>
+                            {facturaDetalhe.data_vencimento.split('-').reverse().join('/')}
+                          </strong>
+                        </>
                       )}
-                      {' • '}Período Fiscal: <strong style={{ color: '#0f172a' }}>{facturaDetalhe.mes}/{facturaDetalhe.ano}</strong>
+                      {' • '}{t('facturasUi.fiscalPeriodLabel', 'Período Fiscal')}:{' '}
+                      <strong style={{ color: '#0f172a' }}>{facturaDetalhe.mes}/{facturaDetalhe.ano}</strong>
                       {facturaDetalhe.criado_por_nome && (
-                        <> • Digitalizado por: <strong style={{ color: '#0f172a' }}>{facturaDetalhe.criado_por_nome}</strong></>
+                        <>
+                          {' '}• {t('facturasUi.scannedByLabel', 'Digitalizado por')}:{' '}
+                          <strong style={{ color: '#0f172a' }}>{facturaDetalhe.criado_por_nome}</strong>
+                        </>
                       )}
                     </div>
                   </div>
@@ -1133,10 +1229,12 @@ const Facturas = () => {
                       rel="noopener noreferrer"
                       className="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
                       style={{ borderRadius: 8, fontSize: 12, padding: '6px 12px', gap: 6, fontWeight: 700 }}
-                      title="Abrir ficheiro ou foto original em novo separador"
+                      title={t('facturasUi.openOriginalNewTabTooltip', 'Abrir ficheiro ou foto original em novo separador')}
                     >
                       <i className={`la ${facturaDetalhe.is_imagem ? 'la-camera' : 'la-file-pdf'}`}></i>
-                      {facturaDetalhe.is_imagem ? 'Ver Foto Original' : 'Ver Documento (PDF)'}
+                      {facturaDetalhe.is_imagem
+                        ? t('facturasUi.viewOriginalPhoto', 'Ver Foto Original')
+                        : t('facturasUi.viewDocumentPdf', 'Ver Documento (PDF)')}
                       <i className="la la-external-link-alt" style={{ fontSize: 11 }}></i>
                     </a>
                   )}
@@ -1144,7 +1242,7 @@ const Facturas = () => {
                     type="button"
                     className="btn btn-outline-primary btn-xs"
                     onClick={() => setFacturaDetalhe(null)}
-                    aria-label="Close"
+                    aria-label={t('common.close', 'Fechar')}
                     style={{ width: 34, height: 34, borderRadius: 8, fontSize: 18, lineHeight: 1, padding: 0 }}
                   >
                     <span aria-hidden="true">&times;</span>
@@ -1162,7 +1260,10 @@ const Facturas = () => {
                         <div className="d-flex align-items-center" style={{ gap: 6 }}>
                           <i className="la la-camera" style={{ fontSize: 16, color: '#2563eb' }}></i>
                           <span className="fw-700" style={{ fontSize: 12.5, color: '#0f172a' }}>
-                            Foto Original Capturada ({facturaDetalhe.documento_nome || 'factura_foto.jpg'})
+                            {t('facturasUi.originalPhotoCaptured', {
+                              name: facturaDetalhe.documento_nome || 'factura_foto.jpg',
+                              defaultValue: 'Foto Original Capturada ({{name}})',
+                            })}
                           </span>
                         </div>
                         <a
@@ -1172,13 +1273,13 @@ const Facturas = () => {
                           className="btn btn-xs btn-outline-primary d-inline-flex align-items-center"
                           style={{ borderRadius: 6, fontSize: 11, gap: 4 }}
                         >
-                          <i className="la la-expand"></i> Abrir em Alta Resolução
+                          <i className="la la-expand"></i> {t('facturasUi.openHighRes', 'Abrir em Alta Resolução')}
                         </a>
                       </div>
                       <div className="card-body p-12 text-center" style={{ background: '#ffffff' }}>
                         <img
                           src={formatarDocUrl(facturaDetalhe.documento_url)}
-                          alt="Foto Original da Factura"
+                          alt={t('facturasUi.originalPhotoAlt', 'Foto Original da Factura')}
                           style={{
                             maxHeight: 280,
                             maxWidth: '100%',
@@ -1211,10 +1312,10 @@ const Facturas = () => {
                           </span>
                           <div>
                             <div className="fw-700" style={{ fontSize: 13, color: '#0f172a' }}>
-                              {facturaDetalhe.documento_nome || 'Documento Fiscal Original (PDF)'}
+                              {facturaDetalhe.documento_nome || t('facturasUi.originalTaxDocPdf', 'Documento Fiscal Original (PDF)')}
                             </div>
                             <small className="text-muted" style={{ fontSize: 11 }}>
-                              Ficheiro original gravado e arquivado para auditoria da AGT
+                              {t('facturasUi.originalSavedForAudit', 'Ficheiro original gravado e arquivado para auditoria da AGT')}
                             </small>
                           </div>
                         </div>
@@ -1225,7 +1326,7 @@ const Facturas = () => {
                           className="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
                           style={{ borderRadius: 8, fontSize: 12, gap: 6, fontWeight: 700 }}
                         >
-                          <i className="la la-external-link-alt"></i> Visualizar / Descarregar PDF
+                          <i className="la la-external-link-alt"></i> {t('facturasUi.viewDownloadPdf', 'Visualizar / Descarregar PDF')}
                         </a>
                       </div>
                     </div>
@@ -1244,7 +1345,7 @@ const Facturas = () => {
                   >
                     <div className="d-flex align-items-center mb-6" style={{ gap: 6, color: '#b45309', fontWeight: 700, fontSize: 12.5 }}>
                       <i className="la la-shield-alt" style={{ fontSize: 16 }}></i>
-                      <span>Notas de Conformidade Fiscal & Validação AGT</span>
+                      <span>{t('facturasUi.complianceNotesTitle', 'Notas de Conformidade Fiscal & Validação AGT')}</span>
                     </div>
                     <div className="d-flex flex-column" style={{ gap: 4 }}>
                       {facturaDetalhe.alertas_auditoria.map((alerta, i) => (
@@ -1264,17 +1365,17 @@ const Facturas = () => {
                     <div className="card h-100" style={{ borderRadius: 10, background: '#ffffff', border: '1px solid #e2e8f0' }}>
                       <div className="card-header py-8 px-14 border-bottom d-flex justify-content-between align-items-center" style={{ background: '#ffffff' }}>
                         <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.5px', color: '#2563eb' }}>
-                          EMISSOR / FORNECEDOR
+                          {t('facturasUi.issuerSupplierHeader', 'EMISSOR / FORNECEDOR')}
                         </span>
                         {facturaDetalhe.fornecedor_nif && (
                           <span style={{ background: '#ffffff', border: '1px solid #bfdbfe', color: '#0f172a', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, fontFamily: 'monospace' }}>
-                            NIF: {facturaDetalhe.fornecedor_nif}
+                            {t('facturasUi.nifLabel', 'NIF')}: {facturaDetalhe.fornecedor_nif}
                           </span>
                         )}
                       </div>
                       <div className="card-body p-14 bg-white">
                         <h6 className="fw-700 mb-4" style={{ fontSize: 14, color: '#0f172a' }}>
-                          {facturaDetalhe.fornecedor_nome || 'Não especificado'}
+                          {facturaDetalhe.fornecedor_nome || t('facturasUi.notSpecified', 'Não especificado')}
                         </h6>
                         {facturaDetalhe.fornecedor_endereco && (
                           <div className="text-muted mb-6 d-flex align-items-start" style={{ gap: 6, fontSize: 11.5, lineHeight: 1.4 }}>
@@ -1285,17 +1386,17 @@ const Facturas = () => {
                         <div className="row g-2 mt-4 pt-6 border-top" style={{ fontSize: 11.5, borderColor: '#e2e8f0' }}>
                           {facturaDetalhe.fornecedor_telefone && (
                             <div className="col-sm-6 text-muted">
-                              <strong>Tel:</strong> {facturaDetalhe.fornecedor_telefone}
+                              <strong>{t('facturasUi.telLabel', 'Tel')}:</strong> {facturaDetalhe.fornecedor_telefone}
                             </div>
                           )}
                           {facturaDetalhe.fornecedor_email && (
                             <div className="col-sm-6 text-muted text-truncate" title={facturaDetalhe.fornecedor_email}>
-                              <strong>Email:</strong> {facturaDetalhe.fornecedor_email}
+                              <strong>{t('facturasUi.emailLabel', 'Email')}:</strong> {facturaDetalhe.fornecedor_email}
                             </div>
                           )}
                           {facturaDetalhe.fornecedor_website && (
                             <div className="col-12 text-muted text-truncate" title={facturaDetalhe.fornecedor_website}>
-                              <strong>Site:</strong> {facturaDetalhe.fornecedor_website}
+                              <strong>{t('facturasUi.siteLabel', 'Site')}:</strong> {facturaDetalhe.fornecedor_website}
                             </div>
                           )}
                         </div>
@@ -1308,17 +1409,17 @@ const Facturas = () => {
                     <div className="card h-100" style={{ borderRadius: 10, background: '#ffffff', border: '1px solid #e2e8f0' }}>
                       <div className="card-header py-8 px-14 border-bottom d-flex justify-content-between align-items-center" style={{ background: '#ffffff' }}>
                         <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.5px', color: '#2563eb' }}>
-                          CLIENTE / ADQUIRENTE
+                          {t('facturasUi.customerAcquirerHeader', 'CLIENTE / ADQUIRENTE')}
                         </span>
                         {facturaDetalhe.cliente_nif && (
                           <span style={{ background: '#ffffff', border: '1px solid #bfdbfe', color: '#0f172a', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, fontFamily: 'monospace' }}>
-                            NIF: {facturaDetalhe.cliente_nif}
+                            {t('facturasUi.nifLabel', 'NIF')}: {facturaDetalhe.cliente_nif}
                           </span>
                         )}
                       </div>
                       <div className="card-body p-14 bg-white">
                         <h6 className="fw-700 mb-4" style={{ fontSize: 14, color: '#0f172a' }}>
-                          {facturaDetalhe.cliente_nome || 'Não especificado'}
+                          {facturaDetalhe.cliente_nome || t('facturasUi.notSpecified', 'Não especificado')}
                         </h6>
                         {facturaDetalhe.cliente_endereco && (
                           <div className="text-muted mb-6 d-flex align-items-start" style={{ gap: 6, fontSize: 11.5, lineHeight: 1.4 }}>
@@ -1329,23 +1430,32 @@ const Facturas = () => {
                         <div className="row g-2 mt-4 pt-6 border-top" style={{ fontSize: 11.5, borderColor: '#e2e8f0' }}>
                           {facturaDetalhe.cliente_telefone && (
                             <div className="col-sm-6 text-muted">
-                              <strong>Tel:</strong> {facturaDetalhe.cliente_telefone}
+                              <strong>{t('facturasUi.telLabel', 'Tel')}:</strong> {facturaDetalhe.cliente_telefone}
                             </div>
                           )}
                           {facturaDetalhe.cliente_email && (
                             <div className="col-sm-6 text-muted text-truncate" title={facturaDetalhe.cliente_email}>
-                              <strong>Email:</strong> {facturaDetalhe.cliente_email}
+                              <strong>{t('facturasUi.emailLabel', 'Email')}:</strong> {facturaDetalhe.cliente_email}
                             </div>
                           )}
                         </div>
                         <div className="mt-8 pt-6 border-top" style={{ fontSize: 11, borderColor: '#e2e8f0' }}>
                           {empresaAtual && empresaAtual.nif === facturaDetalhe.cliente_nif ? (
                             <span style={{ color: '#15803d', fontWeight: 700 }}>
-                              <i className="la la-check-circle mr-3"></i> NIF coincide com a empresa ativa ({empresaAtual.nome})
+                              <i className="la la-check-circle mr-3"></i>{' '}
+                              {t('facturasUi.nifMatchesActiveCompany', {
+                                nome: empresaAtual.nome,
+                                defaultValue: 'NIF coincide com a empresa ativa ({{nome}})',
+                              })}
                             </span>
                           ) : (
                             <span style={{ color: '#64748b' }}>
-                              <i className="la la-info-circle mr-3"></i> NIF ({facturaDetalhe.cliente_nif || '---'}) difere da empresa ativa ({empresaAtual?.nif || '---'})
+                              <i className="la la-info-circle mr-3"></i>{' '}
+                              {t('facturasUi.nifDiffersActiveCompany', {
+                                clienteNif: facturaDetalhe.cliente_nif || '---',
+                                empresaNif: empresaAtual?.nif || '---',
+                                defaultValue: 'NIF ({{clienteNif}}) difere da empresa ativa ({{empresaNif}})',
+                              })}
                             </span>
                           )}
                         </div>
@@ -1358,10 +1468,13 @@ const Facturas = () => {
                 <div className="card mb-18" style={{ borderRadius: 10, background: '#ffffff', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
                   <div className="card-header py-10 px-16 border-bottom d-flex justify-content-between align-items-center" style={{ background: '#ffffff' }}>
                     <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.4px', color: '#0f172a' }}>
-                      ARTIGOS & LINHAS DA FACTURA ({facturaDetalhe.itens_detalhe?.length || 0})
+                      {t('facturasUi.invoiceItemsHeader', {
+                        count: facturaDetalhe.itens_detalhe?.length || 0,
+                        defaultValue: 'ARTIGOS & LINHAS DA FACTURA ({{count}})',
+                      })}
                     </span>
                     <span style={{ fontSize: 11, color: '#2563eb', fontWeight: 600 }}>
-                      Extração integral com IA
+                      {t('facturasUi.fullAiExtractionBadge', 'Extração integral com IA')}
                     </span>
                   </div>
                   <div className="card-body p-0 bg-white">
@@ -1371,15 +1484,15 @@ const Facturas = () => {
                           <thead style={{ background: '#ffffff', position: 'sticky', top: 0, zIndex: 2 }}>
                             <tr style={{ color: '#475569', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
                               <th className="py-8 px-12 text-center" style={{ width: 40 }}>#</th>
-                              <th className="py-8 px-12" style={{ width: 110 }}>Ref.</th>
-                              <th className="py-8 px-12">Descrição do Bem / Serviço</th>
-                              <th className="py-8 px-12 text-center" style={{ width: 65 }}>Qtd</th>
-                              <th className="py-8 px-12 text-center" style={{ width: 60 }}>Unid.</th>
-                              <th className="py-8 px-12 text-end" style={{ width: 110 }}>Preço Unit.</th>
-                              <th className="py-8 px-12 text-end" style={{ width: 85 }}>Desc.</th>
-                              <th className="py-8 px-12 text-center" style={{ width: 95 }}>Taxa IVA</th>
-                              <th className="py-8 px-12 text-end" style={{ width: 100 }}>Valor IVA</th>
-                              <th className="py-8 px-12 text-end" style={{ width: 120 }}>Total Linha</th>
+                              <th className="py-8 px-12" style={{ width: 110 }}>{t('facturasUi.itemThRef', 'Ref.')}</th>
+                              <th className="py-8 px-12">{t('facturasUi.itemThDesc', 'Descrição do Bem / Serviço')}</th>
+                              <th className="py-8 px-12 text-center" style={{ width: 65 }}>{t('facturasUi.itemThQty', 'Qtd')}</th>
+                              <th className="py-8 px-12 text-center" style={{ width: 60 }}>{t('facturasUi.itemThUnit', 'Unid.')}</th>
+                              <th className="py-8 px-12 text-end" style={{ width: 110 }}>{t('facturasUi.itemThUnitPrice', 'Preço Unit.')}</th>
+                              <th className="py-8 px-12 text-end" style={{ width: 85 }}>{t('facturasUi.itemThDiscount', 'Desc.')}</th>
+                              <th className="py-8 px-12 text-center" style={{ width: 95 }}>{t('facturasUi.itemThVatRate', 'Taxa IVA')}</th>
+                              <th className="py-8 px-12 text-end" style={{ width: 100 }}>{t('facturasUi.itemThVatAmount', 'Valor IVA')}</th>
+                              <th className="py-8 px-12 text-end" style={{ width: 120 }}>{t('facturasUi.itemThLineTotal', 'Total Linha')}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1406,7 +1519,9 @@ const Facturas = () => {
                                     )}
                                   </td>
                                   <td className="py-8 px-12">
-                                    <div style={{ fontWeight: 600, color: '#0f172a' }}>{item.descricao || 'Item sem descrição'}</div>
+                                    <div style={{ fontWeight: 600, color: '#0f172a' }}>
+                                      {item.descricao || t('facturasUi.itemNoDescription', 'Item sem descrição')}
+                                    </div>
                                     {item.motivo_isencao && (
                                       <small className="text-muted d-block" style={{ fontSize: 10.5 }}>
                                         {item.motivo_isencao}
@@ -1431,7 +1546,7 @@ const Facturas = () => {
                                         fontWeight: 700,
                                       }}
                                     >
-                                      {taxa === 0 ? '0% (Isento)' : `${taxa}%`}
+                                      {taxa === 0 ? t('facturasUi.zeroExempt', '0% (Isento)') : `${taxa}%`}
                                     </span>
                                   </td>
                                   <td className="py-8 px-12 text-end fw-600" style={{ color: '#0f172a' }}>
@@ -1446,7 +1561,9 @@ const Facturas = () => {
                           </tbody>
                           <tfoot style={{ background: '#ffffff', borderTop: '2px solid #e2e8f0' }}>
                             <tr>
-                              <th colSpan="3" className="py-8 px-12 text-end fw-700" style={{ color: '#334155' }}>Total das Linhas:</th>
+                              <th colSpan="3" className="py-8 px-12 text-end fw-700" style={{ color: '#334155' }}>
+                                {t('facturasUi.linesTotalLabel', 'Total das Linhas:')}
+                              </th>
                               <th className="py-8 px-12 text-center fw-700" style={{ color: '#0f172a' }}>
                                 {facturaDetalhe.itens_detalhe.reduce((acc, it) => acc + (Number(it.quantidade) || 0), 0)}
                               </th>
@@ -1465,7 +1582,7 @@ const Facturas = () => {
                       </div>
                     ) : (
                       <div className="p-16 text-center text-muted" style={{ fontSize: 12 }}>
-                        Nenhum item individual discriminado no documento original.
+                        {t('facturasUi.noIndividualItems', 'Nenhum item individual discriminado no documento original.')}
                       </div>
                     )}
                   </div>
@@ -1475,34 +1592,47 @@ const Facturas = () => {
                 <div className="card mb-18" style={{ borderRadius: 10, background: '#ffffff', border: '1px solid #e2e8f0' }}>
                   <div className="card-header py-10 px-16 border-bottom" style={{ background: '#ffffff' }}>
                     <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.4px', color: '#0f172a' }}>
-                      VALORES FINANCEIROS & APURAMENTO DE IMPOSTOS
+                      {t('facturasUi.financialValuesHeader', 'VALORES FINANCEIROS & APURAMENTO DE IMPOSTOS')}
                     </span>
                   </div>
                   <div className="card-body p-16 bg-white">
                     <div className="row text-center mb-12 g-2">
                       <div className="col-sm-3 col-6 mb-8">
-                        <span className="text-muted fw-600" style={{ fontSize: 11 }}>BASE INCIDÊNCIA</span>
+                        <span className="text-muted fw-600" style={{ fontSize: 11 }}>
+                          {t('facturasUi.baseIncidenceCaps', 'BASE INCIDÊNCIA')}
+                        </span>
                         <div className="fw-800 mt-2" style={{ fontSize: 16, color: '#0f172a' }}>
                           {formatarKz(facturaDetalhe.base_incidencia)}
                         </div>
                       </div>
                       <div className="col-sm-3 col-6 mb-8">
-                        <span className="text-muted fw-600" style={{ fontSize: 11 }}>IVA ({Number(facturaDetalhe.taxa_iva)}%)</span>
+                        <span className="text-muted fw-600" style={{ fontSize: 11 }}>
+                          {t('facturasUi.vatWithRateCaps', {
+                            rate: Number(facturaDetalhe.taxa_iva),
+                            defaultValue: 'IVA ({{rate}}%)',
+                          })}
+                        </span>
                         <div className="fw-800 mt-2" style={{ fontSize: 16, color: '#2563eb' }}>
                           {formatarKz(facturaDetalhe.valor_iva)}
                         </div>
                         <small className="text-muted" style={{ fontSize: 10.5 }}>
-                          {facturaDetalhe.iva_dedutivel ? 'Dedutível' : 'Excluído'}
+                          {facturaDetalhe.iva_dedutivel
+                            ? t('facturasUi.deductible', 'Dedutível')
+                            : t('facturasUi.excluded', 'Excluído')}
                         </small>
                       </div>
                       <div className="col-sm-3 col-6 mb-8">
-                        <span className="text-muted fw-600" style={{ fontSize: 11 }}>RETENÇÕES</span>
+                        <span className="text-muted fw-600" style={{ fontSize: 11 }}>
+                          {t('facturasUi.withholdingsCaps', 'RETENÇÕES')}
+                        </span>
                         <div className="fw-800 mt-2" style={{ fontSize: 16, color: '#0f172a' }}>
                           {formatarKz(Number(facturaDetalhe.retencao_iva || 0) + Number(facturaDetalhe.retencao_ii || 0))}
                         </div>
                       </div>
                       <div className="col-sm-3 col-6 mb-8">
-                        <span className="text-muted fw-600" style={{ fontSize: 11 }}>TOTAL BRUTO</span>
+                        <span className="text-muted fw-600" style={{ fontSize: 11 }}>
+                          {t('facturasUi.grossTotalCaps', 'TOTAL BRUTO')}
+                        </span>
                         <div className="fw-800 mt-2" style={{ fontSize: 16, color: '#0f172a' }}>
                           {formatarKz(facturaDetalhe.valor_total)}
                         </div>
@@ -1517,12 +1647,14 @@ const Facturas = () => {
                           </div>
                         ) : (
                           <div className="text-muted" style={{ fontSize: 11.5 }}>
-                            Moeda: <strong>{facturaDetalhe.moeda || 'Kz (AOA)'}</strong>
+                            {t('facturasUi.currencyLabel', 'Moeda')}: <strong>{facturaDetalhe.moeda || 'Kz (AOA)'}</strong>
                           </div>
                         )}
                       </div>
                       <div className="text-sm-end">
-                        <span className="text-muted fw-700 mr-8" style={{ fontSize: 12 }}>TOTAL LÍQUIDO A PAGAR:</span>
+                        <span className="text-muted fw-700 mr-8" style={{ fontSize: 12 }}>
+                          {t('facturasUi.netTotalPayableCaps', 'TOTAL LÍQUIDO A PAGAR:')}
+                        </span>
                         <span className="fw-800" style={{ fontSize: 20, color: '#2563eb', letterSpacing: '-0.3px' }}>
                           {formatarKz(facturaDetalhe.valor_liquido || facturaDetalhe.valor_total)}
                         </span>
@@ -1535,36 +1667,51 @@ const Facturas = () => {
                 <div className="card" style={{ borderRadius: 10, background: '#ffffff', border: '1px solid #e2e8f0' }}>
                   <div className="card-header py-10 px-16 border-bottom" style={{ background: '#ffffff' }}>
                     <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.4px', color: '#0f172a' }}>
-                      ESCRITURAÇÃO SUGERIDA NO PGC (LIVRO DIÁRIO)
+                      {t('facturasUi.suggestedPgcHeader', 'ESCRITURAÇÃO SUGERIDA NO PGC (LIVRO DIÁRIO)')}
                     </span>
                   </div>
                   <div className="card-body p-14 bg-white">
                     <div className="d-flex flex-column" style={{ gap: 8, fontSize: 12.5 }}>
                       <div className="d-flex align-items-center" style={{ gap: 8 }}>
                         <span className="badge" style={{ background: '#2563eb', color: '#ffffff', borderRadius: 4, padding: '2px 7px', fontSize: 10.5, fontWeight: 700 }}>D</span>
-                        <span>Conta <strong>{facturaDetalhe.conta_custo_sugerida}</strong> ({facturaDetalhe.conta_custo_nome}): <strong>{formatarKz(facturaDetalhe.base_incidencia)}</strong></span>
+                        <span>
+                          {t('facturasUi.accountWord', 'Conta')} <strong>{facturaDetalhe.conta_custo_sugerida}</strong> ({facturaDetalhe.conta_custo_nome}):{' '}
+                          <strong>{formatarKz(facturaDetalhe.base_incidencia)}</strong>
+                        </span>
                       </div>
                       {facturaDetalhe.iva_dedutivel && Number(facturaDetalhe.valor_iva) > 0 && (
                         <div className="d-flex align-items-center" style={{ gap: 8 }}>
                           <span className="badge" style={{ background: '#2563eb', color: '#ffffff', borderRadius: 4, padding: '2px 7px', fontSize: 10.5, fontWeight: 700 }}>D</span>
-                          <span>Conta <strong>{facturaDetalhe.conta_iva_sugerida}</strong> ({facturaDetalhe.conta_iva_nome}): <strong>{formatarKz(facturaDetalhe.valor_iva)}</strong></span>
+                          <span>
+                            {t('facturasUi.accountWord', 'Conta')} <strong>{facturaDetalhe.conta_iva_sugerida}</strong> ({facturaDetalhe.conta_iva_nome}):{' '}
+                            <strong>{formatarKz(facturaDetalhe.valor_iva)}</strong>
+                          </span>
                         </div>
                       )}
                       {Number(facturaDetalhe.retencao_iva) > 0 && (
                         <div className="d-flex align-items-center" style={{ gap: 8 }}>
                           <span className="badge" style={{ background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 4, padding: '2px 7px', fontSize: 10.5, fontWeight: 700 }}>C</span>
-                          <span>Conta <strong>34.2.2</strong> (Retenção na Fonte de IVA 7%): <strong>{formatarKz(facturaDetalhe.retencao_iva)}</strong></span>
+                          <span>
+                            {t('facturasUi.accountWord', 'Conta')} <strong>34.2.2</strong> ({t('facturasUi.vatWithholding7Desc', 'Retenção na Fonte de IVA 7%')}):{' '}
+                            <strong>{formatarKz(facturaDetalhe.retencao_iva)}</strong>
+                          </span>
                         </div>
                       )}
                       {Number(facturaDetalhe.retencao_ii) > 0 && (
                         <div className="d-flex align-items-center" style={{ gap: 8 }}>
                           <span className="badge" style={{ background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 4, padding: '2px 7px', fontSize: 10.5, fontWeight: 700 }}>C</span>
-                          <span>Conta <strong>34.2.1</strong> (Retenção Imposto Industrial 6.5%): <strong>{formatarKz(facturaDetalhe.retencao_ii)}</strong></span>
+                          <span>
+                            {t('facturasUi.accountWord', 'Conta')} <strong>34.2.1</strong> ({t('facturasUi.iiWithholding65Desc', 'Retenção Imposto Industrial 6.5%')}):{' '}
+                            <strong>{formatarKz(facturaDetalhe.retencao_ii)}</strong>
+                          </span>
                         </div>
                       )}
                       <div className="d-flex align-items-center" style={{ gap: 8 }}>
                         <span className="badge" style={{ background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 4, padding: '2px 7px', fontSize: 10.5, fontWeight: 700 }}>C</span>
-                        <span>Conta <strong>{facturaDetalhe.conta_terceiro_sugerida}</strong> ({facturaDetalhe.conta_terceiro_nome}): <strong>{formatarKz(facturaDetalhe.valor_liquido || facturaDetalhe.valor_total)}</strong></span>
+                        <span>
+                          {t('facturasUi.accountWord', 'Conta')} <strong>{facturaDetalhe.conta_terceiro_sugerida}</strong> ({facturaDetalhe.conta_terceiro_nome}):{' '}
+                          <strong>{formatarKz(facturaDetalhe.valor_liquido || facturaDetalhe.valor_total)}</strong>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1591,7 +1738,7 @@ const Facturas = () => {
                     padding: '6px 14px',
                   }}
                 >
-                  <i className="la la-trash mr-4"></i> Eliminar Fatura
+                  <i className="la la-trash mr-4"></i> {t('facturasUi.deleteInvoiceBtn', 'Eliminar Fatura')}
                 </button>
 
                 <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
@@ -1606,7 +1753,7 @@ const Facturas = () => {
                       padding: '6px 16px',
                     }}
                   >
-                    Fechar
+                    {t('facturasUi.closeBtn', 'Fechar')}
                   </button>
                   {isOperador ? (
                     <span
@@ -1615,8 +1762,8 @@ const Facturas = () => {
                     >
                       <i className="la la-info-circle" style={{ color: '#2563eb' }}></i>
                       {facturaDetalhe.lancado_na_contabilidade
-                        ? 'Documento escriturado no Livro Diário'
-                        : 'Escrituração no Livro Diário reservada à Contabilidade'}
+                        ? t('facturasUi.docPostedInJournalInfo', 'Documento escriturado no Livro Diário')
+                        : t('facturasUi.postingReservedToAccounting', 'Escrituração no Livro Diário reservada à Contabilidade')}
                     </span>
                   ) : (
                     !facturaDetalhe.lancado_na_contabilidade && (
@@ -1634,7 +1781,9 @@ const Facturas = () => {
                         }}
                       >
                         <i className={`la ${lancandoId === facturaDetalhe.id ? 'la-spinner la-spin' : 'la-check-double'}`}></i>
-                        {lancandoId === facturaDetalhe.id ? 'A Escriturar...' : 'Lançar no Diário de Compras'}
+                        {lancandoId === facturaDetalhe.id
+                          ? t('facturasUi.postingProgressBtn', 'A Escriturar...')
+                          : t('facturasUi.postToPurchasesJournalBtn', 'Lançar no Diário de Compras')}
                       </button>
                     )
                   )}
@@ -1648,16 +1797,18 @@ const Facturas = () => {
       {/* 7. MODAL DE CONFIRMAÇÃO DE ELIMINAÇÃO */}
       <ConfirmModal
         show={Boolean(facturaApagar)}
-        title="Eliminar Registo de Factura"
-        confirmLabel="Sim, Eliminar"
+        title={t('facturasUi.deleteModalTitle', 'Eliminar Registo de Factura')}
+        confirmLabel={t('facturasUi.deleteModalConfirm', 'Sim, Eliminar')}
         confirmClass="btn-primary"
         onConfirm={handleConfirmarExclusao}
         onClose={() => setFacturaApagar(null)}
       >
         <p className="mb-0">
-          Tem a certeza que deseja eliminar a fatura{' '}
-          <strong>{facturaApagar?.numero_factura}</strong> do fornecedor{' '}
-          <strong>{facturaApagar?.fornecedor_nome || 'desconhecido'}</strong>? Esta ação não pode ser revertida.
+          {t('facturasUi.deleteModalMsgPart1', 'Tem a certeza que deseja eliminar a fatura')}{' '}
+          <strong>{facturaApagar?.numero_factura}</strong>{' '}
+          {t('facturasUi.deleteModalMsgPart2', 'do fornecedor')}{' '}
+          <strong>{facturaApagar?.fornecedor_nome || t('facturasUi.unknownSupplier', 'desconhecido')}</strong>
+          {t('facturasUi.deleteModalMsgPart3', '? Esta ação não pode ser revertida.')}
         </p>
       </ConfirmModal>
 
@@ -1724,10 +1875,10 @@ const Facturas = () => {
                   </span>
                   <div>
                     <h5 className="modal-title fw-800 mb-0" style={{ fontSize: 16, color: '#0f172a' }}>
-                      Tirar Fotografia da Factura
+                      {t('facturasUi.cameraModalTitle', 'Tirar Fotografia da Factura')}
                     </h5>
                     <small className="text-muted" style={{ fontSize: 12 }}>
-                      Enquadre a factura ou talão no visor para extração automática com IA
+                      {t('facturasUi.cameraModalSubtitle', 'Enquadre a factura ou talão no visor para extração automática com IA')}
                     </small>
                   </div>
                 </div>
@@ -1754,9 +1905,15 @@ const Facturas = () => {
                     <div className="upload-icon-circle">
                       <i className="la la-camera"></i>
                     </div>
-                    <h6 className="fw-700 mb-8" style={{ color: '#0f172a' }}>Não foi possível iniciar a câmara</h6>
+                    <h6 className="fw-700 mb-8" style={{ color: '#0f172a' }}>
+                      {t('facturasUi.cameraStartErrorTitle', 'Não foi possível iniciar a câmara')}
+                    </h6>
                     <p className="text-muted" style={{ fontSize: 13, maxWidth: 460, margin: '0 auto 20px' }}>
-                      {cameraErro}. Verifique se concedeu permissão de câmara ao seu navegador ou use o botão abaixo para abrir diretamente a câmara do seu telemóvel/computador.
+                      {cameraErro}.{' '}
+                      {t(
+                        'facturasUi.cameraPermissionHint',
+                        'Verifique se concedeu permissão de câmara ao seu navegador ou use o botão abaixo para abrir diretamente a câmara do seu telemóvel/computador.'
+                      )}
                     </p>
                     <button
                       type="button"
@@ -1767,7 +1924,8 @@ const Facturas = () => {
                       }}
                       style={{ borderRadius: 8, fontWeight: 700 }}
                     >
-                      <i className="la la-camera mr-6"></i> Abrir Câmara do Dispositivo / Ficheiro
+                      <i className="la la-camera mr-6"></i>{' '}
+                      {t('facturasUi.openDeviceCameraBtn', 'Abrir Câmara do Dispositivo / Ficheiro')}
                     </button>
                   </div>
                 ) : fotoCapturada ? (
@@ -1785,7 +1943,7 @@ const Facturas = () => {
                     >
                       <img
                         src={fotoCapturada}
-                        alt="Foto capturada"
+                        alt={t('facturasUi.capturedPhotoAlt', 'Foto capturada')}
                         style={{ width: '100%', maxHeight: 460, objectFit: 'contain' }}
                       />
                       <div
@@ -1804,7 +1962,8 @@ const Facturas = () => {
                           gap: 6,
                         }}
                       >
-                        <i className="la la-check-circle"></i> Foto Capturada com Sucesso
+                        <i className="la la-check-circle"></i>{' '}
+                        {t('facturasUi.photoCapturedSuccessBadge', 'Foto Capturada com Sucesso')}
                       </div>
                     </div>
                   </div>
@@ -1848,7 +2007,7 @@ const Facturas = () => {
                           textShadow: '0 1px 3px rgba(0,0,0,0.8)',
                         }}
                       >
-                        Enquadre os dados da factura (NIF, artigos e totais) aqui
+                        {t('facturasUi.cameraFrameGuide', 'Enquadre os dados da factura (NIF, artigos e totais) aqui')}
                       </div>
                     </div>
                   </div>
@@ -1873,7 +2032,7 @@ const Facturas = () => {
                         fontWeight: 700,
                       }}
                     >
-                      Cancelar
+                      {t('facturasUi.cancelBtn', 'Cancelar')}
                     </button>
 
                     <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
@@ -1881,7 +2040,7 @@ const Facturas = () => {
                         type="button"
                         className="btn btn-outline-primary btn-sm d-flex align-items-center"
                         onClick={alternarCamera}
-                        title="Alternar entre câmara frontal e traseira"
+                        title={t('facturasUi.switchCameraTooltip', 'Alternar entre câmara frontal e traseira')}
                         style={{
                           gap: 6,
                           borderRadius: 8,
@@ -1889,7 +2048,7 @@ const Facturas = () => {
                           fontWeight: 700,
                         }}
                       >
-                        <i className="la la-sync-alt"></i> Mudar Câmara
+                        <i className="la la-sync-alt"></i> {t('facturasUi.switchCameraBtn', 'Mudar Câmara')}
                       </button>
 
                       <button
@@ -1905,7 +2064,7 @@ const Facturas = () => {
                         }}
                       >
                         <i className="la la-camera"></i>
-                        Tirar Fotografia
+                        {t('facturasUi.takePhotoActionBtn', 'Tirar Fotografia')}
                       </button>
                     </div>
                   </>
@@ -1922,7 +2081,7 @@ const Facturas = () => {
                         fontWeight: 700,
                       }}
                     >
-                      <i className="la la-redo"></i> Repetir Foto
+                      <i className="la la-redo"></i> {t('facturasUi.retakePhotoBtn', 'Repetir Foto')}
                     </button>
 
                     <button
@@ -1936,7 +2095,8 @@ const Facturas = () => {
                         padding: '8px 22px',
                       }}
                     >
-                      <i className="la la-magic" style={{ fontSize: 16 }}></i> Processar & Extrair Factura com IA
+                      <i className="la la-magic" style={{ fontSize: 16 }}></i>{' '}
+                      {t('facturasUi.processExtractAiBtn', 'Processar & Extrair Factura com IA')}
                     </button>
                   </>
                 )}

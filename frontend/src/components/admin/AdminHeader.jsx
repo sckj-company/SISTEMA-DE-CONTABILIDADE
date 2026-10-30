@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { usePeriodo } from '../../context/PeriodoContext';
 
 const languages = [
-  { code: 'pt', label: 'Português', flag: '/angola_flag.png' },
-  { code: 'en', label: 'English', flag: '/template/img/eng.png' },
-  { code: 'zh', label: '中文 (Chinês)', flag: '/china_flag.png' },
+  { code: 'bi', short: 'PT/中文', label: 'Português / 中文', flag: '/china_flag.png' },
+  { code: 'pt', short: 'PT', label: 'Português', flag: '/angola_flag.png' },
+  { code: 'zh', short: '中文', label: '中文 (Chinês)', flag: '/china_flag.png' },
+  { code: 'en', short: 'EN', label: 'English', flag: '/template/img/eng.png' },
 ];
 
 const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
@@ -19,7 +20,7 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
   const navRef = useRef(null);
 
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
-  const nomeExibido = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || user.nome || 'Administrador';
+  const nomeExibido = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || user.nome || t('headerUi.roleAdmin', 'Administrador');
   const initial = (user.first_name || user.username || user.nome || 'A').charAt(0).toUpperCase();
 
   useEffect(() => {
@@ -38,8 +39,10 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
     };
   }, []);
 
+  const rawLang = (i18n.language || 'pt').toLowerCase();
+  const activeLangCode = rawLang === 'bi' || rawLang === 'pt-zh' ? 'bi' : rawLang.substring(0, 2);
   const currentLang =
-    languages.find((l) => l.code === (i18n.language?.substring(0, 2) || 'pt')) || languages[0];
+    languages.find((l) => l.code === activeLangCode) || languages[1];
 
   const empresas = estatisticas?.empresas || [];
   const empresasFiltradas = empresas.filter(
@@ -126,7 +129,11 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                   cursor: 'pointer',
                   flexShrink: 0,
                 }}
-                title={empresaAtual ? `${empresaAtual.nome} (NIF: ${empresaAtual.nif})` : 'Escolha uma empresa'}
+                title={
+                  empresaAtual
+                    ? `${empresaAtual.nome} (NIF: ${empresaAtual.nif})`
+                    : t('headerUi.chooseCompany', 'Escolha uma empresa')
+                }
               >
                 <span
                   className="empresa-avatar-icon"
@@ -152,10 +159,14 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                     className="fw-700 text-truncate"
                     style={{ fontSize: 12, maxWidth: 280, color: empresaAtual ? '#0f172a' : '#64748b', display: 'block' }}
                   >
-                    {empresaAtual ? empresaAtual.nome : (empresas.length > 0 ? `${empresas.length} Empresas` : 'Sem Empresa')}
+                    {empresaAtual
+                      ? empresaAtual.nome
+                      : empresas.length > 0
+                      ? `${empresas.length} ${t('headerUi.companies', 'Empresas')}`
+                      : t('headerUi.noCompany', 'Sem Empresa')}
                   </span>
                   <span className="text-muted" style={{ fontSize: 10.5, display: 'block' }}>
-                    {empresaAtual ? `NIF: ${empresaAtual.nif}` : 'Clique para selecionar'}
+                    {empresaAtual ? `NIF: ${empresaAtual.nif}` : t('headerUi.clickToSelect', 'Clique para selecionar')}
                   </span>
                 </div>
                 <i className="la la-angle-down text-muted ml-4" style={{ fontSize: 11, flexShrink: 0 }}></i>
@@ -176,7 +187,7 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                 >
                   <div className="d-flex align-items-center justify-content-between mb-10 pb-8 border-bottom">
                     <span className="fw-600 color-dark" style={{ fontSize: 12 }}>
-                      MUDAR PARA ESPAÇO DE UMA EMPRESA
+                      {t('headerUi.switchCompanySpace', 'MUDAR PARA ESPAÇO DE UMA EMPRESA')}
                     </span>
                     <span className="badge badge-primary badge-round" style={{ fontSize: 10 }}>
                       {empresas.length}
@@ -187,7 +198,7 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                     <input
                       type="text"
                       className="form-control form-control-sm"
-                      placeholder="Filtrar por nome ou NIF..."
+                      placeholder={t('headerUi.filterByNameOrNif', 'Filtrar por nome ou NIF...')}
                       value={empresaFiltro}
                       onChange={(e) => setEmpresaFiltro(e.target.value)}
                       style={{ fontSize: 12 }}
@@ -198,7 +209,7 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                   <div style={{ maxHeight: 220, overflowY: 'auto' }}>
                     {empresasFiltradas.length === 0 ? (
                       <div className="text-center py-15 text-muted" style={{ fontSize: 12 }}>
-                        Nenhuma empresa encontrada.
+                        {t('headerUi.noCompanyFound', 'Nenhuma empresa encontrada.')}
                       </div>
                     ) : (
                       empresasFiltradas.map((emp) => (
@@ -233,7 +244,7 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                               fontSize: 9,
                             }}
                           >
-                            {emp.estado}
+                            {t(`headerUi.companyState_${emp.estado}`, emp.estado)}
                           </span>
                         </button>
                       ))
@@ -253,18 +264,37 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                     e.preventDefault();
                     setOpenMenu(openMenu === 'lang' ? null : 'lang');
                   }}
-                  title={currentLang.label}
-                  style={{ width: 34, height: 34, flexShrink: 0 }}
+                  title={
+                    currentLang.code === 'bi'
+                      ? t('headerUi.langBilingual', 'Português / 中文 (Bilingue)')
+                      : currentLang.code === 'zh'
+                      ? t('headerUi.langChinese', '中文 (Chinês)')
+                      : currentLang.label
+                  }
+                  style={{
+                    height: 34,
+                    padding: '0 10px',
+                    borderRadius: 18,
+                    border: '1px solid #bfdbfe',
+                    backgroundColor: '#ffffff',
+                    color: '#2563eb',
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    gap: 6,
+                    flexShrink: 0,
+                    textDecoration: 'none',
+                  }}
                 >
                   <img
                     src={currentLang.flag}
                     alt=""
                     aria-label={currentLang.label}
                     className="rounded-circle"
-                    style={{ width: 22, height: 22, minWidth: 22, minHeight: 22, objectFit: 'cover', flexShrink: 0 }}
+                    style={{ width: 18, height: 18, minWidth: 18, minHeight: 18, objectFit: 'cover', flexShrink: 0 }}
                   />
+                  <span>{currentLang.short}</span>
                 </a>
-                <div className="dropdown-wrapper dropdown-wrapper--small">
+                <div className="dropdown-wrapper dropdown-wrapper--small" style={{ minWidth: 190 }}>
                   {languages.map((lang) => (
                     <a
                       key={lang.code}
@@ -274,14 +304,18 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                         i18n.changeLanguage(lang.code);
                         setOpenMenu(null);
                       }}
-                      className={i18n.language?.substring(0, 2) === lang.code ? 'active' : ''}
+                      className={activeLangCode === lang.code ? 'active' : ''}
                     >
                       <img
                         src={lang.flag}
                         alt=""
                         style={{ width: 18, height: 18, objectFit: 'cover', borderRadius: '50%' }}
                       />{' '}
-                      {lang.label}
+                      {lang.code === 'bi'
+                        ? t('headerUi.langBilingual', 'Português / 中文 (Bilingue)')
+                        : lang.code === 'zh'
+                        ? t('headerUi.langChinese', '中文 (Chinês)')
+                        : lang.label}
                     </a>
                   ))}
                 </div>
@@ -314,7 +348,11 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
                           @{user.username}
                         </small>
                       )}
-                      <span>{user.is_superuser ? 'Super Administrador' : 'Administrador'}</span>
+                      <span>
+                        {user.is_superuser
+                          ? t('headerUi.roleSuperAdmin', 'Super Administrador')
+                          : t('headerUi.roleAdmin', 'Administrador')}
+                      </span>
                     </div>
                   </div>
                   <div className="nav-author__options">

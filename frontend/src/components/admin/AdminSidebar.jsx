@@ -114,7 +114,7 @@ const AdminSidebar = ({ collapsed, abaAtiva, onMudarAba, estatisticas, onLogout 
                   }}
                   style={{ cursor: 'pointer' }}
                 >
-                  <span className="nav-icon" style={{ backgroundColor: 'rgba(32, 201, 151, 0.1)' }}>
+                  <span className="nav-icon" style={{ backgroundColor: '#ffffff', border: '1px solid #a7f3d0' }}>
                     <i className="la la-chart-bar" style={{ color: '#20c997' }}></i>
                   </span>
                   <span className="menu-text fw-600" style={{ color: '#20c997' }}>
@@ -132,7 +132,7 @@ const AdminSidebar = ({ collapsed, abaAtiva, onMudarAba, estatisticas, onLogout 
                   className="sidebar-logout-link"
                   style={{ cursor: 'pointer' }}
                 >
-                  <span className="nav-icon" style={{ backgroundColor: '#fff0f0' }}>
+                  <span className="nav-icon" style={{ backgroundColor: '#ffffff', border: '1px solid #fecaca' }}>
                     <i className="la la-sign-out-alt text-danger"></i>
                   </span>
                   <span className="menu-text text-danger fw-600">

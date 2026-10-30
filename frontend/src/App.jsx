@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './styles/template.css';
+import i18n from './i18n';
 import LoginPage from './components/auth/LoginPage';
 import MainLayout from './components/common/MainLayout';
 import Documentos from './pages/Documentos';
@@ -45,7 +46,10 @@ function AdminRoute({ children }) {
       .catch(() => {});
 
     toast.error(
-      'Acesso Restrito: As empresas não têm permissão para aceder à Gestão Global do Administrador. A tentativa foi registada para auditoria de segurança.',
+      i18n.t(
+        'headerUi.adminRestrictedToast',
+        'Acesso Restrito: As empresas não têm permissão para aceder à Gestão Global do Administrador. A tentativa foi registada para auditoria de segurança.'
+      ),
       { toastId: 'admin-access-denied' }
     );
   } catch {
@@ -62,9 +66,15 @@ function ContabilidadeRoute({ children }) {
   try {
     const user = JSON.parse(userStr);
     if (user.is_operador_facturas || user.papel === 'Operador de Facturação') {
-      toast.info('Área restrita à Contabilidade. Foi redirecionado para o seu Portal de Digitalização de Facturas.', {
-        toastId: 'operador-redirect',
-      });
+      toast.info(
+        i18n.t(
+          'headerUi.operatorRedirectToast',
+          'Área restrita à Contabilidade. Foi redirecionado para o seu Portal de Digitalização de Facturas.'
+        ),
+        {
+          toastId: 'operador-redirect',
+        }
+      );
       return <Navigate to="/facturas" replace />;
     }
   } catch {

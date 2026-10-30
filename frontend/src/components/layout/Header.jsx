@@ -5,9 +5,10 @@ import { menuItems } from './menuConfig';
 import { usePeriodo } from '../../context/PeriodoContext';
 
 const languages = [
-  { code: 'pt', label: 'Português', flag: '/angola_flag.png' },
-  { code: 'en', label: 'English', flag: '/template/img/eng.png' },
-  { code: 'zh', label: '中文 (Chinês)', flag: '/china_flag.png' },
+  { code: 'bi', short: 'PT/中文', label: 'Português / 中文', flag: '/china_flag.png' },
+  { code: 'pt', short: 'PT', label: 'Português', flag: '/angola_flag.png' },
+  { code: 'zh', short: '中文', label: '中文 (Chinês)', flag: '/china_flag.png' },
+  { code: 'en', short: 'EN', label: 'English', flag: '/template/img/eng.png' },
 ];
 
 const Header = ({ onToggleSidebar }) => {
@@ -20,8 +21,22 @@ const Header = ({ onToggleSidebar }) => {
 
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
   const isAdmin = Boolean(user.is_admin || user.is_superuser || user.is_staff);
-  const nomeExibido = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || user.nome || 'Utilizador';
+  const nomeExibido = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || user.nome || t('headerUi.defaultUser', 'Utilizador');
   const initial = (user.first_name || user.username || user.nome || 'U').charAt(0).toUpperCase();
+
+  const traduzirPapel = (papelBruto) => {
+    const mapa = {
+      'Super Administrador': t('headerUi.roleSuperAdmin', 'Super Administrador'),
+      'Super Admin': t('headerUi.roleSuperAdminShort', 'Super Admin'),
+      'Administrador': t('headerUi.roleAdmin', 'Administrador'),
+      'Contabilista': t('headerUi.roleAccountant', 'Contabilista'),
+      'Operador de Facturação': t('headerUi.roleInvoiceOperator', 'Operador de Facturação'),
+      'Auditor': t('headerUi.roleAuditor', 'Auditor'),
+      'Fiscalista': t('headerUi.roleTaxSpecialist', 'Fiscalista'),
+      'Consulta': t('headerUi.roleReadOnly', 'Consulta'),
+    };
+    return mapa[papelBruto] || papelBruto;
+  };
 
   useEffect(() => {
     const syncUser = () => {
@@ -39,8 +54,10 @@ const Header = ({ onToggleSidebar }) => {
     };
   }, []);
 
+  const rawLang = (i18n.language || 'pt').toLowerCase();
+  const activeLangCode = rawLang === 'bi' || rawLang === 'pt-zh' ? 'bi' : rawLang.substring(0, 2);
   const currentLang =
-    languages.find((l) => l.code === (i18n.language?.substring(0, 2) || 'pt')) || languages[0];
+    languages.find((l) => l.code === activeLangCode) || languages[1];
 
   const matchedItem = menuItems.find((item) => item.path === location.pathname);
   const pageTitle = matchedItem
@@ -120,7 +137,11 @@ const Header = ({ onToggleSidebar }) => {
                         cursor: podeTrocarEmpresa ? 'pointer' : 'default',
                         flexShrink: 0,
                       }}
-                      title={empresaExibida ? `${empresaExibida.nome} (NIF: ${empresaExibida.nif})` : 'Nenhuma empresa selecionada'}
+                      title={
+                        empresaExibida
+                          ? `${empresaExibida.nome} (NIF: ${empresaExibida.nif})`
+                          : t('headerUi.noCompanySelected', 'Nenhuma empresa selecionada')
+                      }
                     >
                       <span
                         className="empresa-avatar-icon"
@@ -146,10 +167,14 @@ const Header = ({ onToggleSidebar }) => {
                           className="fw-700 text-truncate"
                           style={{ fontSize: 12, maxWidth: 300, color: empresaExibida ? '#0f172a' : '#64748b', display: 'block' }}
                         >
-                          {empresaExibida ? empresaExibida.nome : 'Sem Empresa Ativa'}
+                          {empresaExibida ? empresaExibida.nome : t('headerUi.noActiveCompany', 'Sem Empresa Ativa')}
                         </span>
                         <span className="text-muted" style={{ fontSize: 10.5, display: 'block' }}>
-                          {empresaExibida ? `NIF: ${empresaExibida.nif}` : (podeTrocarEmpresa ? 'Clique para selecionar' : 'Aguardando atribuição')}
+                          {empresaExibida
+                            ? `NIF: ${empresaExibida.nif}`
+                            : podeTrocarEmpresa
+                            ? t('headerUi.clickToSelect', 'Clique para selecionar')
+                            : t('headerUi.awaitingAssignment', 'Aguardando atribuição')}
                         </span>
                       </div>
                       {podeTrocarEmpresa && (
@@ -169,7 +194,7 @@ const Header = ({ onToggleSidebar }) => {
                         }}
                       >
                         <div className="dropdown-header px-10 py-5 text-muted fw-700" style={{ fontSize: 11 }}>
-                          EMPRESAS DISPONÍVEIS ({empresas.length})
+                          {t('headerUi.availableCompanies', 'EMPRESAS DISPONÍVEIS')} ({empresas.length})
                         </div>
                         {empresas.map((emp) => {
                           const ativa = String(emp.id) === String(empresaExibida?.id);
@@ -222,7 +247,7 @@ const Header = ({ onToggleSidebar }) => {
                   }}
                   title={t('navigation.admin', 'Administração Global')}
                 >
-                  <i className="la la-sliders-h"></i> Painel de Gestão
+                  <i className="la la-sliders-h"></i> {t('headerUi.managementPanel', 'Painel de Gestão')}
                 </button>
               </li>
             )}
@@ -235,18 +260,37 @@ const Header = ({ onToggleSidebar }) => {
                     e.preventDefault();
                     setOpenMenu(openMenu === 'lang' ? null : 'lang');
                   }}
-                  title={currentLang.label}
-                  style={{ width: 34, height: 34, flexShrink: 0 }}
+                  title={
+                    currentLang.code === 'bi'
+                      ? t('headerUi.langBilingual', 'Português / 中文 (Bilingue)')
+                      : currentLang.code === 'zh'
+                      ? t('headerUi.langChinese', '中文 (Chinês)')
+                      : currentLang.label
+                  }
+                  style={{
+                    height: 34,
+                    padding: '0 10px',
+                    borderRadius: 18,
+                    border: '1px solid #bfdbfe',
+                    backgroundColor: '#ffffff',
+                    color: '#2563eb',
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    gap: 6,
+                    flexShrink: 0,
+                    textDecoration: 'none',
+                  }}
                 >
                   <img
                     src={currentLang.flag}
                     alt=""
                     aria-label={currentLang.label}
                     className="rounded-circle"
-                    style={{ width: 22, height: 22, minWidth: 22, minHeight: 22, objectFit: 'cover', flexShrink: 0 }}
+                    style={{ width: 18, height: 18, minWidth: 18, minHeight: 18, objectFit: 'cover', flexShrink: 0 }}
                   />
+                  <span>{currentLang.short}</span>
                 </a>
-                <div className="dropdown-wrapper dropdown-wrapper--small">
+                <div className="dropdown-wrapper dropdown-wrapper--small" style={{ minWidth: 190 }}>
                   {languages.map((lang) => (
                     <a
                       key={lang.code}
@@ -256,14 +300,18 @@ const Header = ({ onToggleSidebar }) => {
                         i18n.changeLanguage(lang.code);
                         setOpenMenu(null);
                       }}
-                      className={i18n.language?.substring(0, 2) === lang.code ? 'active' : ''}
+                      className={activeLangCode === lang.code ? 'active' : ''}
                     >
                       <img
                         src={lang.flag}
                         alt=""
                         style={{ width: 18, height: 18, objectFit: 'cover', borderRadius: '50%' }}
                       />{' '}
-                      {lang.label}
+                      {lang.code === 'bi'
+                        ? t('headerUi.langBilingual', 'Português / 中文 (Bilingue)')
+                        : lang.code === 'zh'
+                        ? t('headerUi.langChinese', '中文 (Chinês)')
+                        : lang.label}
                     </a>
                   ))}
                 </div>
@@ -296,7 +344,7 @@ const Header = ({ onToggleSidebar }) => {
                         </small>
                       )}
                       <span className="badge px-6 py-2" style={{ fontSize: 11, fontWeight: 700, background: '#ffffff', border: '1px solid #bfdbfe', color: '#2563eb' }}>
-                        {user.papel || user.perfil || (isAdmin ? 'Administrador' : 'Contabilista')}
+                        {traduzirPapel(user.papel || user.perfil || (isAdmin ? 'Administrador' : 'Contabilista'))}
                       </span>
                     </div>
                   </div>
@@ -337,7 +385,8 @@ const Header = ({ onToggleSidebar }) => {
                               navigate('/facturas');
                             }}
                           >
-                            <i className="la la-file-invoice-dollar text-primary"></i> Portal do Scanner (Facturas)
+                            <i className="la la-file-invoice-dollar text-primary"></i>{' '}
+                            {t('headerUi.scannerPortal', 'Portal do Scanner (Facturas)')}
                           </a>
                         </li>
                       ) : (

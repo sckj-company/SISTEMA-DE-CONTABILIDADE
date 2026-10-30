@@ -61,9 +61,25 @@ const MUNICIPIOS_POR_PROVINCIA = {
 
 const AdminGestao = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const localeDate = i18n.language?.startsWith('zh') ? 'zh-CN' : i18n.language?.startsWith('en') ? 'en-GB' : 'pt-AO';
   const [searchParams, setSearchParams] = useSearchParams();
   const { atualizar } = usePeriodo();
+
+  const traduzirPapelAdmin = (papelBruto) => {
+    const mapa = {
+      'Super Admin': t('admin.users.roleSuperAdmin', 'Super Admin'),
+      'Super Administrador': t('adminUi.superAdministrator', 'Super Administrador'),
+      'Administrador': t('admin.users.roleAdmin', 'Administrador'),
+      'Auditor': t('admin.users.roleAuditor', 'Auditor'),
+      'Contabilista': t('admin.users.roleAccountant', 'Contabilista'),
+      'Fiscalista': t('admin.users.roleTaxSpecialist', 'Fiscalista'),
+      'Operador de Facturação': t('adminUi.roleInvoiceOperatorShort', 'Operador de Facturação'),
+      'Consulta': t('admin.users.roleReadOnly', 'Consulta'),
+      'Utilizador': t('adminUi.roleDefaultUser', 'Utilizador'),
+    };
+    return mapa[papelBruto] || papelBruto;
+  };
 
   const abaUrl = searchParams.get('aba') || 'pgc';
   const [abaAtiva, setAbaAtiva] = useState(abaUrl);
@@ -217,20 +233,22 @@ const AdminGestao = () => {
   const salvarMeuPerfilAdmin = async (e) => {
     e.preventDefault();
     if (!perfilAdminForm.username.trim()) {
-      toast.warning('O nome de utilizador não pode ficar vazio.');
+      toast.warning(t('adminUi.toastUsernameRequired', 'O nome de utilizador não pode ficar vazio.'));
       return;
     }
     if (perfilAdminForm.password || perfilAdminForm.confirmPassword) {
       if (!perfilAdminForm.currentPassword) {
-        toast.warning('Informe a sua palavra-passe atual para definir uma nova palavra-passe.');
+        toast.warning(
+          t('adminUi.toastCurrentPasswordRequired', 'Informe a sua palavra-passe atual para definir uma nova palavra-passe.')
+        );
         return;
       }
       if (perfilAdminForm.password !== perfilAdminForm.confirmPassword) {
-        toast.error('A nova palavra-passe e a confirmação não coincidem.');
+        toast.error(t('adminUi.toastPasswordMismatch', 'A nova palavra-passe e a confirmação não coincidem.'));
         return;
       }
       if (perfilAdminForm.password.length < 6) {
-        toast.error('A nova palavra-passe deve ter pelo menos 6 caracteres.');
+        toast.error(t('adminUi.toastPasswordMinLength', 'A nova palavra-passe deve ter pelo menos 6 caracteres.'));
         return;
       }
     }
@@ -266,11 +284,11 @@ const AdminGestao = () => {
       carregarDados();
       toast.success(
         perfilAdminForm.password
-          ? 'Dados pessoais e palavra-passe atualizados com sucesso!'
-          : 'Dados da sua conta atualizados com sucesso!'
+          ? t('adminUi.toastProfileAndPasswordSaved', 'Dados pessoais e palavra-passe atualizados com sucesso!')
+          : t('adminUi.toastProfileSaved', 'Dados da sua conta atualizados com sucesso!')
       );
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Erro ao atualizar perfil.');
+      toast.error(err.response?.data?.error || t('adminUi.toastProfileError', 'Erro ao atualizar perfil.'));
     } finally {
       setSalvandoPerfilAdmin(false);
     }
@@ -301,11 +319,11 @@ const AdminGestao = () => {
       if (resPgc.status === 'fulfilled' && resPgc.value.data) setPgcDados(resPgc.value.data);
 
       if (resStats.status === 'rejected' && resStats.reason?.response?.status === 403) {
-        toast.error('Acesso restrito ao Administrador do Sistema.');
+        toast.error(t('adminUi.toastAdminRestricted', 'Acesso restrito ao Administrador do Sistema.'));
         navigate('/auditoria');
       }
     } catch {
-      toast.error('Erro ao sincronizar dados com o servidor.');
+      toast.error(t('adminUi.toastSyncError', 'Erro ao sincronizar dados com o servidor.'));
     } finally {
       setCarregando(false);
     }
@@ -338,9 +356,9 @@ const AdminGestao = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      toast.success('Download do PGC em Excel (.xlsx) concluído com sucesso!');
+      toast.success(t('adminUi.toastPgcExcelSuccess', 'Download do PGC em Excel (.xlsx) concluído com sucesso!'));
     } catch {
-      toast.error('Erro ao transferir ficheiro Excel do PGC.');
+      toast.error(t('adminUi.toastPgcExcelError', 'Erro ao transferir ficheiro Excel do PGC.'));
     } finally {
       setBaixandoExcelPgc(false);
     }
@@ -434,7 +452,7 @@ const AdminGestao = () => {
   const salvarEmpresa = async (e) => {
     e.preventDefault();
     if (!formEmpresa.nome.trim() || !formEmpresa.nif.trim()) {
-      toast.warning('O Nome e o NIF da empresa são obrigatórios.');
+      toast.warning(t('adminUi.toastCompanyNameNifRequired', 'O Nome e o NIF da empresa são obrigatórios.'));
       return;
     }
 
@@ -459,10 +477,10 @@ const AdminGestao = () => {
 
       if (empresaEmEdicao) {
         await empresaService.update(empresaEmEdicao.id, payload);
-        toast.success(`Empresa "${payload.nome}" atualizada com sucesso!`);
+        toast.success(t('adminUi.toastCompanyUpdated', 'Empresa "{{nome}}" atualizada com sucesso!', { nome: payload.nome }));
       } else {
         await empresaService.create(payload);
-        toast.success(`Empresa "${payload.nome}" cadastrada com sucesso!`);
+        toast.success(t('adminUi.toastCompanyCreated', 'Empresa "{{nome}}" cadastrada com sucesso!', { nome: payload.nome }));
       }
 
       setModalEmpresaAberto(false);
@@ -472,7 +490,7 @@ const AdminGestao = () => {
         ? Object.entries(err.response.data)
             .map(([campo, erro]) => `${campo}: ${Array.isArray(erro) ? erro.join(' ') : erro}`)
             .join(' | ')
-        : 'Erro ao guardar dados da empresa.';
+        : t('adminUi.toastCompanySaveError', 'Erro ao guardar dados da empresa.');
       toast.error(msg);
     } finally {
       setSalvandoEmpresa(false);
@@ -481,17 +499,23 @@ const AdminGestao = () => {
 
   const excluirEmpresa = async (emp) => {
     const confirmacao = window.confirm(
-      `Tem a certeza que deseja eliminar a empresa "${emp.nome}" (NIF: ${emp.nif})?\n\n` +
-      `Esta ação irá remover a empresa e todos os seus registos associados de forma permanente.`
+      t(
+        'adminUi.confirmDeleteCompany',
+        'Tem a certeza que deseja eliminar a empresa "{{nome}}" (NIF: {{nif}})?\n\nEsta ação irá remover a empresa e todos os seus registos associados de forma permanente.',
+        { nome: emp.nome, nif: emp.nif }
+      )
     );
     if (!confirmacao) return;
 
     try {
       await empresaService.delete(emp.id);
-      toast.success(`Empresa "${emp.nome}" eliminada com sucesso.`);
+      toast.success(t('adminUi.toastCompanyDeleted', 'Empresa "{{nome}}" eliminada com sucesso.', { nome: emp.nome }));
       carregarDados();
     } catch (err) {
-      const msg = err.response?.data?.error || err.response?.data?.detail || 'Erro ao eliminar empresa.';
+      const msg =
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        t('adminUi.toastCompanyDeleteError', 'Erro ao eliminar empresa.');
       toast.error(msg);
     }
   };
@@ -499,16 +523,16 @@ const AdminGestao = () => {
   const alterarEstadoRapidoEmpresa = async (emp, novoEstado) => {
     try {
       await empresaService.patch(emp.id, { estado: novoEstado });
-      toast.success(`Estado da empresa alterado para ${novoEstado}.`);
+      toast.success(t('adminUi.toastCompanyStatusChanged', 'Estado da empresa alterado para {{estado}}.', { estado: novoEstado }));
       carregarDados();
     } catch {
-      toast.error('Erro ao atualizar estado da empresa.');
+      toast.error(t('adminUi.toastCompanyStatusError', 'Erro ao atualizar estado da empresa.'));
     }
   };
 
   const entrarNoEspacoEmpresa = (empresaId) => {
     atualizar({ empresaId: String(empresaId) });
-    toast.info('Workspace alterado para a empresa selecionada.');
+    toast.info(t('adminUi.toastWorkspaceSwitched', 'Workspace alterado para a empresa selecionada.'));
     navigate('/auditoria');
   };
 
@@ -551,11 +575,11 @@ const AdminGestao = () => {
   const salvarUser = async (e) => {
     e.preventDefault();
     if (!formUser.username.trim()) {
-      toast.warning('O nome de utilizador (username) é obrigatório.');
+      toast.warning(t('adminUi.toastUserUsernameRequired', 'O nome de utilizador (username) é obrigatório.'));
       return;
     }
     if (!userEmEdicao && !formUser.password) {
-      toast.warning('A palavra-passe é obrigatória para novos utilizadores.');
+      toast.warning(t('adminUi.toastUserPasswordRequired', 'A palavra-passe é obrigatória para novos utilizadores.'));
       return;
     }
 
@@ -575,15 +599,15 @@ const AdminGestao = () => {
           localStorage.setItem('user', JSON.stringify(atualizado));
           window.dispatchEvent(new Event('auth-changed'));
         }
-        toast.success(`Utilizador "${formUser.username}" atualizado com sucesso!`);
+        toast.success(t('adminUi.toastUserUpdated', 'Utilizador "{{username}}" atualizado com sucesso!', { username: formUser.username }));
       } else {
         await adminService.createUtilizador(formUser);
-        toast.success(`Utilizador "${formUser.username}" criado com sucesso!`);
+        toast.success(t('adminUi.toastUserCreated', 'Utilizador "{{username}}" criado com sucesso!', { username: formUser.username }));
       }
       setModalUserAberto(false);
       carregarDados();
     } catch (err) {
-      const msg = err.response?.data?.error || 'Erro ao processar utilizador.';
+      const msg = err.response?.data?.error || t('adminUi.toastUserProcessError', 'Erro ao processar utilizador.');
       toast.error(msg);
     } finally {
       setSalvandoUser(false);
@@ -593,10 +617,14 @@ const AdminGestao = () => {
   const alternarAtivoUser = async (u) => {
     try {
       await adminService.patchUtilizador(u.id, { is_active: !u.is_active });
-      toast.success(`Utilizador ${!u.is_active ? 'ativado' : 'desativado'} com sucesso.`);
+      toast.success(
+        !u.is_active
+          ? t('adminUi.toastUserActivated', 'Utilizador ativado com sucesso.')
+          : t('adminUi.toastUserDeactivated', 'Utilizador desativado com sucesso.')
+      );
       carregarDados();
     } catch {
-      toast.error('Erro ao alterar estado do utilizador.');
+      toast.error(t('adminUi.toastUserStatusError', 'Erro ao alterar estado do utilizador.'));
     }
   };
 
@@ -604,10 +632,10 @@ const AdminGestao = () => {
     if (!window.confirm(t('admin.users.deleteConfirm', 'Tem a certeza de que deseja eliminar o utilizador "{{username}}"?', { username: u.username }))) return;
     try {
       await adminService.deleteUtilizador(u.id);
-      toast.success(`Utilizador "${u.username}" removido.`);
+      toast.success(t('adminUi.toastUserDeleted', 'Utilizador "{{username}}" removido.', { username: u.username }));
       carregarDados();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Erro ao eliminar utilizador.');
+      toast.error(err.response?.data?.error || t('adminUi.toastUserDeleteError', 'Erro ao eliminar utilizador.'));
     }
   };
 
@@ -617,36 +645,50 @@ const AdminGestao = () => {
   const alternarActivaRegra = async (regra) => {
     try {
       await adminService.updateRegra(regra.id, { activa: !regra.activa });
-      toast.success(`Regra ${regra.codigo} ${!regra.activa ? 'ativada' : 'desativada'}.`);
+      toast.success(
+        !regra.activa
+          ? t('adminUi.toastRuleActivated', 'Regra {{codigo}} ativada.', { codigo: regra.codigo })
+          : t('adminUi.toastRuleDeactivated', 'Regra {{codigo}} desativada.', { codigo: regra.codigo })
+      );
       setRegras((prev) =>
         prev.map((r) => (r.id === regra.id ? { ...r, activa: !r.activa } : r))
       );
     } catch {
-      toast.error('Erro ao atualizar regra.');
+      toast.error(t('adminUi.toastRuleUpdateError', 'Erro ao atualizar regra.'));
     }
   };
 
   const mudarSeveridadeRegra = async (regra, novaSeveridade) => {
     try {
       await adminService.updateRegra(regra.id, { severidade: novaSeveridade });
-      toast.success(`Severidade da regra ${regra.codigo} alterada para ${novaSeveridade}.`);
+      toast.success(
+        t('adminUi.toastRuleSeverityChanged', 'Severidade da regra {{codigo}} alterada para {{severidade}}.', {
+          codigo: regra.codigo,
+          severidade: novaSeveridade,
+        })
+      );
       setRegras((prev) =>
         prev.map((r) => (r.id === regra.id ? { ...r, severidade: novaSeveridade } : r))
       );
     } catch {
-      toast.error('Erro ao atualizar severidade.');
+      toast.error(t('adminUi.toastRuleSeverityError', 'Erro ao atualizar severidade.'));
     }
   };
 
   const validarRegraHumana = async (regra, novoEstado) => {
     try {
       await adminService.updateRegra(regra.id, { estado_validacao: novoEstado });
-      toast.success(`Estado de validação da regra ${regra.codigo} definido como ${novoEstado}.`);
+      toast.success(
+        t('adminUi.toastRuleValidationChanged', 'Estado de validação da regra {{codigo}} definido como {{estado}}.', {
+          codigo: regra.codigo,
+          estado: novoEstado,
+        })
+      );
       setRegras((prev) =>
         prev.map((r) => (r.id === regra.id ? { ...r, estado_validacao: novoEstado } : r))
       );
     } catch {
-      toast.error('Erro ao validar regra.');
+      toast.error(t('adminUi.toastRuleValidateError', 'Erro ao validar regra.'));
     }
   };
 
@@ -657,12 +699,20 @@ const AdminGestao = () => {
     try {
       const res = await adminService.updateOcorrencia(occ.id, { estado: novoEstado });
       const estadoAtualizado = res.data?.estado || novoEstado;
-      toast.success(`Ocorrência #${occ.id} marcada como ${estadoAtualizado}.`);
+      toast.success(
+        t('adminUi.toastOccurrenceStatusChanged', 'Ocorrência #{{id}} marcada como {{estado}}.', {
+          id: occ.id,
+          estado: estadoAtualizado,
+        })
+      );
       setOcorrencias((prev) =>
         prev.map((o) => (o.id === occ.id ? { ...o, estado: estadoAtualizado } : o))
       );
     } catch (err) {
-      const detalhe = err?.response?.data?.error || err?.response?.data?.detail || 'Erro ao atualizar estado da ocorrência.';
+      const detalhe =
+        err?.response?.data?.error ||
+        err?.response?.data?.detail ||
+        t('adminUi.toastOccurrenceStatusError', 'Erro ao atualizar estado da ocorrência.');
       toast.error(detalhe);
     }
   };
@@ -670,7 +720,7 @@ const AdminGestao = () => {
   const executarMotorParaEmpresa = async (e) => {
     e.preventDefault();
     if (!formExecEngine.empresa_id) {
-      toast.warning('Selecione a empresa para executar o motor de auditoria.');
+      toast.warning(t('adminUi.toastSelectCompanyForEngine', 'Selecione a empresa para executar o motor de auditoria.'));
       return;
     }
     setExecutandoEngine(true);
@@ -680,11 +730,15 @@ const AdminGestao = () => {
         ano: Number(formExecEngine.ano),
         mes: Number(formExecEngine.mes),
       });
-      toast.success(`Motor executado com sucesso! ${res.data?.ocorrencias_geradas ?? ''} ocorrências geradas/revistas.`);
+      toast.success(
+        t('adminUi.toastEngineExecuted', 'Motor executado com sucesso! {{count}} ocorrências geradas/revistas.', {
+          count: res.data?.ocorrencias_geradas ?? '',
+        })
+      );
       setModalExecEngine(false);
       carregarDados();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Erro ao executar motor.');
+      toast.error(err.response?.data?.error || t('adminUi.toastEngineError', 'Erro ao executar motor.'));
     } finally {
       setExecutandoEngine(false);
     }
@@ -694,13 +748,20 @@ const AdminGestao = () => {
   // FUNÇÕES DE DOCUMENTOS GLOBAIS
   // ==========================================
   const excluirDocumento = async (doc) => {
-    if (!window.confirm(`Tem a certeza que deseja eliminar o documento "${doc.nome_arquivo || doc.nome}"?`)) return;
+    if (
+      !window.confirm(
+        t('adminUi.confirmDeleteDocument', 'Tem a certeza que deseja eliminar o documento "{{nome}}"?', {
+          nome: doc.nome_arquivo || doc.nome,
+        })
+      )
+    )
+      return;
     try {
       await adminService.deleteDocumento(doc.id);
-      toast.success('Documento eliminado do arquivo.');
+      toast.success(t('adminUi.toastDocumentDeleted', 'Documento eliminado do arquivo.'));
       carregarDados();
     } catch {
-      toast.error('Erro ao eliminar documento.');
+      toast.error(t('adminUi.toastDocumentDeleteError', 'Erro ao eliminar documento.'));
     }
   };
 
@@ -734,7 +795,12 @@ const AdminGestao = () => {
       limite_upload_mb: 50,
       fuso_horario: 'Africa/Luanda (GMT+1)',
     }));
-    toast.info('Valores de referência restaurados para o padrão AGT Angola 2026. Clique em Guardar para confirmar.');
+    toast.info(
+      t(
+        'adminUi.toastAgtDefaultsRestored',
+        'Valores de referência restaurados para o padrão AGT Angola 2026. Clique em Guardar para confirmar.'
+      )
+    );
   };
 
   // ==========================================
@@ -820,11 +886,11 @@ const AdminGestao = () => {
       <AdminLayout abaAtiva={abaAtiva} onMudarAba={mudarAba} estatisticas={estatisticas}>
         <div className="d-flex flex-column align-items-center justify-content-center py-80">
           <div className="spinner-border text-primary mb-15" role="status" style={{ width: 44, height: 44 }}>
-            <span className="sr-only">A carregar portal administrativo...</span>
+            <span className="sr-only">{t('adminUi.loadingSrOnly', 'A carregar portal administrativo...')}</span>
           </div>
-          <h5 className="text-dark fw-600 mb-4">A carregar Centro de Controlo Master...</h5>
+          <h5 className="text-dark fw-600 mb-4">{t('adminUi.loadingTitle', 'A carregar Centro de Controlo Master...')}</h5>
           <span className="text-muted" style={{ fontSize: 13 }}>
-            A sincronizar empresas, utilizadores, regras e ocorrências fiscais
+            {t('adminUi.loadingSubtitle', 'A sincronizar empresas, utilizadores, regras e ocorrências fiscais')}
           </span>
         </div>
       </AdminLayout>
@@ -1003,9 +1069,9 @@ const AdminGestao = () => {
           <div className="card card-default mb-25">
             <div className="card-header bg-white py-16 px-20 border-bottom d-flex align-items-center justify-content-between">
               <div>
-                <h5 className="fw-700 text-dark mb-0">Visão de Risco Fiscal por Empresa</h5>
+                <h5 className="fw-700 text-dark mb-0">{t('adminUi.dashRiskByCompanyTitle', 'Visão de Risco Fiscal por Empresa')}</h5>
                 <span className="text-muted" style={{ fontSize: 12 }}>
-                  Empresas ordenadas com os dados do período mais recente e exposição apurada
+                  {t('adminUi.dashRiskByCompanySubtitle', 'Empresas ordenadas com os dados do período mais recente e exposição apurada')}
                 </span>
               </div>
               <button
@@ -1013,21 +1079,21 @@ const AdminGestao = () => {
                 className="btn btn-sm btn-link text-primary fw-600 p-0"
                 onClick={() => mudarAba('empresas')}
               >
-                Ver Todas as Empresas →
+                {t('adminUi.dashViewAllCompanies', 'Ver Todas as Empresas →')}
               </button>
             </div>
             <div className="table-responsive">
               <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
                 <thead style={{ backgroundColor: '#ffffff' }}>
                   <tr>
-                    <th className="py-12 px-20">Empresa</th>
-                    <th>NIF</th>
-                    <th>Regime Fiscal</th>
-                    <th>Documentos</th>
-                    <th>Último Período</th>
-                    <th>Inconformidades</th>
-                    <th>Risco Estimado</th>
-                    <th className="text-right px-20">Ações</th>
+                    <th className="py-12 px-20">{t('adminUi.thCompany', 'Empresa')}</th>
+                    <th>{t('adminUi.thNif', 'NIF')}</th>
+                    <th>{t('adminUi.thTaxRegime', 'Regime Fiscal')}</th>
+                    <th>{t('adminUi.thDocuments', 'Documentos')}</th>
+                    <th>{t('adminUi.thLastPeriod', 'Último Período')}</th>
+                    <th>{t('adminUi.thNonCompliances', 'Inconformidades')}</th>
+                    <th>{t('adminUi.thEstimatedRisk', 'Risco Estimado')}</th>
+                    <th className="text-right px-20">{t('adminUi.thActions', 'Ações')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1040,7 +1106,8 @@ const AdminGestao = () => {
                             style={{
                               width: 32,
                               height: 32,
-                              backgroundColor: '#eef2ff',
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #bfdbfe',
                               color: '#2563eb',
                               fontWeight: 700,
                               fontSize: 12,
@@ -1051,7 +1118,7 @@ const AdminGestao = () => {
                           <div>
                             <div className="fw-700 text-dark">{emp.nome}</div>
                             <div className="text-muted" style={{ fontSize: 11 }}>
-                              {emp.provincia || 'Angola'} · {emp.telefone || 'Sem telefone'}
+                              {emp.provincia || 'Angola'} · {emp.telefone || t('adminUi.noPhone', 'Sem telefone')}
                             </div>
                           </div>
                         </div>
@@ -1060,24 +1127,24 @@ const AdminGestao = () => {
                         <code style={{ color: '#0f172a', fontWeight: 600 }}>{emp.nif}</code>
                       </td>
                       <td>
-                        <span className="badge badge-light border" style={{ fontSize: 11 }}>
-                          {emp.regime_iva}
+                        <span className="badge badge-light border" style={{ fontSize: 11, backgroundColor: '#ffffff' }}>
+                          {t(`adminUi.regimeBadge_${emp.regime_iva}`, emp.regime_iva)}
                         </span>
                       </td>
                       <td>
-                        <span className="badge badge-light border" style={{ fontSize: 11 }}>
-                          {emp.total_documentos} ficheiros
+                        <span className="badge badge-light border" style={{ fontSize: 11, backgroundColor: '#ffffff' }}>
+                          {emp.total_documentos} {t('adminUi.filesUnit', 'ficheiros')}
                         </span>
                       </td>
                       <td className="text-muted">{emp.ultimo_periodo}</td>
                       <td>
                         {emp.erros_contagem > 0 ? (
                           <span className="badge badge-danger" style={{ fontSize: 11 }}>
-                            {emp.erros_contagem} divergências
+                            {emp.erros_contagem} {t('adminUi.divergencesUnit', 'divergências')}
                           </span>
                         ) : (
                           <span className="badge badge-success" style={{ fontSize: 11 }}>
-                            Sem erros
+                            {t('adminUi.noErrors', 'Sem erros')}
                           </span>
                         )}
                       </td>
@@ -1098,16 +1165,16 @@ const AdminGestao = () => {
                             backgroundColor: '#2563eb',
                             borderColor: '#2563eb',
                           }}
-                          title="Entrar no espaço operacional de auditoria desta empresa"
+                          title={t('adminUi.auditCompanyWorkspaceTooltip', 'Entrar no espaço operacional de auditoria desta empresa')}
                         >
-                          <i className="la la-chart-bar mr-4"></i> Auditar
+                          <i className="la la-chart-bar mr-4"></i> {t('adminUi.btnAudit', 'Auditar')}
                         </button>
                         <button
                           type="button"
-                          className="btn btn-xs btn-outline-secondary"
+                          className="btn btn-xs btn-outline-primary"
                           onClick={() => abrirModalEditarEmpresa(emp)}
-                          style={{ borderRadius: 6, padding: '4px 8px' }}
-                          title="Editar cadastro no Django Admin"
+                          style={{ borderRadius: 6, padding: '4px 8px', backgroundColor: '#ffffff' }}
+                          title={t('adminUi.editCompanyAdminTooltip', 'Editar cadastro no Django Admin')}
                         >
                           <i className="la la-pencil-alt"></i>
                         </button>
@@ -1129,10 +1196,10 @@ const AdminGestao = () => {
           <div className="d-flex align-items-center justify-content-between mb-20 flex-wrap" style={{ gap: 12 }}>
             <div>
               <h4 className="text-dark fw-700 mb-4" style={{ fontSize: 22 }}>
-                Empresas & Contribuintes
+                {t('adminUi.companiesTitle', 'Empresas & Contribuintes')}
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13 }}>
-                Cadastro mestre, dados de constituição, regime de IVA, enquadramento fiscal e contactos.
+                {t('adminUi.companiesSubtitle', 'Cadastro mestre, dados de constituição, regime de IVA, enquadramento fiscal e contactos.')}
               </p>
             </div>
             <button
@@ -1148,7 +1215,7 @@ const AdminGestao = () => {
               }}
             >
               <i className="la la-plus mr-8" style={{ fontSize: 16 }}></i>
-              Cadastrar Nova Empresa
+              {t('adminUi.registerNewCompanyBtn', 'Cadastrar Nova Empresa')}
             </button>
           </div>
 
@@ -1165,7 +1232,7 @@ const AdminGestao = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Pesquisar por nome, NIF ou província..."
+                      placeholder={t('adminUi.companiesSearchPlaceholder', 'Pesquisar por nome, NIF ou província...')}
                       value={pesquisaEmpresa}
                       onChange={(e) => setPesquisaEmpresa(e.target.value)}
                       style={{ paddingLeft: 40, borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
@@ -1180,10 +1247,10 @@ const AdminGestao = () => {
                     onChange={(e) => setFiltroRegimeEmpresa(e.target.value)}
                     style={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
                   >
-                    <option value="TODOS">Todos os Regimes</option>
-                    <option value="GERAL">Regime Geral (14%)</option>
-                    <option value="SIMPLIFICADO">Regime Simplificado (7%)</option>
-                    <option value="EXCLUSAO">Regime de Exclusão</option>
+                    <option value="TODOS">{t('adminUi.allRegimes', 'Todos os Regimes')}</option>
+                    <option value="GERAL">{t('adminUi.regimeGeneral14', 'Regime Geral (14%)')}</option>
+                    <option value="SIMPLIFICADO">{t('adminUi.regimeSimplified7', 'Regime Simplificado (7%)')}</option>
+                    <option value="EXCLUSAO">{t('adminUi.regimeExclusion', 'Regime de Exclusão')}</option>
                   </select>
                 </div>
 
@@ -1194,16 +1261,19 @@ const AdminGestao = () => {
                     onChange={(e) => setFiltroEstadoEmpresa(e.target.value)}
                     style={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
                   >
-                    <option value="TODOS">Todos os Estados</option>
-                    <option value="ATIVA">Ativa</option>
-                    <option value="INATIVA">Inativa</option>
-                    <option value="SUSPENSA">Suspensa</option>
-                    <option value="ENCERRADA">Encerrada</option>
+                    <option value="TODOS">{t('adminUi.allStatuses', 'Todos os Estados')}</option>
+                    <option value="ATIVA">{t('adminUi.statusActiveFem', 'Ativa')}</option>
+                    <option value="INATIVA">{t('adminUi.statusInactiveFem', 'Inativa')}</option>
+                    <option value="SUSPENSA">{t('adminUi.statusSuspendedFem', 'Suspensa')}</option>
+                    <option value="ENCERRADA">{t('adminUi.statusClosedFem', 'Encerrada')}</option>
                   </select>
                 </div>
 
                 <div className="col-md-2 text-md-right text-muted" style={{ fontSize: 12 }}>
-                  <strong>{empresasFiltradas.length}</strong> de {empresasLista.length} empresas
+                  {t('adminUi.companiesCountShowing', '{{count}} de {{total}} empresas', {
+                    count: empresasFiltradas.length,
+                    total: empresasLista.length,
+                  })}
                 </div>
               </div>
 
@@ -1212,22 +1282,22 @@ const AdminGestao = () => {
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
                   <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
-                      <th className="py-12">Empresa</th>
-                      <th>NIF</th>
-                      <th>Tipo</th>
-                      <th>Regime Fiscal</th>
-                      <th>Província</th>
-                      <th>Volume Anual</th>
-                      <th>Contabilista</th>
-                      <th>Estado</th>
-                      <th className="text-right">Ações</th>
+                      <th className="py-12">{t('adminUi.thCompany', 'Empresa')}</th>
+                      <th>{t('adminUi.thNif', 'NIF')}</th>
+                      <th>{t('adminUi.thType', 'Tipo')}</th>
+                      <th>{t('adminUi.thTaxRegime', 'Regime Fiscal')}</th>
+                      <th>{t('adminUi.thProvince', 'Província')}</th>
+                      <th>{t('adminUi.thAnnualTurnover', 'Volume Anual')}</th>
+                      <th>{t('adminUi.thAccountant', 'Contabilista')}</th>
+                      <th>{t('adminUi.thStatus', 'Estado')}</th>
+                      <th className="text-right">{t('adminUi.thActions', 'Ações')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {empresasFiltradas.length === 0 ? (
                       <tr>
                         <td colSpan={9} className="text-center py-40 text-muted">
-                          Nenhuma empresa encontrada com os filtros selecionados.
+                          {t('adminUi.companiesEmptyFiltered', 'Nenhuma empresa encontrada com os filtros selecionados.')}
                         </td>
                       </tr>
                     ) : (
@@ -1245,7 +1315,7 @@ const AdminGestao = () => {
                             <code style={{ color: '#0f172a', fontWeight: 600 }}>{emp.nif}</code>
                           </td>
                           <td>
-                            <span className="badge badge-light border" style={{ fontSize: 10 }}>
+                            <span className="badge badge-light border" style={{ fontSize: 10, backgroundColor: '#ffffff' }}>
                               {emp.tipo_entidade || 'SQ'}
                             </span>
                           </td>
@@ -1253,12 +1323,13 @@ const AdminGestao = () => {
                             <span
                               className="badge"
                               style={{
-                                backgroundColor:
+                                backgroundColor: '#ffffff',
+                                border:
                                   emp.regime_iva === 'GERAL'
-                                    ? '#eef2ff'
+                                    ? '1px solid #bfdbfe'
                                     : emp.regime_iva === 'SIMPLIFICADO'
-                                    ? '#ecfdf5'
-                                    : '#fef3c7',
+                                    ? '1px solid #a7f3d0'
+                                    : '1px solid #fde68a',
                                 color:
                                   emp.regime_iva === 'GERAL'
                                     ? '#2563eb'
@@ -1269,14 +1340,14 @@ const AdminGestao = () => {
                                 fontWeight: 700,
                               }}
                             >
-                              {emp.regime_iva}
+                              {t(`adminUi.regimeBadge_${emp.regime_iva}`, emp.regime_iva)}
                             </span>
                           </td>
                           <td>{emp.provincia || 'Luanda'}</td>
                           <td className="text-dark fw-600">
                             {Number(emp.volume_negocios_anual) > 0
                               ? kzComMoeda(emp.volume_negocios_anual)
-                              : 'Não declarado'}
+                              : t('adminUi.notDeclared', 'Não declarado')}
                           </td>
                           <td className="text-muted" style={{ fontSize: 12 }}>
                             {emp.contabilista_nome || '—'}
@@ -1287,7 +1358,7 @@ const AdminGestao = () => {
                               value={emp.estado}
                               onChange={(e) => alterarEstadoRapidoEmpresa(emp, e.target.value)}
                               style={{
-                                width: 105,
+                                width: 110,
                                 fontSize: 10,
                                 fontWeight: 700,
                                 borderRadius: 6,
@@ -1297,12 +1368,12 @@ const AdminGestao = () => {
                                 color: emp.estado === 'ATIVA' ? '#059669' : '#475569',
                                 border: emp.estado === 'ATIVA' ? '1px solid #a7f3d0' : '1px solid #cbd5e1',
                               }}
-                              title="Alterar estado da empresa no sistema"
+                              title={t('adminUi.changeCompanyStatusTooltip', 'Alterar estado da empresa no sistema')}
                             >
-                              <option value="ATIVA">ATIVA</option>
-                              <option value="INATIVA">INATIVA</option>
-                              <option value="SUSPENSA">SUSPENSA</option>
-                              <option value="ENCERRADA">ENCERRADA</option>
+                              <option value="ATIVA">{t('adminUi.statusUpperActive', 'ATIVA')}</option>
+                              <option value="INATIVA">{t('adminUi.statusUpperInactive', 'INATIVA')}</option>
+                              <option value="SUSPENSA">{t('adminUi.statusUpperSuspended', 'SUSPENSA')}</option>
+                              <option value="ENCERRADA">{t('adminUi.statusUpperClosed', 'ENCERRADA')}</option>
                             </select>
                           </td>
                           <td className="text-right">
@@ -1317,16 +1388,16 @@ const AdminGestao = () => {
                                 backgroundColor: '#2563eb',
                                 borderColor: '#2563eb',
                               }}
-                              title="Auditar empresa"
+                              title={t('adminUi.auditCompanyTooltip', 'Auditar empresa')}
                             >
-                              <i className="la la-chart-bar mr-4"></i> Auditar
+                              <i className="la la-chart-bar mr-4"></i> {t('adminUi.btnAudit', 'Auditar')}
                             </button>
                             <button
                               type="button"
-                              className="btn btn-xs btn-outline-secondary mr-6"
+                              className="btn btn-xs btn-outline-primary mr-6"
                               onClick={() => abrirModalEditarEmpresa(emp)}
-                              style={{ borderRadius: 6, padding: '4px 8px' }}
-                              title="Editar dados"
+                              style={{ borderRadius: 6, padding: '4px 8px', backgroundColor: '#ffffff' }}
+                              title={t('adminUi.editDataTooltip', 'Editar dados')}
                             >
                               <i className="la la-pencil-alt"></i>
                             </button>
@@ -1334,8 +1405,8 @@ const AdminGestao = () => {
                               type="button"
                               className="btn btn-xs btn-outline-danger"
                               onClick={() => excluirEmpresa(emp)}
-                              style={{ borderRadius: 6, padding: '4px 8px' }}
-                              title="Eliminar empresa"
+                              style={{ borderRadius: 6, padding: '4px 8px', backgroundColor: '#ffffff' }}
+                              title={t('adminUi.deleteCompanyTooltip', 'Eliminar empresa')}
                             >
                               <i className="la la-trash"></i>
                             </button>
@@ -1416,7 +1487,7 @@ const AdminGestao = () => {
                     <option value="Auditor">{t('admin.users.roleAuditor', 'Auditor')}</option>
                     <option value="Contabilista">{t('admin.users.roleAccountant', 'Contabilista')}</option>
                     <option value="Fiscalista">{t('admin.users.roleTaxSpecialist', 'Fiscalista')}</option>
-                    <option value="Operador de Facturação">Operador de Facturação / Digitalizador</option>
+                    <option value="Operador de Facturação">{t('adminUi.roleInvoiceOperatorFilter', 'Operador de Facturação / Digitalizador')}</option>
                     <option value="Consulta">{t('admin.users.roleReadOnly', 'Consulta')}</option>
                   </select>
                 </div>
@@ -1497,7 +1568,7 @@ const AdminGestao = () => {
                                   fontSize: 10,
                                 }}
                               >
-                                {papelExibido}
+                                {traduzirPapelAdmin(papelExibido)}
                               </span>
                             </td>
                             <td>
@@ -1575,38 +1646,38 @@ const AdminGestao = () => {
           </div>
 
           {/* PAINEL DE AUDITORIA DE SEGURANÇA: TENTATIVAS BLOQUEADAS */}
-          <div className="card card-default mt-25" style={{ borderRadius: 10, border: '1px solid #fee2e2' }}>
+          <div className="card card-default mt-25" style={{ borderRadius: 10, border: '1px solid #fee2e2', backgroundColor: '#ffffff' }}>
             <div className="card-header bg-white d-flex align-items-center justify-content-between flex-wrap" style={{ padding: '16px 20px', borderBottom: '1px solid #fecaca' }}>
               <div>
                 <h6 style={{ margin: 0, fontWeight: 700, color: '#991b1b', display: 'flex', alignItems: 'center' }}>
                   <i className="la la-shield-alt mr-2" style={{ color: '#ef4444', fontSize: 20 }}></i>
-                  Auditoria de Segurança: Tentativas de Acesso de Empresas Bloqueadas
+                  {t('adminUi.secAuditTitle', 'Auditoria de Segurança: Tentativas de Acesso de Empresas Bloqueadas')}
                 </h6>
                 <small className="text-muted">
-                  Registo em tempo real de tentativas de entrada na Área Administrativa por empresas e utilizadores não autorizados.
+                  {t('adminUi.secAuditSubtitle', 'Registo em tempo real de tentativas de entrada na Área Administrativa por empresas e utilizadores não autorizados.')}
                 </small>
               </div>
               <div className="d-flex align-items-center mt-2 mt-sm-0" style={{ gap: 8 }}>
-                <span className="badge" style={{ backgroundColor: '#fee2e2', color: '#dc2626', fontWeight: 700, padding: '5px 10px' }}>
-                  {registrosAcesso.total_bloqueados || registrosAcesso.registros?.length || 0} Tentativas Travadas
+                <span className="badge" style={{ backgroundColor: '#ffffff', border: '1px solid #fecaca', color: '#dc2626', fontWeight: 700, padding: '5px 10px' }}>
+                  {registrosAcesso.total_bloqueados || registrosAcesso.registros?.length || 0} {t('adminUi.secAuditBlockedCount', 'Tentativas Travadas')}
                 </span>
-                <span className="badge" style={{ backgroundColor: '#ecfdf5', color: '#059669', fontWeight: 700, padding: '5px 10px' }}>
-                  <i className="la la-lock mr-1"></i> Firewall 100% Ativo
+                <span className="badge" style={{ backgroundColor: '#ffffff', border: '1px solid #a7f3d0', color: '#059669', fontWeight: 700, padding: '5px 10px' }}>
+                  <i className="la la-lock mr-1"></i> {t('adminUi.secAuditFirewallActive', 'Firewall 100% Ativo')}
                 </span>
               </div>
             </div>
             <div className="card-body p-0">
               <div className="table-responsive">
                 <table className="table mb-0 table-hover">
-                  <thead style={{ backgroundColor: '#fef2f2', fontSize: 11, textTransform: 'uppercase' }}>
+                  <thead style={{ backgroundColor: '#ffffff', fontSize: 11, textTransform: 'uppercase' }}>
                     <tr>
-                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>Data / Hora</th>
-                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>Utilizador</th>
-                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>Empresa Vinculada</th>
-                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>IP de Origem</th>
-                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>Rota Tentada</th>
-                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>Motivo</th>
-                      <th style={{ padding: '10px 16px', color: '#991b1b' }} className="text-center">Resultado</th>
+                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>{t('adminUi.secThDateTime', 'Data / Hora')}</th>
+                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>{t('adminUi.secThUser', 'Utilizador')}</th>
+                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>{t('adminUi.secThLinkedCompany', 'Empresa Vinculada')}</th>
+                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>{t('adminUi.secThSourceIp', 'IP de Origem')}</th>
+                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>{t('adminUi.secThAttemptedRoute', 'Rota Tentada')}</th>
+                      <th style={{ padding: '10px 16px', color: '#991b1b' }}>{t('adminUi.secThReason', 'Motivo')}</th>
+                      <th style={{ padding: '10px 16px', color: '#991b1b' }} className="text-center">{t('adminUi.secThResult', 'Resultado')}</th>
                     </tr>
                   </thead>
                   <tbody style={{ fontSize: 13 }}>
@@ -1614,14 +1685,17 @@ const AdminGestao = () => {
                       <tr>
                         <td colSpan="7" className="text-center py-25 text-muted">
                           <i className="la la-check-circle text-success mr-2" style={{ fontSize: 18 }}></i>
-                          Nenhuma tentativa de intrusão detetada. O isolamento entre as empresas e o painel administrativo está 100% operacional.
+                          {t(
+                            'adminUi.secAuditEmpty',
+                            'Nenhuma tentativa de intrusão detetada. O isolamento entre as empresas e o painel administrativo está 100% operacional.'
+                          )}
                         </td>
                       </tr>
                     ) : (
                       registrosAcesso.registros.slice(0, 15).map((r) => (
                         <tr key={r.id}>
                           <td style={{ padding: '10px 16px', whiteSpace: 'nowrap' }} className="text-muted">
-                            {new Date(r.created_at).toLocaleString('pt-AO')}
+                            {new Date(r.created_at).toLocaleString(localeDate)}
                           </td>
                           <td style={{ padding: '10px 16px', fontWeight: 600, color: '#1f2937' }}>
                             {r.username}
@@ -1632,7 +1706,7 @@ const AdminGestao = () => {
                           <td style={{ padding: '10px 16px', fontFamily: 'monospace', fontSize: 12 }}>
                             {r.ip_origem || '127.0.0.1'}
                           </td>
-                          <td style={{ padding: '10px 16px', fontFamily: 'monospace', fontSize: 12, color: '#6366f1' }}>
+                          <td style={{ padding: '10px 16px', fontFamily: 'monospace', fontSize: 12, color: '#2563eb' }}>
                             {r.rota_tentada}
                           </td>
                           <td style={{ padding: '10px 16px', fontSize: 12, color: '#6b7280' }}>
@@ -1642,14 +1716,17 @@ const AdminGestao = () => {
                             <span
                               className="badge"
                               style={{
-                                backgroundColor: r.resultado === 'NEGADO' ? '#fee2e2' : '#ecfdf5',
+                                backgroundColor: '#ffffff',
+                                border: r.resultado === 'NEGADO' ? '1px solid #fecaca' : '1px solid #a7f3d0',
                                 color: r.resultado === 'NEGADO' ? '#dc2626' : '#059669',
                                 fontWeight: 700,
                                 fontSize: 10,
                                 padding: '4px 8px',
                               }}
                             >
-                              {r.resultado === 'NEGADO' ? 'BLOQUEADO (403)' : 'PERMITIDO'}
+                              {r.resultado === 'NEGADO'
+                                ? t('adminUi.secResultBlocked', 'BLOQUEADO (403)')
+                                : t('adminUi.secResultAllowed', 'PERMITIDO')}
                             </span>
                           </td>
                         </tr>
@@ -1671,10 +1748,10 @@ const AdminGestao = () => {
           <div className="d-flex align-items-center justify-content-between mb-20 flex-wrap" style={{ gap: 12 }}>
             <div>
               <h4 className="text-dark fw-700 mb-4" style={{ fontSize: 22 }}>
-                Motores de Auditoria & Regras Fiscais
+                {t('adminUi.rulesTitle', 'Motores de Auditoria & Regras Fiscais')}
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13 }}>
-                Configuração ativa do Rule Engine tributário angolano (Lei 7/19 CIVA, Lei 18/14 CIRT, Lei 19/14 CII).
+                {t('adminUi.rulesSubtitle', 'Configuração ativa do Rule Engine tributário angolano (Lei 7/19 CIVA, Lei 18/14 CIRT, Lei 19/14 CII).')}
               </p>
             </div>
           </div>
@@ -1692,7 +1769,7 @@ const AdminGestao = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Pesquisar por código, nome da regra ou imposto..."
+                      placeholder={t('adminUi.rulesSearchPlaceholder', 'Pesquisar por código, nome da regra ou imposto...')}
                       value={pesquisaRegra}
                       onChange={(e) => setPesquisaRegra(e.target.value)}
                       style={{ paddingLeft: 40, borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
@@ -1707,12 +1784,12 @@ const AdminGestao = () => {
                     onChange={(e) => setFiltroMotorRegra(e.target.value)}
                     style={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
                   >
-                    <option value="TODOS">Todos os Motores</option>
-                    <option value="M-IVA">Motor IVA</option>
-                    <option value="M-IRT">Motor IRT</option>
-                    <option value="M-II">Imposto Industrial</option>
-                    <option value="M-RET">Retenções</option>
-                    <option value="M-SS">Segurança Social</option>
+                    <option value="TODOS">{t('adminUi.allEngines', 'Todos os Motores')}</option>
+                    <option value="M-IVA">{t('adminUi.engineVat', 'Motor IVA')}</option>
+                    <option value="M-IRT">{t('adminUi.engineIrt', 'Motor IRT')}</option>
+                    <option value="M-II">{t('adminUi.engineIi', 'Imposto Industrial')}</option>
+                    <option value="M-RET">{t('adminUi.engineWithholding', 'Retenções')}</option>
+                    <option value="M-SS">{t('adminUi.engineInss', 'Segurança Social')}</option>
                   </select>
                 </div>
 
@@ -1723,16 +1800,19 @@ const AdminGestao = () => {
                     onChange={(e) => setFiltroSeveridadeRegra(e.target.value)}
                     style={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
                   >
-                    <option value="TODOS">Todas as Severidades</option>
-                    <option value="ALTO">Alto</option>
-                    <option value="MEDIO">Médio</option>
-                    <option value="BAIXO">Baixo</option>
-                    <option value="INFORMATIVO">Informativo</option>
+                    <option value="TODOS">{t('adminUi.allSeverities', 'Todas as Severidades')}</option>
+                    <option value="ALTO">{t('adminUi.sevHigh', 'Alto')}</option>
+                    <option value="MEDIO">{t('adminUi.sevMedium', 'Médio')}</option>
+                    <option value="BAIXO">{t('adminUi.sevLow', 'Baixo')}</option>
+                    <option value="INFORMATIVO">{t('adminUi.sevInfo', 'Informativo')}</option>
                   </select>
                 </div>
 
                 <div className="col-md-2 text-md-right text-muted" style={{ fontSize: 12 }}>
-                  <strong>{regrasFiltradas.length}</strong> de {regras.length} regras
+                  {t('adminUi.rulesCountShowing', '{{count}} de {{total}} regras', {
+                    count: regrasFiltradas.length,
+                    total: regras.length,
+                  })}
                 </div>
               </div>
 
@@ -1741,27 +1821,27 @@ const AdminGestao = () => {
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
                   <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
-                      <th className="py-12">Código</th>
-                      <th>Nome da Regra</th>
-                      <th>Imposto</th>
-                      <th>Base Legal (Legislação Angolana)</th>
-                      <th>Severidade</th>
-                      <th>Validação</th>
-                      <th className="text-center">Ativa</th>
+                      <th className="py-12">{t('adminUi.thCode', 'Código')}</th>
+                      <th>{t('adminUi.thRuleName', 'Nome da Regra')}</th>
+                      <th>{t('adminUi.thTax', 'Imposto')}</th>
+                      <th>{t('adminUi.thLegalBasis', 'Base Legal (Legislação Angolana)')}</th>
+                      <th>{t('adminUi.thSeverity', 'Severidade')}</th>
+                      <th>{t('adminUi.thValidation', 'Validação')}</th>
+                      <th className="text-center">{t('adminUi.thActiveFem', 'Ativa')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {regrasFiltradas.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="text-center py-40 text-muted">
-                          Nenhuma regra encontrada com os filtros selecionados.
+                          {t('adminUi.rulesEmptyFiltered', 'Nenhuma regra encontrada com os filtros selecionados.')}
                         </td>
                       </tr>
                     ) : (
                       regrasFiltradas.map((r) => (
                         <tr key={r.id}>
                           <td className="py-12">
-                            <span className="badge badge-light border fw-700" style={{ color: '#0f172a' }}>
+                            <span className="badge badge-light border fw-700" style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>
                               {r.codigo}
                             </span>
                           </td>
@@ -1783,7 +1863,7 @@ const AdminGestao = () => {
                               <div>
                                 <span className="fw-600 text-dark">{r.base_legal.legislacao}</span>
                                 <div className="text-muted" style={{ fontSize: 11 }}>
-                                  Art. {r.base_legal.artigo}
+                                  {t('adminUi.articleAbbrev', 'Art.')} {r.base_legal.artigo}
                                 </div>
                               </div>
                             ) : (
@@ -1796,10 +1876,11 @@ const AdminGestao = () => {
                               value={r.severidade}
                               onChange={(e) => mudarSeveridadeRegra(r, e.target.value)}
                               style={{
-                                width: 110,
+                                width: 115,
                                 fontSize: 11,
                                 fontWeight: 700,
                                 borderRadius: 6,
+                                backgroundColor: '#ffffff',
                                 color:
                                   r.severidade === 'ALTO'
                                     ? '#ef4444'
@@ -1808,10 +1889,10 @@ const AdminGestao = () => {
                                     : '#10b981',
                               }}
                             >
-                              <option value="ALTO">ALTO</option>
-                              <option value="MEDIO">MÉDIO</option>
-                              <option value="BAIXO">BAIXO</option>
-                              <option value="INFORMATIVO">INFO</option>
+                              <option value="ALTO">{t('adminUi.sevUpperHigh', 'ALTO')}</option>
+                              <option value="MEDIO">{t('adminUi.sevUpperMedium', 'MÉDIO')}</option>
+                              <option value="BAIXO">{t('adminUi.sevUpperLow', 'BAIXO')}</option>
+                              <option value="INFORMATIVO">{t('adminUi.sevUpperInfo', 'INFO')}</option>
                             </select>
                           </td>
                           <td>
@@ -1819,12 +1900,13 @@ const AdminGestao = () => {
                               <span
                                 className="badge"
                                 style={{
-                                  backgroundColor:
+                                  backgroundColor: '#ffffff',
+                                  border:
                                     r.estado_validacao === 'VALIDADA'
-                                      ? '#ecfdf5'
+                                      ? '1px solid #a7f3d0'
                                       : r.estado_validacao === 'POR_VALIDAR'
-                                      ? '#fef3c7'
-                                      : '#fef2f2',
+                                      ? '1px solid #fde68a'
+                                      : '1px solid #fecaca',
                                   color:
                                     r.estado_validacao === 'VALIDADA'
                                       ? '#059669'
@@ -1835,15 +1917,15 @@ const AdminGestao = () => {
                                   fontWeight: 700,
                                 }}
                               >
-                                {r.estado_validacao}
+                                {t(`adminUi.ruleValidation_${r.estado_validacao}`, r.estado_validacao)}
                               </span>
                               {r.estado_validacao !== 'VALIDADA' && (
                                 <button
                                   type="button"
                                   className="btn btn-xs btn-outline-success p-1"
                                   onClick={() => validarRegraHumana(r, 'VALIDADA')}
-                                  title="Aprovar e Validar Regra"
-                                  style={{ lineHeight: 1 }}
+                                  title={t('adminUi.approveRuleTooltip', 'Aprovar e Validar Regra')}
+                                  style={{ lineHeight: 1, backgroundColor: '#ffffff' }}
                                 >
                                   <i className="la la-check"></i>
                                 </button>
@@ -1853,8 +1935,8 @@ const AdminGestao = () => {
                                   type="button"
                                   className="btn btn-xs btn-outline-danger p-1"
                                   onClick={() => validarRegraHumana(r, 'REJEITADA')}
-                                  title="Rejeitar Regra"
-                                  style={{ lineHeight: 1 }}
+                                  title={t('adminUi.rejectRuleTooltip', 'Rejeitar Regra')}
+                                  style={{ lineHeight: 1, backgroundColor: '#ffffff' }}
                                 >
                                   <i className="la la-times"></i>
                                 </button>
@@ -1896,19 +1978,19 @@ const AdminGestao = () => {
           <div className="d-flex align-items-center justify-content-between mb-20 flex-wrap" style={{ gap: 12 }}>
             <div>
               <h4 className="text-dark fw-700 mb-4" style={{ fontSize: 22 }}>
-                Ocorrências Fiscais Globais
+                {t('adminUi.occurrencesTitle', 'Ocorrências Fiscais Globais')}
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13 }}>
-                Alertas, incongruências e divergências detectadas em todas as empresas pelo Rule Engine.
+                {t('adminUi.occurrencesSubtitle', 'Alertas, incongruências e divergências detectadas em todas as empresas pelo Rule Engine.')}
               </p>
             </div>
             <button
               type="button"
               className="btn btn-outline-primary d-flex align-items-center"
               onClick={() => setModalExecEngine(true)}
-              style={{ borderRadius: 8, fontWeight: 600 }}
+              style={{ borderRadius: 8, fontWeight: 600, backgroundColor: '#ffffff' }}
             >
-              <i className="la la-play mr-8"></i> Executar Motor em Empresa
+              <i className="la la-play mr-8"></i> {t('adminUi.runEngineInCompanyBtn', 'Executar Motor em Empresa')}
             </button>
           </div>
 
@@ -1925,7 +2007,7 @@ const AdminGestao = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Pesquisar..."
+                      placeholder={t('adminUi.searchShortPlaceholder', 'Pesquisar...')}
                       value={pesquisaOcorrencia}
                       onChange={(e) => setPesquisaOcorrencia(e.target.value)}
                       style={{ paddingLeft: 40, borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
@@ -1940,7 +2022,7 @@ const AdminGestao = () => {
                     onChange={(e) => setFiltroEmpresaOcorrencia(e.target.value)}
                     style={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
                   >
-                    <option value="TODOS">Todas as Empresas</option>
+                    <option value="TODOS">{t('adminUi.allCompanies', 'Todas as Empresas')}</option>
                     {empresasLista.map((e) => (
                       <option key={e.id} value={e.id}>
                         {e.nome}
@@ -1956,11 +2038,11 @@ const AdminGestao = () => {
                     onChange={(e) => setFiltroSeveridadeOcorrencia(e.target.value)}
                     style={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
                   >
-                    <option value="TODOS">Todas as Severidades</option>
-                    <option value="ALTO">Alto</option>
-                    <option value="MEDIO">Médio</option>
-                    <option value="BAIXO">Baixo</option>
-                    <option value="INFORMATIVO">Informativo</option>
+                    <option value="TODOS">{t('adminUi.allSeverities', 'Todas as Severidades')}</option>
+                    <option value="ALTO">{t('adminUi.sevHigh', 'Alto')}</option>
+                    <option value="MEDIO">{t('adminUi.sevMedium', 'Médio')}</option>
+                    <option value="BAIXO">{t('adminUi.sevLow', 'Baixo')}</option>
+                    <option value="INFORMATIVO">{t('adminUi.sevInfo', 'Informativo')}</option>
                   </select>
                 </div>
 
@@ -1971,16 +2053,16 @@ const AdminGestao = () => {
                     onChange={(e) => setFiltroEstadoOcorrencia(e.target.value)}
                     style={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
                   >
-                    <option value="TODOS">Todos os Estados</option>
-                    <option value="ABERTA">Aberta / Pendente</option>
-                    <option value="REVISADA">Revisada / Confirmada</option>
-                    <option value="IGNORADA">Ignorada / Falso Positivo</option>
-                    <option value="RESOLVIDA">Resolvida</option>
+                    <option value="TODOS">{t('adminUi.allStatuses', 'Todos os Estados')}</option>
+                    <option value="ABERTA">{t('adminUi.occStatusOpenFilter', 'Aberta / Pendente')}</option>
+                    <option value="REVISADA">{t('adminUi.occStatusReviewedFilter', 'Revisada / Confirmada')}</option>
+                    <option value="IGNORADA">{t('adminUi.occStatusIgnoredFilter', 'Ignorada / Falso Positivo')}</option>
+                    <option value="RESOLVIDA">{t('adminUi.occStatusResolvedFilter', 'Resolvida')}</option>
                   </select>
                 </div>
 
                 <div className="col-md-2 text-md-right text-muted" style={{ fontSize: 12 }}>
-                  <strong>{ocorrenciasFiltradas.length}</strong> ocorrências
+                  <strong>{ocorrenciasFiltradas.length}</strong> {t('adminUi.occurrencesUnit', 'ocorrências')}
                 </div>
               </div>
 
@@ -1990,20 +2072,20 @@ const AdminGestao = () => {
                   <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
                       <th className="py-12">#</th>
-                      <th>Empresa</th>
-                      <th>Regra Fiscal</th>
-                      <th>Período</th>
-                      <th>Severidade</th>
-                      <th>Valor Divergente</th>
-                      <th>Estado</th>
-                      <th className="text-right">Ação</th>
+                      <th>{t('adminUi.thCompany', 'Empresa')}</th>
+                      <th>{t('adminUi.thTaxRule', 'Regra Fiscal')}</th>
+                      <th>{t('adminUi.thPeriod', 'Período')}</th>
+                      <th>{t('adminUi.thSeverity', 'Severidade')}</th>
+                      <th>{t('adminUi.thDivergentAmount', 'Valor Divergente')}</th>
+                      <th>{t('adminUi.thStatus', 'Estado')}</th>
+                      <th className="text-right">{t('adminUi.thActionSingular', 'Ação')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {ocorrenciasFiltradas.length === 0 ? (
                       <tr>
                         <td colSpan={8} className="text-center py-40 text-muted">
-                          Nenhuma ocorrência encontrada.
+                          {t('adminUi.occurrencesEmpty', 'Nenhuma ocorrência encontrada.')}
                         </td>
                       </tr>
                     ) : (
@@ -2011,11 +2093,13 @@ const AdminGestao = () => {
                         <tr key={occ.id}>
                           <td className="py-12 fw-700 text-muted">#{occ.id}</td>
                           <td>
-                            <div className="fw-700 text-dark">{occ.empresa_nome || `Empresa #${occ.empresa}`}</div>
+                            <div className="fw-700 text-dark">
+                              {occ.empresa_nome || t('adminUi.companyFallbackNum', 'Empresa #{{id}}', { id: occ.empresa })}
+                            </div>
                           </td>
                           <td>
-                            <span className="badge badge-light border fw-600 mr-6">
-                              {occ.regra_codigo || occ.regra?.codigo || 'REGRA'}
+                            <span className="badge badge-light border fw-600 mr-6" style={{ backgroundColor: '#ffffff' }}>
+                              {occ.regra_codigo || occ.regra?.codigo || t('adminUi.ruleBadgeFallback', 'REGRA')}
                             </span>
                             <span style={{ fontSize: 12 }}>{occ.regra_nome || occ.regra?.nome}</span>
                           </td>
@@ -2034,7 +2118,7 @@ const AdminGestao = () => {
                                 fontSize: 10,
                               }}
                             >
-                              {occ.severidade}
+                              {t(`adminUi.sevBadge_${occ.severidade}`, occ.severidade)}
                             </span>
                           </td>
                           <td>
@@ -2052,12 +2136,12 @@ const AdminGestao = () => {
                                 (occ.estado || 'ABERTA')
                               }
                               onChange={(e) => mudarEstadoOcorrencia(occ, e.target.value)}
-                              style={{ width: 155, fontSize: 11, borderRadius: 6, fontWeight: 600 }}
+                              style={{ width: 165, fontSize: 11, borderRadius: 6, fontWeight: 600, backgroundColor: '#ffffff' }}
                             >
-                              <option value="ABERTA">ABERTA (Pendente)</option>
-                              <option value="REVISADA">REVISADA (Confirmada)</option>
-                              <option value="IGNORADA">IGNORADA (Falso Pos.)</option>
-                              <option value="RESOLVIDA">RESOLVIDA</option>
+                              <option value="ABERTA">{t('adminUi.occOptionOpen', 'ABERTA (Pendente)')}</option>
+                              <option value="REVISADA">{t('adminUi.occOptionReviewed', 'REVISADA (Confirmada)')}</option>
+                              <option value="IGNORADA">{t('adminUi.occOptionIgnored', 'IGNORADA (Falso Pos.)')}</option>
+                              <option value="RESOLVIDA">{t('adminUi.occOptionResolved', 'RESOLVIDA')}</option>
                             </select>
                           </td>
                           <td className="text-right">
@@ -2065,10 +2149,10 @@ const AdminGestao = () => {
                               type="button"
                               className="btn btn-xs btn-primary"
                               onClick={() => entrarNoEspacoEmpresa(occ.empresa)}
-                              style={{ borderRadius: 6, padding: '4px 8px' }}
-                              title="Auditar no espaço da empresa"
+                              style={{ borderRadius: 6, padding: '4px 8px', backgroundColor: '#2563eb', borderColor: '#2563eb' }}
+                              title={t('adminUi.auditInCompanySpaceTooltip', 'Auditar no espaço da empresa')}
                             >
-                              Auditar →
+                              {t('adminUi.btnAuditArrow', 'Auditar →')}
                             </button>
                           </td>
                         </tr>
@@ -2090,10 +2174,10 @@ const AdminGestao = () => {
           <div className="d-flex align-items-center justify-content-between mb-20 flex-wrap" style={{ gap: 12 }}>
             <div>
               <h4 className="text-dark fw-700 mb-4" style={{ fontSize: 22 }}>
-                Arquivo Central de Ficheiros Fiscais
+                {t('adminUi.docsTitle', 'Arquivo Central de Ficheiros Fiscais')}
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13 }}>
-                Gestão consolidada de ficheiros submetidos por todas as empresas (SAF-T, Balancetes, Modelo 7, DARs).
+                {t('adminUi.docsSubtitle', 'Gestão consolidada de ficheiros submetidos por todas as empresas (SAF-T, Balancetes, Modelo 7, DARs).')}
               </p>
             </div>
           </div>
@@ -2111,7 +2195,7 @@ const AdminGestao = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Pesquisar por nome de ficheiro ou empresa..."
+                      placeholder={t('adminUi.docsSearchPlaceholder', 'Pesquisar por nome de ficheiro ou empresa...')}
                       value={pesquisaDoc}
                       onChange={(e) => setPesquisaDoc(e.target.value)}
                       style={{ paddingLeft: 40, borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
@@ -2126,16 +2210,16 @@ const AdminGestao = () => {
                     onChange={(e) => setFiltroTipoDoc(e.target.value)}
                     style={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13 }}
                   >
-                    <option value="TODOS">Todos os Tipos</option>
-                    <option value="BALANCETE">Balancete de Verificação</option>
-                    <option value="MODELO7">Declaração Modelo 7</option>
-                    <option value="SAFT">SAF-T AO (Facturação)</option>
-                    <option value="RECIBO_AGT">DAR / Comprovativo AGT</option>
+                    <option value="TODOS">{t('adminUi.allTypes', 'Todos os Tipos')}</option>
+                    <option value="BALANCETE">{t('adminUi.docTypeTrialBalance', 'Balancete de Verificação')}</option>
+                    <option value="MODELO7">{t('adminUi.docTypeModel7', 'Declaração Modelo 7')}</option>
+                    <option value="SAFT">{t('adminUi.docTypeSaft', 'SAF-T AO (Facturação)')}</option>
+                    <option value="RECIBO_AGT">{t('adminUi.docTypeDar', 'DAR / Comprovativo AGT')}</option>
                   </select>
                 </div>
 
                 <div className="col-md-3 text-md-right text-muted" style={{ fontSize: 12 }}>
-                  <strong>{documentosFiltrados.length}</strong> ficheiros arquivados
+                  <strong>{documentosFiltrados.length}</strong> {t('adminUi.archivedFilesUnit', 'ficheiros arquivados')}
                 </div>
               </div>
 
@@ -2144,20 +2228,20 @@ const AdminGestao = () => {
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: 13 }}>
                   <thead style={{ backgroundColor: '#ffffff' }}>
                     <tr>
-                      <th className="py-12">Ficheiro</th>
-                      <th>Empresa</th>
-                      <th>Tipo</th>
-                      <th>Período</th>
-                      <th>Data de Envio</th>
-                      <th>Validação Estrita</th>
-                      <th className="text-right">Ações</th>
+                      <th className="py-12">{t('adminUi.thFile', 'Ficheiro')}</th>
+                      <th>{t('adminUi.thCompany', 'Empresa')}</th>
+                      <th>{t('adminUi.thType', 'Tipo')}</th>
+                      <th>{t('adminUi.thPeriod', 'Período')}</th>
+                      <th>{t('adminUi.thUploadDate', 'Data de Envio')}</th>
+                      <th>{t('adminUi.thStrictValidation', 'Validação Estrita')}</th>
+                      <th className="text-right">{t('adminUi.thActions', 'Ações')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {documentosFiltrados.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="text-center py-40 text-muted">
-                          Nenhum documento arquivado.
+                          {t('adminUi.docsEmpty', 'Nenhum documento arquivado.')}
                         </td>
                       </tr>
                     ) : (
@@ -2177,28 +2261,31 @@ const AdminGestao = () => {
                             </div>
                           </td>
                           <td>
-                            <span className="fw-600 text-dark">{doc.empresa_nome || `Empresa #${doc.empresa}`}</span>
+                            <span className="fw-600 text-dark">
+                              {doc.empresa_nome || t('adminUi.companyFallbackNum', 'Empresa #{{id}}', { id: doc.empresa })}
+                            </span>
                           </td>
                           <td>
-                            <span className="badge badge-light border" style={{ fontSize: 10 }}>
+                            <span className="badge badge-light border" style={{ fontSize: 10, backgroundColor: '#ffffff' }}>
                               {doc.tipo}
                             </span>
                           </td>
                           <td>{doc.mes ? `${String(doc.mes).padStart(2, '0')}/${doc.ano}` : '—'}</td>
                           <td className="text-muted">
-                            {doc.created_at ? new Date(doc.created_at).toLocaleDateString('pt-AO') : '—'}
+                            {doc.created_at ? new Date(doc.created_at).toLocaleDateString(localeDate) : '—'}
                           </td>
                           <td>
                             <span
                               className="badge"
                               style={{
-                                backgroundColor: doc.estado === 'VALIDADO' ? '#ecfdf5' : '#fef2f2',
+                                backgroundColor: '#ffffff',
+                                border: doc.estado === 'VALIDADO' ? '1px solid #a7f3d0' : '1px solid #fecaca',
                                 color: doc.estado === 'VALIDADO' ? '#059669' : '#dc2626',
                                 fontSize: 10,
                                 fontWeight: 700,
                               }}
                             >
-                              {doc.estado || 'PROCESSADO'}
+                              {t(`adminUi.docState_${doc.estado || 'PROCESSADO'}`, doc.estado || 'PROCESSADO')}
                             </span>
                           </td>
                           <td className="text-right">
@@ -2206,8 +2293,8 @@ const AdminGestao = () => {
                               type="button"
                               className="btn btn-xs btn-outline-danger"
                               onClick={() => excluirDocumento(doc)}
-                              style={{ borderRadius: 6, padding: '4px 8px' }}
-                              title="Remover ficheiro (Apenas Super Admin)"
+                              style={{ borderRadius: 6, padding: '4px 8px', backgroundColor: '#ffffff' }}
+                              title={t('adminUi.removeFileSuperAdminTooltip', 'Remover ficheiro (Apenas Super Admin)')}
                             >
                               <i className="la la-trash"></i>
                             </button>
@@ -2237,47 +2324,57 @@ const AdminGestao = () => {
               <div>
                 <h5 style={{ margin: 0, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
                   <i className="la la-user-lock" style={{ color: '#2563eb', fontSize: 22 }}></i>
-                  <span>A Minha Conta de Acesso (Nome, Utilizador, Email & Palavra-passe)</span>
+                  <span>{t('adminUi.myAccountCardTitle', 'A Minha Conta de Acesso (Nome, Utilizador, Email & Palavra-passe)')}</span>
                 </h5>
                 <small className="text-muted">
-                  Atualize os seus dados pessoais, nome de utilizador (login) e palavra-passe de administrador.
+                  {t('adminUi.myAccountCardSubtitle', 'Atualize os seus dados pessoais, nome de utilizador (login) e palavra-passe de administrador.')}
                 </small>
               </div>
               <button
                 type="button"
                 className="btn btn-outline-primary btn-xs d-flex align-items-center"
                 onClick={() => setMostrarSenhasAdmin((v) => !v)}
-                style={{ borderRadius: 6, fontWeight: 600, padding: '6px 12px', gap: 5 }}
+                style={{ borderRadius: 6, fontWeight: 600, padding: '6px 12px', gap: 5, backgroundColor: '#ffffff' }}
               >
                 <i className={`la ${mostrarSenhasAdmin ? 'la-eye-slash' : 'la-eye'}`}></i>
-                <span>{mostrarSenhasAdmin ? 'Ocultar Senhas' : 'Mostrar Senhas'}</span>
+                <span>
+                  {mostrarSenhasAdmin
+                    ? t('adminUi.hidePasswords', 'Ocultar Senhas')
+                    : t('adminUi.showPasswords', 'Mostrar Senhas')}
+                </span>
               </button>
             </div>
             <div className="card-body" style={{ padding: '20px 24px' }}>
               <form onSubmit={salvarMeuPerfilAdmin}>
                 <div className="row" style={{ rowGap: 14 }}>
                   <div className="col-md-3">
-                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Primeiro Nome</label>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
+                      {t('adminUi.firstNameLabel', 'Primeiro Nome')}
+                    </label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Primeiro nome"
+                      placeholder={t('adminUi.firstNamePlaceholder', 'Primeiro nome')}
                       value={perfilAdminForm.first_name}
                       onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, first_name: e.target.value })}
                     />
                   </div>
                   <div className="col-md-3">
-                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Sobrenome / Apelido</label>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
+                      {t('adminUi.lastNameLabel', 'Sobrenome / Apelido')}
+                    </label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Sobrenome"
+                      placeholder={t('adminUi.lastNamePlaceholder', 'Sobrenome')}
                       value={perfilAdminForm.last_name}
                       onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, last_name: e.target.value })}
                     />
                   </div>
                   <div className="col-md-3">
-                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Nome de Utilizador (Login) *</label>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
+                      {t('adminUi.loginUsernameLabel', 'Nome de Utilizador (Login) *')}
+                    </label>
                     <input
                       type="text"
                       className="form-control fw-600"
@@ -2287,7 +2384,9 @@ const AdminGestao = () => {
                     />
                   </div>
                   <div className="col-md-3">
-                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Email</label>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
+                      {t('adminUi.emailLabel', 'Email')}
+                    </label>
                     <input
                       type="email"
                       className="form-control"
@@ -2299,12 +2398,12 @@ const AdminGestao = () => {
 
                   <div className="col-md-4">
                     <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
-                      Palavra-passe Atual (para mudar a senha)
+                      {t('adminUi.currentPasswordLabel', 'Palavra-passe Atual (para mudar a senha)')}
                     </label>
                     <input
                       type={mostrarSenhasAdmin ? 'text' : 'password'}
                       className="form-control"
-                      placeholder="Senha atual"
+                      placeholder={t('adminUi.currentPasswordPlaceholder', 'Senha atual')}
                       autoComplete="current-password"
                       value={perfilAdminForm.currentPassword}
                       onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, currentPassword: e.target.value })}
@@ -2312,12 +2411,12 @@ const AdminGestao = () => {
                   </div>
                   <div className="col-md-4">
                     <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
-                      Nova Palavra-passe (opcional)
+                      {t('adminUi.newPasswordOptionalLabel', 'Nova Palavra-passe (opcional)')}
                     </label>
                     <input
                       type={mostrarSenhasAdmin ? 'text' : 'password'}
                       className="form-control"
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder={t('adminUi.min6CharsPlaceholder', 'Mínimo 6 caracteres')}
                       autoComplete="new-password"
                       value={perfilAdminForm.password}
                       onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, password: e.target.value })}
@@ -2325,12 +2424,12 @@ const AdminGestao = () => {
                   </div>
                   <div className="col-md-4">
                     <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
-                      Confirmar Nova Palavra-passe
+                      {t('adminUi.confirmNewPasswordLabel', 'Confirmar Nova Palavra-passe')}
                     </label>
                     <input
                       type={mostrarSenhasAdmin ? 'text' : 'password'}
                       className="form-control"
-                      placeholder="Repita a nova senha"
+                      placeholder={t('adminUi.repeatNewPasswordPlaceholder', 'Repita a nova senha')}
                       autoComplete="new-password"
                       value={perfilAdminForm.confirmPassword}
                       onChange={(e) => setPerfilAdminForm({ ...perfilAdminForm, confirmPassword: e.target.value })}
@@ -2342,10 +2441,14 @@ const AdminGestao = () => {
                       type="submit"
                       className="btn btn-primary btn-sm d-flex align-items-center"
                       disabled={salvandoPerfilAdmin}
-                      style={{ borderRadius: 6, fontWeight: 700, padding: '8px 18px', gap: 6 }}
+                      style={{ borderRadius: 6, fontWeight: 700, padding: '8px 18px', gap: 6, backgroundColor: '#2563eb', borderColor: '#2563eb' }}
                     >
                       <i className="la la-save"></i>
-                      <span>{salvandoPerfilAdmin ? 'A guardar...' : 'Guardar Minha Conta & Palavra-passe'}</span>
+                      <span>
+                        {salvandoPerfilAdmin
+                          ? t('adminUi.saving', 'A guardar...')
+                          : t('adminUi.saveMyAccountBtn', 'Guardar Minha Conta & Palavra-passe')}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -2370,11 +2473,11 @@ const AdminGestao = () => {
                 <div className="d-flex align-items-center mt-3 mt-md-0" style={{ gap: 10 }}>
                   <button
                     type="button"
-                    className="btn btn-outline-lighten btn-sm"
-                    style={{ borderRadius: 6, fontWeight: 600, color: '#5a5f7d', borderColor: '#edf0f5' }}
+                    className="btn btn-outline-primary btn-sm"
+                    style={{ borderRadius: 6, fontWeight: 600, backgroundColor: '#ffffff' }}
                     onClick={restaurarPadroesAgt}
                   >
-                    <i className="la la-undo mr-1"></i> Padrões AGT
+                    <i className="la la-undo mr-1"></i> {t('adminUi.agtDefaultsBtn', 'Padrões AGT')}
                   </button>
                   <button
                     type="submit"
@@ -2416,7 +2519,7 @@ const AdminGestao = () => {
                       className="form-control"
                       value={configuracoes.nome_sistema || ''}
                       onChange={(e) => setConfiguracoes({ ...configuracoes, nome_sistema: e.target.value })}
-                      placeholder="Ex: SCKJ - Sistema de Reconciliação Contabilística"
+                      placeholder={t('adminUi.systemNamePlaceholder', 'Ex: SCKJ - Sistema de Reconciliação Contabilística')}
                     />
                   </div>
 
@@ -2463,7 +2566,9 @@ const AdminGestao = () => {
                         <span className="input-group-text">MB</span>
                       </div>
                     </div>
-                    <small className="text-muted">Aplica-se ao upload de SAF-T, Balancetes e Declarações fiscais.</small>
+                    <small className="text-muted">
+                      {t('adminUi.uploadLimitHint', 'Aplica-se ao upload de SAF-T, Balancetes e Declarações fiscais.')}
+                    </small>
                   </div>
 
                   <div
@@ -2527,7 +2632,7 @@ const AdminGestao = () => {
                           <span className="input-group-text">%</span>
                         </div>
                       </div>
-                      <small className="text-muted">Art. 12.º do Código do IVA (Lei n.º 7/19)</small>
+                      <small className="text-muted">{t('adminUi.vatLegalHint', 'Art. 12.º do Código do IVA (Lei n.º 7/19)')}</small>
                     </div>
 
                     <div className="col-md-6 form-group mb-3">
@@ -2548,7 +2653,7 @@ const AdminGestao = () => {
                           <span className="input-group-text">%</span>
                         </div>
                       </div>
-                      <small className="text-muted">Art. 67.º do Código do Imposto Industrial</small>
+                      <small className="text-muted">{t('adminUi.iiLegalHint', 'Art. 67.º do Código do Imposto Industrial')}</small>
                     </div>
                   </div>
 
@@ -2571,7 +2676,7 @@ const AdminGestao = () => {
                           <span className="input-group-text">%</span>
                         </div>
                       </div>
-                      <small className="text-muted">Quota entidade patronal (8%)</small>
+                      <small className="text-muted">{t('adminUi.inssCompanyHint', 'Quota entidade patronal (8%)')}</small>
                     </div>
 
                     <div className="col-md-6 form-group mb-3">
@@ -2592,18 +2697,26 @@ const AdminGestao = () => {
                           <span className="input-group-text">%</span>
                         </div>
                       </div>
-                      <small className="text-muted">Desconto do trabalhador (3%)</small>
+                      <small className="text-muted">{t('adminUi.inssWorkerHint', 'Desconto do trabalhador (3%)')}</small>
                     </div>
                   </div>
 
-                  <div className="p-3" style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8 }}>
+                  <div className="p-3" style={{ backgroundColor: '#ffffff', border: '1px solid #bbf7d0', borderRadius: 8 }}>
                     <div className="d-flex align-items-center">
                       <i className="la la-calendar-check mr-2" style={{ color: '#16a34a', fontSize: 20 }}></i>
-                      <strong style={{ fontSize: 12, color: '#166534' }}>Prazos Oficiais de Submissão e Liquidação</strong>
+                      <strong style={{ fontSize: 12, color: '#166534' }}>
+                        {t('adminUi.officialDeadlinesTitle', 'Prazos Oficiais de Submissão e Liquidação')}
+                      </strong>
                     </div>
                     <ul className="mb-0 mt-2 pl-3" style={{ fontSize: 12, color: '#15803d' }}>
-                      <li><strong>Segurança Social (INSS):</strong> Submissão de folha e pagamento até ao <strong>dia 10</strong> do mês seguinte.</li>
-                      <li><strong>Declaração Modelo 7 (IVA):</strong> Submissão e liquidação até ao <strong>último dia</strong> do mês seguinte.</li>
+                      <li>
+                        <strong>{t('adminUi.deadlineInssLabel', 'Segurança Social (INSS):')}</strong>{' '}
+                        {t('adminUi.deadlineInssText', 'Submissão de folha e pagamento até ao dia 10 do mês seguinte.')}
+                      </li>
+                      <li>
+                        <strong>{t('adminUi.deadlineVatLabel', 'Declaração Modelo 7 (IVA):')}</strong>{' '}
+                        {t('adminUi.deadlineVatText', 'Submissão e liquidação até ao último dia do mês seguinte.')}
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -2638,7 +2751,10 @@ const AdminGestao = () => {
                       </div>
                     </div>
                     <small className="text-muted">
-                      Empresas com divergências acumuladas superiores a este valor acionam alerta vermelho de severidade CRÍTICA.
+                      {t(
+                        'adminUi.riskThresholdHint',
+                        'Empresas com divergências acumuladas superiores a este valor acionam alerta vermelho de severidade CRÍTICA.'
+                      )}
                     </small>
                   </div>
 
@@ -2655,7 +2771,7 @@ const AdminGestao = () => {
                     />
                   </div>
 
-                  <div className="p-3" style={{ backgroundColor: '#fffbe6', border: '1px solid #ffe58f', borderRadius: 8 }}>
+                  <div className="p-3" style={{ backgroundColor: '#ffffff', border: '1px solid #fde68a', borderRadius: 8 }}>
                     <div className="custom-control custom-checkbox">
                       <input
                         type="checkbox"
@@ -2673,7 +2789,10 @@ const AdminGestao = () => {
                       </label>
                     </div>
                     <small className="text-muted d-block mt-1">
-                      Dispara alertas quando uma empresa atinge risco crítico ou aproxima-se dos prazos sem declaração enviada.
+                      {t(
+                        'adminUi.emailAlertsHint',
+                        'Dispara alertas quando uma empresa atinge risco crítico ou aproxima-se dos prazos sem declaração enviada.'
+                      )}
                     </small>
                   </div>
                 </div>
@@ -2714,7 +2833,7 @@ const AdminGestao = () => {
                         {`${perfilAdminForm.first_name || ''} ${perfilAdminForm.last_name || ''}`.trim() ||
                           perfilAdminForm.username ||
                           userAtivo.username ||
-                          'Super Administrador'}
+                          t('adminUi.superAdministrator', 'Super Administrador')}
                       </h6>
                       <span className="text-muted" style={{ fontSize: 13 }}>
                         {perfilAdminForm.email || userAtivo.email || 'admin@sistema.local'}
@@ -2731,7 +2850,7 @@ const AdminGestao = () => {
                             padding: '3px 8px',
                           }}
                         >
-                          <i className="la la-shield-alt mr-1"></i> Super Admin Master
+                          <i className="la la-shield-alt mr-1"></i> {t('adminUi.superAdminMasterBadge', 'Super Admin Master')}
                         </span>
                       </div>
                     </div>
@@ -2740,7 +2859,10 @@ const AdminGestao = () => {
                   <div className="p-3 mb-3" style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8 }}>
                     <div style={{ fontSize: 12, color: '#475569', lineHeight: 1.6 }}>
                       <i className="la la-info-circle mr-1 text-primary"></i>
-                      Utilize o formulário no topo desta página para alterar o seu próprio nome, utilizador ou palavra-passe, ou aceda à aba Utilizadores para gerir todas as contas do sistema.
+                      {t(
+                        'adminUi.adminSessionInfoText',
+                        'Utilize o formulário no topo desta página para alterar o seu próprio nome, utilizador ou palavra-passe, ou aceda à aba Utilizadores para gerir todas as contas do sistema.'
+                      )}
                     </div>
                   </div>
 
@@ -2748,9 +2870,9 @@ const AdminGestao = () => {
                     type="button"
                     className="btn btn-outline-primary btn-block"
                     onClick={() => mudarAba('utilizadores')}
-                    style={{ borderRadius: 6, fontWeight: 600 }}
+                    style={{ borderRadius: 6, fontWeight: 600, backgroundColor: '#ffffff' }}
                   >
-                    <i className="la la-users-cog mr-1"></i> Gerir Todas as Contas de Utilizadores
+                    <i className="la la-users-cog mr-1"></i> {t('adminUi.manageAllUsersBtn', 'Gerir Todas as Contas de Utilizadores')}
                   </button>
                 </div>
               </div>
@@ -2763,10 +2885,10 @@ const AdminGestao = () => {
               <button
                 type="button"
                 className="btn btn-outline-primary"
-                style={{ borderRadius: 6, fontWeight: 600 }}
+                style={{ borderRadius: 6, fontWeight: 600, backgroundColor: '#ffffff' }}
                 onClick={restaurarPadroesAgt}
               >
-                <i className="la la-undo mr-1"></i> Padrões AGT Angola 2026
+                <i className="la la-undo mr-1"></i> {t('adminUi.agtDefaults2026Btn', 'Padrões AGT Angola 2026')}
               </button>
               <button
                 type="submit"
@@ -2804,10 +2926,12 @@ const AdminGestao = () => {
           style={{ backgroundColor: 'rgba(15, 23, 42, 0.7)', zIndex: 1060 }}
         >
           <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 12 }}>
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 12, backgroundColor: '#ffffff' }}>
               <div className="modal-header bg-white border-bottom py-16 px-24">
                 <h5 className="modal-title fw-700 text-dark">
-                  {empresaEmEdicao ? `Editar Empresa: ${empresaEmEdicao.nome}` : 'Cadastrar Nova Empresa Cliente'}
+                  {empresaEmEdicao
+                    ? t('adminUi.companyModalEditTitle', 'Editar Empresa: {{nome}}', { nome: empresaEmEdicao.nome })
+                    : t('adminUi.companyModalCreateTitle', 'Cadastrar Nova Empresa Cliente')}
                 </h5>
                 <button
                   type="button"
@@ -2820,20 +2944,20 @@ const AdminGestao = () => {
               </div>
 
               <form onSubmit={salvarEmpresa}>
-                <div className="modal-body p-24" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+                <div className="modal-body p-24" style={{ maxHeight: '72vh', overflowY: 'auto', backgroundColor: '#ffffff' }}>
                   {/* SECÇÃO 1: IDENTIFICAÇÃO FISCAL */}
                   <h6 className="fw-700 text-primary text-uppercase mb-12" style={{ fontSize: 12, letterSpacing: '0.5px' }}>
-                    1. Identificação Fiscal & Legal
+                    {t('adminUi.companySec1Title', '1. Identificação Fiscal & Legal')}
                   </h6>
                   <div className="row mb-15">
                     <div className="col-md-7 mb-10 mb-md-0">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Nome / Razão Social *
+                        {t('adminUi.companyLegalNameLabel', 'Nome / Razão Social *')}
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Ex: SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA"
+                        placeholder={t('adminUi.companyLegalNamePlaceholder', 'Ex: SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA')}
                         value={formEmpresa.nome}
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, nome: e.target.value })}
                         required
@@ -2842,12 +2966,12 @@ const AdminGestao = () => {
                     </div>
                     <div className="col-md-5">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        NIF (Número de Identificação Fiscal) *
+                        {t('adminUi.companyNifLabel', 'NIF (Número de Identificação Fiscal) *')}
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Ex: 5001234567"
+                        placeholder={t('adminUi.companyNifPlaceholder', 'Ex: 5001234567')}
                         value={formEmpresa.nif}
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, nif: e.target.value })}
                         required
@@ -2859,12 +2983,12 @@ const AdminGestao = () => {
                   <div className="row mb-20">
                     <div className="col-md-6 mb-10 mb-md-0">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Nome Comercial / Insígnia
+                        {t('adminUi.companyTradeNameLabel', 'Nome Comercial / Insígnia')}
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Ex: Grupo SCKJ Angola"
+                        placeholder={t('adminUi.companyTradeNamePlaceholder', 'Ex: Grupo SCKJ Angola')}
                         value={formEmpresa.nome_comercial}
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, nome_comercial: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
@@ -2872,7 +2996,7 @@ const AdminGestao = () => {
                     </div>
                     <div className="col-md-3 col-sm-6 mb-10 mb-md-0">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Tipo de Entidade
+                        {t('adminUi.companyEntityTypeLabel', 'Tipo de Entidade')}
                       </label>
                       <select
                         className="form-control"
@@ -2880,15 +3004,15 @@ const AdminGestao = () => {
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, tipo_entidade: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
                       >
-                        <option value="SQ">Sociedade por Quotas (Lda)</option>
-                        <option value="SA">Sociedade Anónima (SA)</option>
-                        <option value="UNIPESSOAL">Unipessoal (SU)</option>
-                        <option value="ENI">Empresário em Nome Individual</option>
+                        <option value="SQ">{t('adminUi.entityTypeSq', 'Sociedade por Quotas (Lda)')}</option>
+                        <option value="SA">{t('adminUi.entityTypeSa', 'Sociedade Anónima (SA)')}</option>
+                        <option value="UNIPESSOAL">{t('adminUi.entityTypeSu', 'Unipessoal (SU)')}</option>
+                        <option value="ENI">{t('adminUi.entityTypeEni', 'Empresário em Nome Individual')}</option>
                       </select>
                     </div>
                     <div className="col-md-3 col-sm-6">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Estado Operacional
+                        {t('adminUi.companyOperationalStatusLabel', 'Estado Operacional')}
                       </label>
                       <select
                         className="form-control"
@@ -2896,10 +3020,10 @@ const AdminGestao = () => {
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, estado: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
                       >
-                        <option value="ATIVA">Ativa</option>
-                        <option value="INATIVA">Inativa</option>
-                        <option value="SUSPENSA">Suspensa</option>
-                        <option value="ENCERRADA">Encerrada</option>
+                        <option value="ATIVA">{t('adminUi.statusActiveFem', 'Ativa')}</option>
+                        <option value="INATIVA">{t('adminUi.statusInactiveFem', 'Inativa')}</option>
+                        <option value="SUSPENSA">{t('adminUi.statusSuspendedFem', 'Suspensa')}</option>
+                        <option value="ENCERRADA">{t('adminUi.statusClosedFem', 'Encerrada')}</option>
                       </select>
                     </div>
                   </div>
@@ -2907,7 +3031,7 @@ const AdminGestao = () => {
                   <div className="row mb-20">
                     <div className="col-md-6 mb-10 mb-md-0">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Data de Constituição (Opcional)
+                        {t('adminUi.companyIncorporationDateLabel', 'Data de Constituição (Opcional)')}
                       </label>
                       <input
                         type="date"
@@ -2919,7 +3043,7 @@ const AdminGestao = () => {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Data de Início de Atividade (Opcional)
+                        {t('adminUi.companyActivityStartDateLabel', 'Data de Início de Atividade (Opcional)')}
                       </label>
                       <input
                         type="date"
@@ -2933,12 +3057,12 @@ const AdminGestao = () => {
 
                   {/* SECÇÃO 2: REGIME DE IVA & VOLUME DE NEGÓCIOS */}
                   <h6 className="fw-700 text-primary text-uppercase mb-12" style={{ fontSize: 12, letterSpacing: '0.5px' }}>
-                    2. Enquadramento no IVA & Volume de Negócios
+                    {t('adminUi.companySec2Title', '2. Enquadramento no IVA & Volume de Negócios')}
                   </h6>
                   <div className="row mb-20">
                     <div className="col-md-4 mb-10 mb-md-0">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Regime de IVA
+                        {t('adminUi.companyVatRegimeLabel', 'Regime de IVA')}
                       </label>
                       <select
                         className="form-control"
@@ -2946,19 +3070,19 @@ const AdminGestao = () => {
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, regime_iva: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
                       >
-                        <option value="GERAL">Regime Geral (Taxa 14%)</option>
-                        <option value="SIMPLIFICADO">Regime Simplificado (Taxa 7%)</option>
-                        <option value="EXCLUSAO">Regime de Exclusão (Isento)</option>
+                        <option value="GERAL">{t('adminUi.vatRegimeGeneralOption', 'Regime Geral (Taxa 14%)')}</option>
+                        <option value="SIMPLIFICADO">{t('adminUi.vatRegimeSimplifiedOption', 'Regime Simplificado (Taxa 7%)')}</option>
+                        <option value="EXCLUSAO">{t('adminUi.vatRegimeExclusionOption', 'Regime de Exclusão (Isento)')}</option>
                       </select>
                     </div>
                     <div className="col-md-5 mb-10 mb-md-0">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Volume de Negócios Anual (Kz)
+                        {t('adminUi.companyAnnualTurnoverLabel', 'Volume de Negócios Anual (Kz)')}
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Ex: 50000000.00"
+                        placeholder={t('adminUi.companyAnnualTurnoverPlaceholder', 'Ex: 50000000.00')}
                         value={formEmpresa.volume_negocios_anual}
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, volume_negocios_anual: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
@@ -2966,7 +3090,7 @@ const AdminGestao = () => {
                     </div>
                     <div className="col-md-3">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Ano de Referência
+                        {t('adminUi.companyReferenceYearLabel', 'Ano de Referência')}
                       </label>
                       <input
                         type="number"
@@ -2980,12 +3104,12 @@ const AdminGestao = () => {
 
                   {/* SECÇÃO 3: LOCALIZAÇÃO & CONTACTOS */}
                   <h6 className="fw-700 text-primary text-uppercase mb-12" style={{ fontSize: 12, letterSpacing: '0.5px' }}>
-                    3. Localização & Contactos
+                    {t('adminUi.companySec3Title', '3. Localização & Contactos')}
                   </h6>
                   <div className="row mb-15">
                     <div className="col-md-4 mb-10 mb-md-0">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Província
+                        {t('adminUi.companyProvinceLabel', 'Província')}
                       </label>
                       <select
                         className="form-control"
@@ -3003,13 +3127,13 @@ const AdminGestao = () => {
                     </div>
                     <div className="col-md-4 mb-10 mb-md-0">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Município
+                        {t('adminUi.companyMunicipalityLabel', 'Município')}
                       </label>
                       <input
                         type="text"
                         className="form-control"
                         list="lista-sugestoes-municipios"
-                        placeholder="Ex: Belas / Viana / Luanda"
+                        placeholder={t('adminUi.companyMunicipalityPlaceholder', 'Ex: Belas / Viana / Luanda')}
                         value={formEmpresa.municipio}
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, municipio: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
@@ -3022,7 +3146,7 @@ const AdminGestao = () => {
                     </div>
                     <div className="col-md-4">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Telefone
+                        {t('adminUi.companyPhoneLabel', 'Telefone')}
                       </label>
                       <input
                         type="text"
@@ -3038,12 +3162,12 @@ const AdminGestao = () => {
                   <div className="row mb-20">
                     <div className="col-md-6 mb-10 mb-md-0">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Email Corporativo
+                        {t('adminUi.companyCorporateEmailLabel', 'Email Corporativo')}
                       </label>
                       <input
                         type="email"
                         className="form-control"
-                        placeholder="contato@empresa.co.ao"
+                        placeholder={t('adminUi.companyCorporateEmailPlaceholder', 'contato@empresa.co.ao')}
                         value={formEmpresa.email}
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, email: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
@@ -3051,12 +3175,12 @@ const AdminGestao = () => {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Endereço / Sede
+                        {t('adminUi.companyAddressLabel', 'Endereço / Sede')}
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Rua, Bairro, Edifício"
+                        placeholder={t('adminUi.companyAddressPlaceholder', 'Rua, Bairro, Edifício')}
                         value={formEmpresa.endereco}
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, endereco: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
@@ -3066,17 +3190,17 @@ const AdminGestao = () => {
 
                   {/* SECÇÃO 4: DADOS DO CONTABILISTA RESPONSÁVEL */}
                   <h6 className="fw-700 text-primary text-uppercase mb-12" style={{ fontSize: 12, letterSpacing: '0.5px' }}>
-                    4. Contabilista Responsável (OCPCA)
+                    {t('adminUi.companySec4Title', '4. Contabilista Responsável (OCPCA)')}
                   </h6>
                   <div className="row">
                     <div className="col-md-6 mb-10 mb-md-0">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Nome do Contabilista
+                        {t('adminUi.companyAccountantNameLabel', 'Nome do Contabilista')}
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Nome do contabilista credenciado"
+                        placeholder={t('adminUi.companyAccountantNamePlaceholder', 'Nome do contabilista credenciado')}
                         value={formEmpresa.contabilista_nome}
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, contabilista_nome: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
@@ -3084,12 +3208,12 @@ const AdminGestao = () => {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Contacto do Contabilista
+                        {t('adminUi.companyAccountantContactLabel', 'Contacto do Contabilista')}
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Telefone / Email"
+                        placeholder={t('adminUi.companyAccountantContactPlaceholder', 'Telefone / Email')}
                         value={formEmpresa.contabilista_contacto}
                         onChange={(e) => setFormEmpresa({ ...formEmpresa, contabilista_contacto: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
@@ -3104,8 +3228,9 @@ const AdminGestao = () => {
                     className="btn btn-outline-primary btn-sm"
                     onClick={() => setModalEmpresaAberto(false)}
                     disabled={salvandoEmpresa}
+                    style={{ backgroundColor: '#ffffff' }}
                   >
-                    Cancelar
+                    {t('adminUi.cancelBtn', 'Cancelar')}
                   </button>
                   <button
                     type="submit"
@@ -3113,7 +3238,11 @@ const AdminGestao = () => {
                     disabled={salvandoEmpresa}
                     style={{ backgroundColor: '#2563eb', borderColor: '#2563eb', fontWeight: 600 }}
                   >
-                    {salvandoEmpresa ? 'A guardar...' : empresaEmEdicao ? 'Guardar Alterações' : 'Criar Empresa'}
+                    {salvandoEmpresa
+                      ? t('adminUi.saving', 'A guardar...')
+                      : empresaEmEdicao
+                      ? t('adminUi.saveChangesBtn', 'Guardar Alterações')
+                      : t('adminUi.createCompanyBtn', 'Criar Empresa')}
                   </button>
                 </div>
               </form>
@@ -3132,7 +3261,7 @@ const AdminGestao = () => {
           style={{ backgroundColor: 'rgba(15, 23, 42, 0.7)', zIndex: 1060 }}
         >
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 12 }}>
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 12, backgroundColor: '#ffffff' }}>
               <div className="modal-header bg-white border-bottom py-16 px-24">
                 <h5 className="modal-title fw-700 text-dark">
                   {userEmEdicao
@@ -3150,7 +3279,7 @@ const AdminGestao = () => {
               </div>
 
               <form onSubmit={salvarUser}>
-                <div className="modal-body p-24">
+                <div className="modal-body p-24" style={{ backgroundColor: '#ffffff' }}>
                   <div className="row mb-12">
                     <div className="col-md-6 mb-10 mb-md-0">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
@@ -3159,7 +3288,7 @@ const AdminGestao = () => {
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Primeiro nome"
+                        placeholder={t('adminUi.firstNamePlaceholder', 'Primeiro nome')}
                         value={formUser.first_name}
                         onChange={(e) => setFormUser({ ...formUser, first_name: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
@@ -3172,7 +3301,7 @@ const AdminGestao = () => {
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Último nome"
+                        placeholder={t('adminUi.lastNameShortPlaceholder', 'Último nome')}
                         value={formUser.last_name}
                         onChange={(e) => setFormUser({ ...formUser, last_name: e.target.value })}
                         style={{ borderRadius: 6, fontSize: 13 }}
@@ -3187,7 +3316,7 @@ const AdminGestao = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="ex: carlos.contabilista"
+                      placeholder={t('adminUi.usernameExamplePlaceholder', 'ex: carlos.contabilista')}
                       value={formUser.username}
                       onChange={(e) => setFormUser({ ...formUser, username: e.target.value })}
                       required
@@ -3202,7 +3331,7 @@ const AdminGestao = () => {
                     <input
                       type="email"
                       className="form-control"
-                      placeholder="utilizador@empresa.co.ao"
+                      placeholder={t('adminUi.userEmailPlaceholder', 'utilizador@empresa.co.ao')}
                       value={formUser.email}
                       onChange={(e) => setFormUser({ ...formUser, email: e.target.value })}
                       style={{ borderRadius: 6, fontSize: 13 }}
@@ -3218,7 +3347,7 @@ const AdminGestao = () => {
                     <input
                       type="password"
                       className="form-control"
-                      placeholder={userEmEdicao ? '••••••••' : 'Mínimo 8 caracteres'}
+                      placeholder={userEmEdicao ? '••••••••' : t('adminUi.min8CharsPlaceholder', 'Mínimo 8 caracteres')}
                       value={formUser.password}
                       onChange={(e) => setFormUser({ ...formUser, password: e.target.value })}
                       required={!userEmEdicao}
@@ -3236,12 +3365,16 @@ const AdminGestao = () => {
                       onChange={(e) => setFormUser({ ...formUser, papel: e.target.value })}
                       style={{ borderRadius: 6, fontSize: 13 }}
                     >
-                      <option value="Super Admin">Super Admin ({t('admin.users.fullMasterAccess', 'Acesso Total Root')})</option>
+                      <option value="Super Admin">
+                        {t('admin.users.roleSuperAdmin', 'Super Admin')} ({t('admin.users.fullMasterAccess', 'Acesso Total Root')})
+                      </option>
                       <option value="Administrador">{t('admin.users.roleAdmin', 'Administrador')}</option>
                       <option value="Auditor">{t('admin.users.roleAuditor', 'Auditor')}</option>
                       <option value="Fiscalista">{t('admin.users.roleTaxSpecialist', 'Fiscalista')}</option>
                       <option value="Contabilista">{t('admin.users.roleAccountant', 'Contabilista')}</option>
-                      <option value="Operador de Facturação">Operador de Facturação / Digitalizador (Portal de Scanner & Upload)</option>
+                      <option value="Operador de Facturação">
+                        {t('adminUi.roleInvoiceOperatorModal', 'Operador de Facturação / Digitalizador (Portal de Scanner & Upload)')}
+                      </option>
                       <option value="Consulta">{t('admin.users.roleReadOnly', 'Consulta')}</option>
                     </select>
                   </div>
@@ -3295,6 +3428,7 @@ const AdminGestao = () => {
                     className="btn btn-outline-primary btn-sm"
                     onClick={() => setModalUserAberto(false)}
                     disabled={salvandoUser}
+                    style={{ backgroundColor: '#ffffff' }}
                   >
                     {t('common.cancel', 'Cancelar')}
                   </button>
@@ -3327,10 +3461,10 @@ const AdminGestao = () => {
           style={{ backgroundColor: 'rgba(15, 23, 42, 0.7)', zIndex: 1060 }}
         >
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 12 }}>
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 12, backgroundColor: '#ffffff' }}>
               <div className="modal-header bg-white border-bottom py-16 px-24">
                 <h5 className="modal-title fw-700 text-dark">
-                  Executar Motor de Auditoria Fiscal
+                  {t('adminUi.execEngineModalTitle', 'Executar Motor de Auditoria Fiscal')}
                 </h5>
                 <button
                   type="button"
@@ -3343,14 +3477,17 @@ const AdminGestao = () => {
               </div>
 
               <form onSubmit={executarMotorParaEmpresa}>
-                <div className="modal-body p-24">
+                <div className="modal-body p-24" style={{ backgroundColor: '#ffffff' }}>
                   <p className="text-muted mb-15" style={{ fontSize: 13 }}>
-                    O Rule Engine avaliará as regras ativas de IVA, IRT, Imposto Industrial e Segurança Social sobre os ficheiros e declarações do período.
+                    {t(
+                      'adminUi.execEngineModalDesc',
+                      'O Rule Engine avaliará as regras ativas de IVA, IRT, Imposto Industrial e Segurança Social sobre os ficheiros e declarações do período.'
+                    )}
                   </p>
 
                   <div className="mb-15">
                     <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                      Empresa Alvo *
+                      {t('adminUi.execEngineTargetCompanyLabel', 'Empresa Alvo *')}
                     </label>
                     <select
                       className="form-control"
@@ -3359,7 +3496,7 @@ const AdminGestao = () => {
                       required
                       style={{ borderRadius: 6, fontSize: 13 }}
                     >
-                      <option value="">Selecione a empresa...</option>
+                      <option value="">{t('adminUi.execEngineSelectCompanyPlaceholder', 'Selecione a empresa...')}</option>
                       {empresasLista.map((e) => (
                         <option key={e.id} value={e.id}>
                           {e.nome} (NIF: {e.nif})
@@ -3371,7 +3508,7 @@ const AdminGestao = () => {
                   <div className="row">
                     <div className="col-6">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Ano
+                        {t('adminUi.execEngineYearLabel', 'Ano')}
                       </label>
                       <input
                         type="number"
@@ -3383,7 +3520,7 @@ const AdminGestao = () => {
                     </div>
                     <div className="col-6">
                       <label className="form-label fw-600 mb-4" style={{ fontSize: 12 }}>
-                        Mês
+                        {t('adminUi.execEngineMonthLabel', 'Mês')}
                       </label>
                       <select
                         className="form-control"
@@ -3393,7 +3530,7 @@ const AdminGestao = () => {
                       >
                         {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                           <option key={m} value={m}>
-                            {String(m).padStart(2, '0')} - Período {m}
+                            {String(m).padStart(2, '0')} - {t('adminUi.periodNumber', 'Período {{num}}', { num: m })}
                           </option>
                         ))}
                       </select>
@@ -3401,14 +3538,15 @@ const AdminGestao = () => {
                   </div>
                 </div>
 
-                <div className="modal-footer bg-light py-12 px-24">
+                <div className="modal-footer bg-white py-12 px-24" style={{ gap: 10 }}>
                   <button
                     type="button"
-                    className="btn btn-secondary btn-sm"
+                    className="btn btn-outline-primary btn-sm"
                     onClick={() => setModalExecEngine(false)}
                     disabled={executandoEngine}
+                    style={{ backgroundColor: '#ffffff' }}
                   >
-                    Cancelar
+                    {t('adminUi.cancelBtn', 'Cancelar')}
                   </button>
                   <button
                     type="submit"
@@ -3416,7 +3554,9 @@ const AdminGestao = () => {
                     disabled={executandoEngine}
                     style={{ backgroundColor: '#2563eb', borderColor: '#2563eb', fontWeight: 600 }}
                   >
-                    {executandoEngine ? 'A executar motores...' : 'Iniciar Auditoria'}
+                    {executandoEngine
+                      ? t('adminUi.executingEngines', 'A executar motores...')
+                      : t('adminUi.startAuditBtn', 'Iniciar Auditoria')}
                   </button>
                 </div>
               </form>

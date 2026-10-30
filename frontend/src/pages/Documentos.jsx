@@ -7,26 +7,26 @@ import ConfirmModal from '../components/common/ConfirmModal';
 import { usePeriodo, usePeriodoDaUrl } from '../context/PeriodoContext';
 
 const PASTAS_ORGANIZACIONAIS = [
-  { id: 'TODOS', nomePadrao: 'Todos os Documentos', icone: 'la la-folder-open', tipos: [] },
-  { id: 'BALANCETES', nomePadrao: 'Balancetes PGC', icone: 'la la-book', tipos: ['BALANCETE'] },
-  { id: 'AGT', nomePadrao: 'Declarações AGT (Modelo 7)', icone: 'la la-landmark', tipos: ['MODELO7', 'IMPOSTO_INDUSTRIAL', 'DECLARACAO_IRT'] },
-  { id: 'OUTROS', nomePadrao: 'Outros Comprovativos', icone: 'la la-file-alt', tipos: ['FACTURA_VENDA', 'FACTURA_COMPRA', 'FOLHA_SALARIAL', 'FOLHA_SS', 'EXTRACTO_BANCARIO', 'COMPROVATIVOS', 'RETENCOES', 'OUTRO', 'DOSSIE_MENSAL'] },
+  { id: 'TODOS', labelKey: 'documentosUi.folderAll', nomePadrao: 'Todos os Documentos', icone: 'la la-folder-open', tipos: [] },
+  { id: 'BALANCETES', labelKey: 'documentosUi.folderTrialBalances', nomePadrao: 'Balancetes PGC', icone: 'la la-book', tipos: ['BALANCETE'] },
+  { id: 'AGT', labelKey: 'documentosUi.folderAgtDeclarations', nomePadrao: 'Declarações AGT (Modelo 7)', icone: 'la la-landmark', tipos: ['MODELO7', 'IMPOSTO_INDUSTRIAL', 'DECLARACAO_IRT'] },
+  { id: 'OUTROS', labelKey: 'documentosUi.folderOtherReceipts', nomePadrao: 'Outros Comprovativos', icone: 'la la-file-alt', tipos: ['FACTURA_VENDA', 'FACTURA_COMPRA', 'FOLHA_SALARIAL', 'FOLHA_SS', 'EXTRACTO_BANCARIO', 'COMPROVATIVOS', 'RETENCOES', 'OUTRO', 'DOSSIE_MENSAL'] },
 ];
 
 const TIPOS_DOCUMENTO = [
-  { valor: 'BALANCETE', pasta: 'BALANCETES', labelPadrao: 'Balancete de Verificação (PGC)' },
-  { valor: 'MODELO7', pasta: 'AGT', labelPadrao: 'Declaração Modelo 7 da AGT (IVA)' },
-  { valor: 'IMPOSTO_INDUSTRIAL', pasta: 'AGT', labelPadrao: 'Declaração de Imposto Industrial' },
-  { valor: 'DECLARACAO_IRT', pasta: 'AGT', labelPadrao: 'Declaração de IRT' },
-  { valor: 'FACTURA_VENDA', pasta: 'OUTROS', labelPadrao: 'Fatura de Venda (Emitida)' },
-  { valor: 'FACTURA_COMPRA', pasta: 'OUTROS', labelPadrao: 'Fatura de Compra / Fornecedor' },
-  { valor: 'FOLHA_SALARIAL', pasta: 'OUTROS', labelPadrao: 'Folha Salarial' },
-  { valor: 'FOLHA_SS', pasta: 'OUTROS', labelPadrao: 'Guia da Segurança Social (INSS)' },
-  { valor: 'EXTRACTO_BANCARIO', pasta: 'OUTROS', labelPadrao: 'Extrato Bancário' },
-  { valor: 'COMPROVATIVOS', pasta: 'OUTROS', labelPadrao: 'Comprovativo de Pagamento' },
-  { valor: 'RETENCOES', pasta: 'OUTROS', labelPadrao: 'Retenção na Fonte' },
-  { valor: 'DOSSIE_MENSAL', pasta: 'OUTROS', labelPadrao: 'Dossiê Mensal Completo' },
-  { valor: 'OUTRO', pasta: 'OUTROS', labelPadrao: 'Outro Documento Societário' },
+  { valor: 'BALANCETE', pasta: 'BALANCETES', labelKey: 'documentosUi.typeBalancete', labelPadrao: 'Balancete de Verificação (PGC)' },
+  { valor: 'MODELO7', pasta: 'AGT', labelKey: 'documentosUi.typeModelo7', labelPadrao: 'Declaração Modelo 7 da AGT (IVA)' },
+  { valor: 'IMPOSTO_INDUSTRIAL', pasta: 'AGT', labelKey: 'documentosUi.typeImpostoIndustrial', labelPadrao: 'Declaração de Imposto Industrial' },
+  { valor: 'DECLARACAO_IRT', pasta: 'AGT', labelKey: 'documentosUi.typeDeclaracaoIrt', labelPadrao: 'Declaração de IRT' },
+  { valor: 'FACTURA_VENDA', pasta: 'OUTROS', labelKey: 'documentosUi.typeFacturaVenda', labelPadrao: 'Fatura de Venda (Emitida)' },
+  { valor: 'FACTURA_COMPRA', pasta: 'OUTROS', labelKey: 'documentosUi.typeFacturaCompra', labelPadrao: 'Fatura de Compra / Fornecedor' },
+  { valor: 'FOLHA_SALARIAL', pasta: 'OUTROS', labelKey: 'documentosUi.typeFolhaSalarial', labelPadrao: 'Folha Salarial' },
+  { valor: 'FOLHA_SS', pasta: 'OUTROS', labelKey: 'documentosUi.typeFolhaSs', labelPadrao: 'Guia da Segurança Social (INSS)' },
+  { valor: 'EXTRACTO_BANCARIO', pasta: 'OUTROS', labelKey: 'documentosUi.typeExtractoBancario', labelPadrao: 'Extrato Bancário' },
+  { valor: 'COMPROVATIVOS', pasta: 'OUTROS', labelKey: 'documentosUi.typeComprovativos', labelPadrao: 'Comprovativo de Pagamento' },
+  { valor: 'RETENCOES', pasta: 'OUTROS', labelKey: 'documentosUi.typeRetencoes', labelPadrao: 'Retenção na Fonte' },
+  { valor: 'DOSSIE_MENSAL', pasta: 'OUTROS', labelKey: 'documentosUi.typeDossieMensal', labelPadrao: 'Dossiê Mensal Completo' },
+  { valor: 'OUTRO', pasta: 'OUTROS', labelKey: 'documentosUi.typeOutro', labelPadrao: 'Outro Documento Societário' },
 ];
 
 const MESES = [
@@ -92,9 +92,9 @@ const Documentos = () => {
   const getTipoLabel = useCallback(
     (valor, fallback) => {
       const achado = TIPOS_DOCUMENTO.find((tItem) => tItem.valor === valor);
-      return achado ? achado.labelPadrao : fallback || valor;
+      return achado ? t(achado.labelKey, achado.labelPadrao) : fallback || valor;
     },
-    []
+    [t]
   );
 
   const getMesNome = useCallback(
@@ -179,7 +179,11 @@ const Documentos = () => {
         if (data.empresa_recem_criada) {
           await carregarEmpresas();
           toast.success(
-            `✨ ${data.mensagem_cadastro || `Nova empresa pré-cadastrada a partir do documento: ${data.empresa_nome} (NIF: ${data.empresa_nif})`}`,
+            `✨ ${data.mensagem_cadastro || t('documentosUi.newCompanyPreRegisteredToast', {
+              nome: data.empresa_nome,
+              nif: data.empresa_nif,
+              defaultValue: 'Nova empresa pré-cadastrada a partir do documento: {{nome}} (NIF: {{nif}})',
+            })}`,
             { autoClose: 7000 }
           );
         }
@@ -196,8 +200,9 @@ const Documentos = () => {
           });
         }
         if (!data.empresa_recem_criada) {
+          const detectedTypeLabel = getTipoLabel(data.tipo, data.tipo_nome || data.tipo);
           toast.info(
-            `⚡ Detetado: ${data.tipo_nome || data.tipo} ${data.empresa_nome ? '· ' + data.empresa_nome : ''} ${data.mes && data.ano ? `(${data.mes}/${data.ano})` : ''}`,
+            `⚡ ${t('documentosUi.detectedPrefix', 'Detetado')}: ${detectedTypeLabel} ${data.empresa_nome ? '· ' + data.empresa_nome : ''} ${data.mes && data.ano ? `(${data.mes}/${data.ano})` : ''}`,
             { autoClose: 4000 }
           );
         }
@@ -261,7 +266,10 @@ const Documentos = () => {
       if (response.ok) {
         const data = await response.json().catch(() => ({}));
         if (data.documento?.empresa_recem_criada) {
-          toast.success(data.documento.mensagem_cadastro || 'Empresa pré-cadastrada automaticamente com sucesso!');
+          toast.success(
+            data.documento.mensagem_cadastro ||
+              t('documentosUi.companyAutoPreRegisteredSuccess', 'Empresa pré-cadastrada automaticamente com sucesso!')
+          );
         } else {
           toast.success(t('archive.notifications.uploadSuccess', 'Documento arquivado com sucesso no repositório!'));
         }
@@ -418,7 +426,10 @@ const Documentos = () => {
                 {t('archive.title', 'Arquivo Digital & Repositório de Documentos')}
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13.5 }}>
-                Guarda permanente e recuperação rápida de balancetes, declarações Modelo 7 e comprovativos fiscais da empresa.
+                {t(
+                  'documentosUi.headerSubtitle',
+                  'Guarda permanente e recuperação rápida de balancetes, declarações Modelo 7 e comprovativos fiscais da empresa.'
+                )}
               </p>
             </div>
 
@@ -439,7 +450,7 @@ const Documentos = () => {
                 onClick={() => navigate('/confronto')}
                 style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
               >
-                <i className="la la-balance-scale mr-4"></i> Ir para Confronto com IA &rarr;
+                <i className="la la-balance-scale mr-4"></i> {t('documentosUi.goToAiReconciliation', 'Ir para Confronto com IA')} &rarr;
               </button>
             </div>
           </div>
@@ -469,10 +480,11 @@ const Documentos = () => {
               </div>
               <div>
                 <strong className="color-dark d-block" style={{ fontSize: 14 }}>
-                  {empresaAtual?.nome || 'Selecione uma Empresa'}
+                  {empresaAtual?.nome || t('documentosUi.selectCompany', 'Selecione uma Empresa')}
                 </strong>
                 <span className="text-muted" style={{ fontSize: 12 }}>
-                  NIF: {empresaAtual?.nif || '---'} · Regime: {empresaAtual?.regime_nome || empresaAtual?.regime_iva || 'Geral'}
+                  {t('documentosUi.nifLabel', 'NIF')}: {empresaAtual?.nif || '---'} · {t('documentosUi.regimeLabel', 'Regime')}:{' '}
+                  {empresaAtual?.regime_nome || empresaAtual?.regime_iva || t('documentosUi.generalRegime', 'Geral')}
                 </span>
               </div>
             </div>
@@ -502,10 +514,10 @@ const Documentos = () => {
                   onChange={(e) => setFiltroAno(e.target.value)}
                   style={{ minWidth: 120, height: 36, fontSize: 12.5 }}
                 >
-                  <option value="todos">Todos os Anos</option>
+                  <option value="todos">{t('documentosUi.allYears', 'Todos os Anos')}</option>
                   {anosDisponiveis.map((y) => (
                     <option key={y} value={String(y)}>
-                      Ano {y}
+                      {t('documentosUi.yearPrefix', { year: y, defaultValue: 'Ano {{year}}' })}
                     </option>
                   ))}
                 </select>
@@ -518,10 +530,10 @@ const Documentos = () => {
                   onChange={(e) => setFiltroMes(e.target.value)}
                   style={{ minWidth: 130, height: 36, fontSize: 12.5 }}
                 >
-                  <option value="todos">Todos os Meses</option>
+                  <option value="todos">{t('documentosUi.allMonths', 'Todos os Meses')}</option>
                   {MESES.map((m) => (
                     <option key={m.valor} value={m.valor}>
-                      {m.nome}
+                      {t(`months.${m.chave}`, m.nome)}
                     </option>
                   ))}
                 </select>
@@ -536,14 +548,14 @@ const Documentos = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Total no Repositório
+              {t('documentosUi.kpiTotalRepoTitle', 'Total no Repositório')}
             </span>
             <div className="fw-800" style={{ fontSize: 26, color: '#0f172a' }}>
               {documentosFiltrados.length}{' '}
-              <span className="fs-13 text-muted fw-normal">ficheiros</span>
+              <span className="fs-13 text-muted fw-normal">{t('documentosUi.kpiFilesUnit', 'ficheiros')}</span>
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              Preservados no arquivo digital
+              {t('documentosUi.kpiTotalRepoSub', 'Preservados no arquivo digital')}
             </span>
           </div>
         </div>
@@ -551,14 +563,14 @@ const Documentos = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Balancetes de Verificação
+              {t('documentosUi.kpiTrialBalancesTitle', 'Balancetes de Verificação')}
             </span>
             <div className="fw-800" style={{ fontSize: 26, color: '#2563eb' }}>
               {contadoresPastas.BALANCETES || 0}{' '}
-              <span className="fs-13 text-muted fw-normal">PGC</span>
+              <span className="fs-13 text-muted fw-normal">{t('documentosUi.kpiPgcUnit', 'PGC')}</span>
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              Contabilidade e diários
+              {t('documentosUi.kpiTrialBalancesSub', 'Contabilidade e diários')}
             </span>
           </div>
         </div>
@@ -566,14 +578,14 @@ const Documentos = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Declarações AGT (IVA)
+              {t('documentosUi.kpiAgtDeclarationsTitle', 'Declarações AGT (IVA)')}
             </span>
             <div className="fw-800" style={{ fontSize: 26, color: '#2563eb' }}>
               {contadoresPastas.AGT || 0}{' '}
-              <span className="fs-13 text-muted fw-normal">Modelo 7</span>
+              <span className="fs-13 text-muted fw-normal">{t('documentosUi.kpiModel7Unit', 'Modelo 7')}</span>
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              IVA e impostos declarados
+              {t('documentosUi.kpiAgtDeclarationsSub', 'IVA e impostos declarados')}
             </span>
           </div>
         </div>
@@ -581,14 +593,14 @@ const Documentos = () => {
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="confronto-kpi-card h-100" style={{ borderTop: '3px solid #2563eb' }}>
             <span className="text-muted fw-700 d-block mb-4" style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Outros Comprovativos
+              {t('documentosUi.kpiOtherReceiptsTitle', 'Outros Comprovativos')}
             </span>
             <div className="fw-800" style={{ fontSize: 26, color: '#0f172a' }}>
               {contadoresPastas.OUTROS || 0}{' '}
-              <span className="fs-13 text-muted fw-normal">anexos</span>
+              <span className="fs-13 text-muted fw-normal">{t('documentosUi.kpiAttachmentsUnit', 'anexos')}</span>
             </div>
             <span className="text-muted" style={{ fontSize: 12 }}>
-              Faturas, bancos e contratos
+              {t('documentosUi.kpiOtherReceiptsSub', 'Faturas, bancos e contratos')}
             </span>
           </div>
         </div>
@@ -598,10 +610,11 @@ const Documentos = () => {
       <div className="card card-default mb-20" style={{ border: '1px solid #e2e8f0', borderRadius: 14, background: '#ffffff' }}>
         <div className="card-header bg-white py-14 px-20 border-bottom d-flex align-items-center justify-content-between flex-wrap" style={{ gap: 8 }}>
           <h5 className="fw-700 mb-0" style={{ fontSize: 15, color: '#0f172a' }}>
-            <i className="la la-cloud-upload-alt mr-1" style={{ color: '#2563eb' }}></i> Carregar Novo Ficheiro para o Arquivo
+            <i className="la la-cloud-upload-alt mr-1" style={{ color: '#2563eb' }}></i>{' '}
+            {t('documentosUi.uploadCardTitle', 'Carregar Novo Ficheiro para o Arquivo')}
           </h5>
           <span className="text-muted" style={{ fontSize: 12 }}>
-            Deteção inteligente de empresa, exercício fiscal e modelo
+            {t('documentosUi.uploadCardHint', 'Deteção inteligente de empresa, exercício fiscal e modelo')}
           </span>
         </div>
         <div className="card-body p-20 bg-white">
@@ -624,10 +637,13 @@ const Documentos = () => {
                 <i className="la la-cloud-upload-alt"></i>
               </div>
               <h6 className="fw-700 mb-4" style={{ fontSize: 15, color: '#0f172a' }}>
-                Arraste qualquer ficheiro para aqui ou clique para selecionar
+                {t('documentosUi.dropzoneTitle', 'Arraste qualquer ficheiro para aqui ou clique para selecionar')}
               </h6>
               <p className="text-muted mb-0" style={{ fontSize: 13 }}>
-                Suporta ficheiros PDF e Excel (.xlsx). O sistema categoriza e associa automaticamente à empresa.
+                {t(
+                  'documentosUi.dropzoneDesc',
+                  'Suporta ficheiros PDF e Excel (.xlsx). O sistema categoriza e associa automaticamente à empresa.'
+                )}
               </p>
             </div>
           ) : (
@@ -660,13 +676,14 @@ const Documentos = () => {
                         {(selectedFile.size / 1024).toFixed(1)} KB
                         {detectando && (
                           <span className="ml-2" style={{ color: '#2563eb', fontWeight: 600 }}>
-                            <i className="la la-spinner la-spin"></i> A analisar documento...
+                            <i className="la la-spinner la-spin"></i> {t('documentosUi.analyzingDoc', 'A analisar documento...')}
                           </span>
                         )}
                         {detecaoInfo && !detectando && (
                           <>
                             <span className="ml-2 font-weight-bold" style={{ color: '#2563eb' }}>
-                              <i className="la la-check"></i> {detecaoInfo.tipo_nome || detecaoInfo.tipo}
+                              <i className="la la-check"></i>{' '}
+                              {getTipoLabel(detecaoInfo.tipo, detecaoInfo.tipo_nome || detecaoInfo.tipo)}
                             </span>
                             {detecaoInfo.empresa_recem_criada && (
                               <span
@@ -680,7 +697,7 @@ const Documentos = () => {
                                   borderRadius: 6,
                                 }}
                               >
-                                Nova Empresa Pré-Cadastrada
+                                {t('documentosUi.newCompanyPreRegisteredBadge', 'Nova Empresa Pré-Cadastrada')}
                               </span>
                             )}
                           </>
@@ -697,7 +714,7 @@ const Documentos = () => {
                       disabled={uploading}
                       style={{ fontWeight: 700, padding: '7px 14px' }}
                     >
-                      Cancelar
+                      {t('documentosUi.cancelBtn', 'Cancelar')}
                     </button>
                     <button
                       type="submit"
@@ -707,11 +724,12 @@ const Documentos = () => {
                     >
                       {uploading ? (
                         <>
-                          <i className="la la-spinner la-spin mr-1"></i> A Guardar...
+                          <i className="la la-spinner la-spin mr-1"></i> {t('documentosUi.savingBtn', 'A Guardar...')}
                         </>
                       ) : (
                         <>
-                          <i className="la la-shield-alt mr-1"></i> Guardar no Arquivo Permanente
+                          <i className="la la-shield-alt mr-1"></i>{' '}
+                          {t('documentosUi.savePermanentBtn', 'Guardar no Arquivo Permanente')}
                         </>
                       )}
                     </button>
@@ -721,7 +739,7 @@ const Documentos = () => {
                 <div className="row" style={{ rowGap: 10 }}>
                   <div className="col-12 col-md-4">
                     <label className="text-muted fw-600 mb-2" style={{ fontSize: 11.5 }}>
-                      EMPRESA ASSOCIADA
+                      {t('documentosUi.associatedCompanyLabel', 'EMPRESA ASSOCIADA')}
                     </label>
                     {isAdmin && empresas.length > 1 ? (
                       <select
@@ -729,7 +747,9 @@ const Documentos = () => {
                         value={empresaId || ''}
                         onChange={(e) => atualizar({ empresaId: e.target.value })}
                       >
-                        <option value="">✨ Deteção Automática (Extrair do Documento)</option>
+                        <option value="">
+                          {t('documentosUi.autoDetectCompanyOption', '✨ Deteção Automática (Extrair do Documento)')}
+                        </option>
                         {empresas.map((emp) => (
                           <option key={emp.id} value={String(emp.id)}>
                             {emp.nome} ({emp.nif})
@@ -743,7 +763,8 @@ const Documentos = () => {
                       >
                         <i className="la la-building mr-1" style={{ color: '#2563eb' }}></i>
                         <span className="text-truncate">
-                          {empresaAtual?.nome || 'Empresa Vinculada'} (NIF: {empresaAtual?.nif || '---'})
+                          {empresaAtual?.nome || t('documentosUi.linkedCompanyFallback', 'Empresa Vinculada')} ({t('documentosUi.nifLabel', 'NIF')}:{' '}
+                          {empresaAtual?.nif || '---'})
                         </span>
                       </div>
                     )}
@@ -751,7 +772,7 @@ const Documentos = () => {
 
                   <div className="col-12 col-md-4">
                     <label className="text-muted fw-600 mb-2" style={{ fontSize: 11.5 }}>
-                      CATEGORIA DO DOCUMENTO
+                      {t('documentosUi.docCategoryLabel', 'CATEGORIA DO DOCUMENTO')}
                     </label>
                     <select
                       className="form-control form-control-sm"
@@ -761,7 +782,7 @@ const Documentos = () => {
                     >
                       {TIPOS_DOCUMENTO.map((tItem) => (
                         <option key={tItem.valor} value={tItem.valor}>
-                          {tItem.labelPadrao}
+                          {t(tItem.labelKey, tItem.labelPadrao)}
                         </option>
                       ))}
                     </select>
@@ -769,7 +790,7 @@ const Documentos = () => {
 
                   <div className="col-6 col-md-2">
                     <label className="text-muted fw-600 mb-2" style={{ fontSize: 11.5 }}>
-                      ANO
+                      {t('documentosUi.yearCapsLabel', 'ANO')}
                     </label>
                     <select
                       className="form-control form-control-sm"
@@ -786,7 +807,7 @@ const Documentos = () => {
 
                   <div className="col-6 col-md-2">
                     <label className="text-muted fw-600 mb-2" style={{ fontSize: 11.5 }}>
-                      MÊS
+                      {t('documentosUi.monthCapsLabel', 'MÊS')}
                     </label>
                     <select
                       className="form-control form-control-sm"
@@ -795,7 +816,7 @@ const Documentos = () => {
                     >
                       {MESES.map((m) => (
                         <option key={m.valor} value={m.valor}>
-                          {m.nome}
+                          {t(`months.${m.chave}`, m.nome)}
                         </option>
                       ))}
                     </select>
@@ -824,7 +845,7 @@ const Documentos = () => {
                 }}
               >
                 <i className={pasta.icone} style={{ fontSize: 15 }}></i>
-                <span>{pasta.nomePadrao}</span>
+                <span>{t(pasta.labelKey, pasta.nomePadrao)}</span>
                 <span
                   className="badge"
                   style={{
@@ -855,7 +876,7 @@ const Documentos = () => {
               <input
                 type="text"
                 className="form-control border-left-0"
-                placeholder="Pesquisar documento..."
+                placeholder={t('documentosUi.searchDocPlaceholder', 'Pesquisar documento...')}
                 value={termoBusca}
                 onChange={(e) => setTermoBusca(e.target.value)}
                 style={{ height: 36, fontSize: 13 }}
@@ -866,7 +887,7 @@ const Documentos = () => {
                   className="btn btn-outline-primary btn-xs ml-2"
                   style={{ height: 36, padding: '0 10px' }}
                   onClick={() => setTermoBusca('')}
-                  title="Limpar pesquisa"
+                  title={t('documentosUi.clearSearchTooltip', 'Limpar pesquisa')}
                 >
                   <i className="la la-times"></i>
                 </button>
@@ -881,12 +902,12 @@ const Documentos = () => {
               value={filtroTipo}
               onChange={(e) => setFiltroTipo(e.target.value)}
               style={{ height: 36, fontSize: 12.5 }}
-              title="Filtrar por tipo de documento"
+              title={t('documentosUi.filterByTypeTooltip', 'Filtrar por tipo de documento')}
             >
-              <option value="todos">Todos os Tipos</option>
+              <option value="todos">{t('documentosUi.allTypes', 'Todos os Tipos')}</option>
               {TIPOS_DOCUMENTO.map((tItem) => (
                 <option key={tItem.valor} value={tItem.valor}>
-                  {tItem.labelPadrao}
+                  {t(tItem.labelKey, tItem.labelPadrao)}
                 </option>
               ))}
             </select>
@@ -899,12 +920,12 @@ const Documentos = () => {
               value={filtroAno}
               onChange={(e) => setFiltroAno(e.target.value)}
               style={{ height: 36, fontSize: 12.5 }}
-              title="Filtrar por ano"
+              title={t('documentosUi.filterByYearTooltip', 'Filtrar por ano')}
             >
-              <option value="todos">Todos os Anos</option>
+              <option value="todos">{t('documentosUi.allYears', 'Todos os Anos')}</option>
               {anosDisponiveis.map((y) => (
                 <option key={y} value={String(y)}>
-                  Ano {y}
+                  {t('documentosUi.yearPrefix', { year: y, defaultValue: 'Ano {{year}}' })}
                 </option>
               ))}
             </select>
@@ -917,12 +938,12 @@ const Documentos = () => {
               value={filtroMes}
               onChange={(e) => setFiltroMes(e.target.value)}
               style={{ height: 36, fontSize: 12.5 }}
-              title="Filtrar por mês"
+              title={t('documentosUi.filterByMonthTooltip', 'Filtrar por mês')}
             >
-              <option value="todos">Todos os Meses</option>
+              <option value="todos">{t('documentosUi.allMonths', 'Todos os Meses')}</option>
               {MESES.map((m) => (
                 <option key={m.valor} value={m.valor}>
-                  {m.nome}
+                  {t(`months.${m.chave}`, m.nome)}
                 </option>
               ))}
             </select>
@@ -941,9 +962,9 @@ const Documentos = () => {
                 setFiltroMes('todos');
                 setPastaAtiva('TODOS');
               }}
-              title="Limpar todos os filtros aplicados"
+              title={t('documentosUi.clearAllFiltersTooltip', 'Limpar todos os filtros aplicados')}
             >
-              <i className="la la-filter mr-1"></i> Limpar
+              <i className="la la-filter mr-1"></i> {t('documentosUi.clearBtn', 'Limpar')}
             </button>
           )}
         </div>
@@ -956,7 +977,7 @@ const Documentos = () => {
             <div className="text-center py-40">
               <SpinDots />
               <p className="text-muted mt-10" style={{ fontSize: 13 }}>
-                A aceder ao repositório de documentos...
+                {t('documentosUi.loadingRepo', 'A aceder ao repositório de documentos...')}
               </p>
             </div>
           ) : documentosFiltrados.length === 0 ? (
@@ -965,10 +986,13 @@ const Documentos = () => {
                 <i className="la la-folder-open"></i>
               </div>
               <h5 className="fw-700 mb-6" style={{ fontSize: 16, color: '#0f172a' }}>
-                Nenhum documento encontrado com os filtros selecionados
+                {t('documentosUi.emptyFilteredTitle', 'Nenhum documento encontrado com os filtros selecionados')}
               </h5>
               <p className="text-muted mb-15" style={{ fontSize: 13 }}>
-                Tente ajustar os filtros de tipo, ano, mês ou limpar a pesquisa para encontrar ficheiros.
+                {t(
+                  'documentosUi.emptyFilteredDesc',
+                  'Tente ajustar os filtros de tipo, ano, mês ou limpar a pesquisa para encontrar ficheiros.'
+                )}
               </p>
               {(termoBusca || filtroTipo !== 'todos' || filtroAno !== 'todos' || filtroMes !== 'todos' || pastaAtiva !== 'TODOS') && (
                 <button
@@ -982,7 +1006,7 @@ const Documentos = () => {
                     setPastaAtiva('TODOS');
                   }}
                 >
-                  <i className="la la-filter mr-1"></i> Limpar Filtros
+                  <i className="la la-filter mr-1"></i> {t('documentosUi.clearFiltersBtn', 'Limpar Filtros')}
                 </button>
               )}
             </div>
@@ -992,19 +1016,22 @@ const Documentos = () => {
                 <thead style={{ backgroundColor: '#ffffff' }}>
                   <tr>
                     <th style={{ width: '40%', padding: '14px 18px', fontWeight: 700, color: '#334155' }}>
-                      Documento Arquivado ({documentosFiltrados.length})
+                      {t('documentosUi.thArchivedDoc', {
+                        count: documentosFiltrados.length,
+                        defaultValue: 'Documento Arquivado ({{count}})',
+                      })}
                     </th>
                     <th style={{ width: '18%', padding: '14px 18px', fontWeight: 700, color: '#334155' }}>
-                      Categoria
+                      {t('documentosUi.thCategory', 'Categoria')}
                     </th>
                     <th style={{ width: '12%', padding: '14px 18px', fontWeight: 700, color: '#334155', textAlign: 'center' }}>
-                      Período
+                      {t('documentosUi.thPeriod', 'Período')}
                     </th>
                     <th style={{ width: '12%', padding: '14px 18px', fontWeight: 700, color: '#334155', textAlign: 'center' }}>
-                      Data
+                      {t('documentosUi.thDate', 'Data')}
                     </th>
                     <th style={{ width: '18%', padding: '14px 18px', fontWeight: 700, color: '#334155', textAlign: 'right' }}>
-                      Ações
+                      {t('documentosUi.thActions', 'Ações')}
                     </th>
                   </tr>
                 </thead>
@@ -1044,7 +1071,7 @@ const Documentos = () => {
                                 {doc.nome_arquivo}
                               </strong>
                               <span className="text-muted" style={{ fontSize: 11.5 }}>
-                                {doc.empresa_nome || empresaAtual?.nome || 'Empresa'}
+                                {doc.empresa_nome || empresaAtual?.nome || t('documentosUi.companyFallback', 'Empresa')}
                               </span>
                             </div>
                           </div>
@@ -1086,16 +1113,16 @@ const Documentos = () => {
                             <button
                               type="button"
                               className="btn btn-primary btn-xs"
-                              title="Confrontar este documento"
+                              title={t('documentosUi.reconcileDocTooltip', 'Confrontar este documento')}
                               onClick={() => navigate(`/confronto?empresa=${doc.empresa}&ano=${doc.ano}&mes=${doc.mes}`)}
                               style={{ padding: '5px 10px', borderRadius: 6, fontWeight: 700, fontSize: 11.5 }}
                             >
-                              <i className="la la-bolt mr-1"></i> Confrontar
+                              <i className="la la-bolt mr-1"></i> {t('documentosUi.reconcileBtn', 'Confrontar')}
                             </button>
                             <button
                               type="button"
                               className="btn btn-outline-primary btn-xs"
-                              title="Visualizar documento"
+                              title={t('documentosUi.viewDocTooltip', 'Visualizar documento')}
                               onClick={() => handleView(doc)}
                               style={{ padding: '5px 9px', borderRadius: 6 }}
                             >
@@ -1104,7 +1131,7 @@ const Documentos = () => {
                             <button
                               type="button"
                               className="btn btn-outline-primary btn-xs"
-                              title="Descarregar ficheiro"
+                              title={t('documentosUi.downloadFileTooltip', 'Descarregar ficheiro')}
                               onClick={() => handleDownload(doc)}
                               style={{ padding: '5px 9px', borderRadius: 6 }}
                             >
@@ -1113,7 +1140,7 @@ const Documentos = () => {
                             <button
                               type="button"
                               className="btn btn-outline-primary btn-xs"
-                              title="Eliminar documento"
+                              title={t('documentosUi.deleteDocTooltip', 'Eliminar documento')}
                               onClick={() => setDocApagar(doc)}
                               style={{ padding: '5px 9px', borderRadius: 6 }}
                             >

@@ -27,7 +27,7 @@ const Sidebar = ({ collapsed, onNavigate }) => {
         {
           path: '/facturas',
           icon: 'la la-file-invoice-dollar',
-          textKey: 'navigation.facturas',
+          textKey: 'headerUi.scannerPortal',
           fallbackText: 'Portal do Scanner (Facturas)',
           text: 'Portal do Scanner (Facturas)',
         },
@@ -41,7 +41,7 @@ const Sidebar = ({ collapsed, onNavigate }) => {
           <div className="sidebar__menu-group" style={{ padding: '16px 12px' }}>
             <ul className="sidebar_nav">
               <li className="menu-title" style={{ padding: '6px 12px', fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#8c98a4' }}>
-                <span>{isOperador ? 'Entrada de Facturas' : t('sidebar.mainSection', 'Menu Principal')}</span>
+                <span>{isOperador ? t('headerUi.invoiceEntry', 'Entrada de Facturas') : t('sidebar.mainSection', 'Menu Principal')}</span>
               </li>
               {itensMenu.map((item) => (
                 <li key={item.path} style={{ marginBottom: 4 }}>
@@ -73,7 +73,7 @@ const Sidebar = ({ collapsed, onNavigate }) => {
                   className="sidebar-logout-link"
                   style={{ cursor: 'pointer' }}
                 >
-                  <span className="nav-icon" style={{ backgroundColor: '#fff0f0' }}>
+                  <span className="nav-icon" style={{ backgroundColor: '#ffffff', border: '1px solid #fecaca' }}>
                     <i className="la la-sign-out-alt text-danger"></i>
                   </span>
                   <span className="menu-text text-danger fw-600">

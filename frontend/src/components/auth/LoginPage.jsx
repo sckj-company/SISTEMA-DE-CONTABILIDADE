@@ -66,25 +66,6 @@ const LoginPage = ({ onLogin }) => {
 
   return (
     <main className="main-content">
-      <div className="login-lang-switch">
-        {[
-          { code: 'pt', label: 'PT', flag: '🇦🇴' },
-          { code: 'en', label: 'EN', flag: '🇬🇧' },
-          { code: 'zh', label: '中文', flag: '🇨🇳' },
-        ].map((lang) => (
-          <button
-            key={lang.code}
-            type="button"
-            className={i18n.language?.substring(0, 2) === lang.code ? 'active' : ''}
-            onClick={() => i18n.changeLanguage(lang.code)}
-            title={lang.code === 'zh' ? '中文 (Chinês Simplificado)' : lang.code === 'en' ? 'English' : 'Português'}
-          >
-            <span style={{ marginRight: 4 }}>{lang.flag}</span>
-            {lang.label}
-          </button>
-        ))}
-      </div>
-
       <div className="signUP-admin">
         <div className="container-fluid">
           <div className="row justify-content-center">
@@ -126,7 +107,44 @@ const LoginPage = ({ onLogin }) => {
                         overflow: 'hidden',
                       }}
                     >
-                      <div className="card-header border-0 pb-md-15 pb-10 pt-md-25 pt-20 text-center">
+                      <div
+                        className="d-flex justify-content-end align-items-center px-20 pt-15 flex-wrap"
+                        style={{ background: '#ffffff', gap: 6 }}
+                      >
+                        {[
+                          { code: 'bi', label: 'PT/中文', title: 'Português / 中文' },
+                          { code: 'pt', label: 'PT', title: 'Português' },
+                          { code: 'zh', label: '中文', title: '中文' },
+                          { code: 'en', label: 'EN', title: 'English' },
+                        ].map((lang) => {
+                          const rawLang = (i18n.language || 'pt').toLowerCase();
+                          const activeCode = rawLang === 'bi' || rawLang === 'pt-zh' ? 'bi' : rawLang.substring(0, 2);
+                          const isActive = activeCode === lang.code;
+                          return (
+                            <button
+                              key={lang.code}
+                              type="button"
+                              onClick={() => i18n.changeLanguage(lang.code)}
+                              title={lang.title}
+                              style={{
+                                background: isActive ? '#2563eb' : '#ffffff',
+                                color: isActive ? '#ffffff' : '#2563eb',
+                                border: '1px solid #2563eb',
+                                borderRadius: 6,
+                                padding: '3px 10px',
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                lineHeight: 1.4,
+                                transition: 'all 0.15s ease',
+                              }}
+                            >
+                              {lang.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="card-header border-0 pb-md-15 pb-10 pt-10 text-center" style={{ background: '#ffffff' }}>
                         <div className="edit-profile__title w-100">
                           <h4 className="fw-700 mb-2" style={{ color: '#0f172a' }}>
                             {t('login.title', 'Iniciar Sessão')}
@@ -136,7 +154,7 @@ const LoginPage = ({ onLogin }) => {
                           </span>
                         </div>
                       </div>
-                      <div className="card-body pt-0">
+                      <div className="card-body pt-0" style={{ background: '#ffffff' }}>
                         <div className="edit-profile__body">
                           <p className="text-muted mb-25 text-center" style={{ fontSize: 13.5 }}>
                             {t('login.subtitle', 'Use a sua conta para aceder ao sistema')}
@@ -211,7 +229,10 @@ const LoginPage = ({ onLogin }) => {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   toast.info(
-                                    'Contacte o suporte da SCKJ para redefinir as suas credenciais.'
+                                    t(
+                                      'loginUi.forgotPasswordToast',
+                                      'Contacte o suporte da SCKJ para redefinir as suas credenciais.'
+                                    )
                                   );
                                 }}
                               >
@@ -246,7 +267,10 @@ const LoginPage = ({ onLogin }) => {
                               onClick={(e) => {
                                 e.preventDefault();
                                 toast.info(
-                                  'Por favor contacte o Administrador da sua organização ou o Suporte Técnico da SCKJ.'
+                                  t(
+                                    'loginUi.contactAdminToast',
+                                    'Por favor contacte o Administrador da sua organização ou o Suporte Técnico da SCKJ.'
+                                  )
                                 );
                               }}
                             >
@@ -263,7 +287,10 @@ const LoginPage = ({ onLogin }) => {
                                 rel="noopener noreferrer"
                                 className="btn btn-outline-primary fw-600 fs-13 px-3 py-2 rounded-pill d-inline-flex align-items-center"
                                 style={{ background: '#ffffff', transition: 'all 0.2s' }}
-                                title="Conheça a história e estrutura da SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA"
+                                title={t(
+                                  'loginUi.aboutUsTitle',
+                                  'Conheça a história e estrutura da SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA'
+                                )}
                               >
                                 <i className="la la-building mr-1 fs-16"></i>
                                 {t('login.aboutUs', 'Sobre a SCKJ')}
@@ -274,7 +301,10 @@ const LoginPage = ({ onLogin }) => {
                                 rel="noopener noreferrer"
                                 className="btn btn-outline-primary fw-600 fs-13 px-3 py-2 rounded-pill d-inline-flex align-items-center"
                                 style={{ background: '#ffffff', transition: 'all 0.2s' }}
-                                title="Canais Oficiais de Suporte Técnico e Atendimento"
+                                title={t(
+                                  'loginUi.techSupportTitle',
+                                  'Canais Oficiais de Suporte Técnico e Atendimento'
+                                )}
                               >
                                 <i className="la la-headset mr-1 fs-16"></i>
                                 {t('login.techSupport', 'Suporte Técnico')}
@@ -289,7 +319,7 @@ const LoginPage = ({ onLogin }) => {
                   {/* Rodapé institucional logo abaixo do cartão */}
                   <div className="text-center mt-25 mb-10">
                     <p className="text-muted mb-1" style={{ fontSize: 12.5 }}>
-                      © 2026 <strong>SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA</strong> • NIF: 5002830280
+                      © 2026 <strong>SCKJ - COMÉRCIO E SERVIÇOS, (SU), LDA</strong> • {t('loginUi.nifLabel', 'NIF')}: 5002830280
                     </p>
                     <div className="d-flex justify-content-center align-items-center gap-3">
                       <a
@@ -298,7 +328,7 @@ const LoginPage = ({ onLogin }) => {
                         rel="noopener noreferrer"
                         className="text-primary fs-12 fw-500"
                       >
-                        Apresentação da Empresa
+                        {t('loginUi.companyPresentation', 'Apresentação da Empresa')}
                       </a>
                       <span className="text-muted fs-12">•</span>
                       <a
@@ -307,7 +337,7 @@ const LoginPage = ({ onLogin }) => {
                         rel="noopener noreferrer"
                         className="text-primary fs-12 fw-500"
                       >
-                        Canais de Atendimento
+                        {t('loginUi.serviceChannels', 'Canais de Atendimento')}
                       </a>
                     </div>
                   </div>

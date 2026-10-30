@@ -39,10 +39,10 @@ const AdminHeader = ({ onToggleSidebar, estatisticas }) => {
     };
   }, []);
 
-  const rawLang = (i18n.language || 'pt').toLowerCase();
+  const rawLang = (i18n.language || 'bi').toLowerCase();
   const activeLangCode = rawLang === 'bi' || rawLang === 'pt-zh' ? 'bi' : rawLang.substring(0, 2);
   const currentLang =
-    languages.find((l) => l.code === activeLangCode) || languages[1];
+    languages.find((l) => l.code === activeLangCode) || languages[0];
 
   const empresas = estatisticas?.empresas || [];
   const empresasFiltradas = empresas.filter(

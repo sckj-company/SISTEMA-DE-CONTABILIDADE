@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { kzExacto } from '../../utils/formato';
 
@@ -27,19 +28,19 @@ const Seccao = ({ titulo, children }) => (
 
 const Tabela = ({ cabecalhos, linhas }) => (
   <div className="table-responsive">
-    <table className="table table-bordered mb-0" style={{ fontSize: 13 }}>
-      <thead style={{ background: '#f9fafb' }}>
+    <table className="table table-bordered mb-0" style={{ fontSize: 13, background: '#ffffff' }}>
+      <thead style={{ background: '#ffffff' }}>
         <tr>
-          {cabecalhos.map((c) => (
-            <th key={c} style={{ fontSize: 12 }}>{c}</th>
+          {cabecalhos.map((c, idx) => (
+            <th key={idx} style={{ fontSize: 12, background: '#ffffff', color: '#1e293b' }}>{c}</th>
           ))}
         </tr>
       </thead>
-      <tbody>
+      <tbody style={{ background: '#ffffff' }}>
         {linhas.map((linha, i) => (
-          <tr key={i}>
+          <tr key={i} style={{ background: '#ffffff' }}>
             {linha.map((celula, j) => (
-              <td key={j}>{celula}</td>
+              <td key={j} style={{ background: '#ffffff' }}>{celula}</td>
             ))}
           </tr>
         ))}
@@ -49,6 +50,7 @@ const Tabela = ({ cabecalhos, linhas }) => (
 );
 
 const Taxas = () => {
+  const { t } = useTranslation();
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState('');
 
@@ -56,32 +58,35 @@ const Taxas = () => {
     api
       .get('/taxas/')
       .then((r) => setDados(r.data))
-      .catch(() => setErro('Não foi possível carregar a tabela de taxas.'));
-  }, []);
+      .catch(() => setErro(t('taxasUi.loadError', 'Não foi possível carregar a tabela de taxas.')));
+  }, [t]);
 
   if (erro) {
-    return <div className="alert alert-danger">{erro}</div>;
+    return <div className="alert alert-danger" style={{ background: '#ffffff', border: '1px solid #fecaca', color: '#dc2626' }}>{erro}</div>;
   }
   if (!dados) {
-    return <p className="text-muted" style={{ fontSize: 13 }}>A carregar...</p>;
+    return <p className="text-muted" style={{ fontSize: 13 }}>{t('common.loading', 'A carregar...')}</p>;
   }
 
   return (
-    <div className="card card-default">
-      <div className="card-body" style={{ padding: 24 }}>
-        <div className="d-flex justify-content-between align-items-center flex-wrap mb-20">
+    <div className="card card-default" style={{ background: '#ffffff', border: '1px solid #e2e8f0' }}>
+      <div className="card-body" style={{ padding: 24, background: '#ffffff' }}>
+        <div className="d-flex justify-content-between align-items-center flex-wrap mb-20" style={{ gap: 10 }}>
           <div>
             <h5 className="fw-700 color-dark mb-2" style={{ fontSize: 15 }}>
-              Taxas e regimes em vigor
+              {t('taxasUi.title', 'Taxas e regimes em vigor')}
             </h5>
             <span className="text-muted" style={{ fontSize: 12.5 }}>
-              São estas as percentagens que os motores aplicam.
+              {t('taxasUi.subtitle', 'São estas as percentagens que os motores aplicam.')}
             </span>
           </div>
           <span
             style={{
               fontSize: 12,
-              background: '#f4f5fb',
+              fontWeight: 600,
+              background: '#ffffff',
+              color: '#2563eb',
+              border: '1px solid #bfdbfe',
               padding: '4px 12px',
               borderRadius: 12,
             }}
@@ -90,9 +95,13 @@ const Taxas = () => {
           </span>
         </div>
 
-        <Seccao titulo="Regimes de IVA">
+        <Seccao titulo={t('taxasUi.vatRegimes', 'Regimes de IVA')}>
           <Tabela
-            cabecalhos={['Regime', 'Quando se aplica', 'Como paga']}
+            cabecalhos={[
+              t('taxasUi.headerRegime', 'Regime'),
+              t('taxasUi.headerWhenApplies', 'Quando se aplica'),
+              t('taxasUi.headerHowPays', 'Como paga')
+            ]}
             linhas={dados.regimes_iva.map((r) => [
               <strong>{r.nome}</strong>,
               r.limite,
@@ -101,72 +110,85 @@ const Taxas = () => {
           />
         </Seccao>
 
-        <Seccao titulo="Taxas de IVA">
+        <Seccao titulo={t('taxasUi.vatRates', 'Taxas de IVA')}>
           <Tabela
-            cabecalhos={['Taxa', 'Operação', 'Base legal']}
-            linhas={dados.iva.map((t) => [
-              <strong>{pct(t.taxa)}</strong>,
-              t.descricao,
+            cabecalhos={[
+              t('taxasUi.headerRate', 'Taxa'),
+              t('taxasUi.headerOperation', 'Operação'),
+              t('taxasUi.headerLegalBase', 'Base legal')
+            ]}
+            linhas={dados.iva.map((tItem) => [
+              <strong>{pct(tItem.taxa)}</strong>,
+              tItem.descricao,
               <span style={{ fontSize: 11.5 }} className="text-muted">
-                {t.base_legal}
+                {tItem.base_legal}
               </span>,
             ])}
           />
         </Seccao>
 
-        <Seccao titulo="Imposto Industrial">
+        <Seccao titulo={t('taxasUi.industrialTax', 'Imposto Industrial')}>
           <Tabela
-            cabecalhos={['Taxa', 'Aplica-se a', 'Base legal']}
-            linhas={dados.imposto_industrial.map((t) => [
-              <strong>{pct(t.taxa)}</strong>,
-              t.descricao,
+            cabecalhos={[
+              t('taxasUi.headerRate', 'Taxa'),
+              t('taxasUi.headerAppliesTo', 'Aplica-se a'),
+              t('taxasUi.headerLegalBase', 'Base legal')
+            ]}
+            linhas={dados.imposto_industrial.map((tItem) => [
+              <strong>{pct(tItem.taxa)}</strong>,
+              tItem.descricao,
               <span style={{ fontSize: 11.5 }} className="text-muted">
-                {t.base_legal}
+                {tItem.base_legal}
               </span>,
             ])}
           />
         </Seccao>
 
-        <Seccao titulo={`IRT — isento até ${kzExacto(dados.irt.isencao_mensal)} Kz/mês`}>
+        <Seccao titulo={`IRT — ${t('taxasUi.irtExemption', 'isento até')} ${kzExacto(dados.irt.isencao_mensal)} Kz/${t('common.month', 'mês')}`}>
           <Tabela
-            cabecalhos={['Até (Kz)', 'Parcela fixa', 'Taxa', 'Sobre o excesso de']}
+            cabecalhos={[
+              t('taxasUi.headerUpTo', 'Até (Kz)'),
+              t('taxasUi.headerFixedPart', 'Parcela fixa'),
+              t('taxasUi.headerRate', 'Taxa'),
+              t('taxasUi.headerOverExcess', 'Sobre o excesso de')
+            ]}
             linhas={dados.irt.escaloes.map((e) => [
-              e.ate ? kzExacto(e.ate) : 'acima',
+              e.ate ? kzExacto(e.ate) : t('taxasUi.above', 'acima'),
               kzExacto(e.parcela_fixa),
               pct(e.taxa),
               kzExacto(e.excesso_sobre),
             ])}
           />
           <p className="text-muted" style={{ fontSize: 11.5, marginTop: 8 }}>
-            {dados.irt.base_legal} · Grupo B (prestadores): {pct(dados.irt.grupo_b)}
+            {dados.irt.base_legal} · {t('taxasUi.groupB', 'Grupo B (prestadores)')}: {pct(dados.irt.grupo_b)}
           </p>
         </Seccao>
 
-        <Seccao titulo="Outras taxas">
+        <Seccao titulo={t('taxasUi.otherRates', 'Outras taxas')}>
           <Tabela
-            cabecalhos={['Taxa', 'Descrição']}
+            cabecalhos={[t('taxasUi.headerRate', 'Taxa'), t('taxasUi.headerDescription', 'Descrição')]}
             linhas={[
               [
                 <strong>{pct(dados.seguranca_social.patronal)}</strong>,
-                `Segurança Social — entidade patronal (${dados.seguranca_social.base_legal})`,
+                `${t('taxasUi.socialSecurityEmployer', 'Segurança Social — entidade patronal')} (${dados.seguranca_social.base_legal})`,
               ],
               [
                 <strong>{pct(dados.seguranca_social.trabalhador)}</strong>,
-                'Segurança Social — trabalhador, retido no salário',
+                t('taxasUi.socialSecurityWorker', 'Segurança Social — trabalhador, retido no salário'),
               ],
               [
                 <strong>{pct(dados.retencao_servicos)}</strong>,
-                'Retenção na fonte sobre prestações de serviço',
+                t('taxasUi.withholdingServices', 'Retenção na fonte sobre prestações de serviço'),
               ],
               [
                 <strong>{pct(dados.imposto_predial.arrendamento_efectiva)}</strong>,
-                `Imposto Predial sobre rendas — ${pct(
+                `${t('taxasUi.propertyTaxRents', 'Imposto Predial sobre rendas')} — ${pct(
                   dados.imposto_predial.arrendamento_nominal
-                )} sobre ${pct(1 - Number(dados.imposto_predial.deducao_conservacao))} da renda`,
+                )} sobre ${pct(1 - Number(dados.imposto_predial.deducao_conservacao))} ${t('taxasUi.ofRent', 'da renda')}`,
               ],
               [
                 <strong>{pct(dados.imposto_selo_quitacao)}</strong>,
-                'Imposto do Selo sobre quitações não sujeitas a IVA',
+                t('taxasUi.stampTaxReceipts', 'Imposto do Selo sobre quitações não sujeitas a IVA'),
               ],
             ]}
           />

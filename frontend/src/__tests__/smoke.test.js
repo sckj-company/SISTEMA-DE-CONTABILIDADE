@@ -221,9 +221,15 @@ test.each([
   await page.unmount();
 });
 
-test('menu traduz em pt, en e zh', async () => {
-  await i18n.changeLanguage('en');
+test('menu traduz em pt, en, zh e bi (lado a lado)', async () => {
+  await i18n.changeLanguage('bi');
   let page = await renderAt('/arquivo');
+  expect(page.text).toContain('Documentos & Ficheiros / 文件与档案');
+  expect(page.text).toContain('Confronto Contabilidade vs AGT / 会计与AGT税务对账');
+  await page.unmount();
+
+  await i18n.changeLanguage('en');
+  page = await renderAt('/arquivo');
   expect(page.text).toContain('Documents & Files');
   expect(page.text).toContain('Accounting vs AGT Confrontation');
   await page.unmount();

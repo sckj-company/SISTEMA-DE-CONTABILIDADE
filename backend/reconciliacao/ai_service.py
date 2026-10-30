@@ -1,3 +1,4 @@
+import httpx
 from groq import Groq
 from decouple import config
 from .models import (
@@ -23,7 +24,11 @@ def get_groq_client():
     api_key = config('GROQ_API_KEY', default='')
     if not api_key:
         raise ValueError("GROQ_API_KEY não configurada no arquivo .env")
-    return Groq(api_key=api_key)
+    try:
+        http_client = httpx.Client(timeout=120.0)
+        return Groq(api_key=api_key, http_client=http_client)
+    except Exception:
+        return Groq(api_key=api_key)
 
 
 def get_model_name():

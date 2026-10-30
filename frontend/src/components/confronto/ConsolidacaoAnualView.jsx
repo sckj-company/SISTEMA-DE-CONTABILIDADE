@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { consolidacaoService } from '../../services/api';
 
@@ -14,6 +15,7 @@ const SpinDots = () => (
 );
 
 const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
+  const { t } = useTranslation();
   const [ano, setAno] = useState(anoPadrao || 2024);
   const [carregando, setCarregando] = useState(false);
   const [dados, setDados] = useState(null);
@@ -73,7 +75,7 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
           <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 15 }}>
             <div className="d-flex align-items-center flex-wrap" style={{ gap: 12 }}>
               <span className="fw-700" style={{ fontSize: 13.5, color: '#0f172a' }}>
-                <i className="la la-calendar mr-1" style={{ color: '#2563eb' }}></i> Exercício Fiscal:
+                <i className="la la-calendar mr-1" style={{ color: '#2563eb' }}></i> {t('consolidacaoUi.fiscalYear', 'Exercício Fiscal:')}
               </span>
               <select
                 className="form-control form-control-default"
@@ -94,7 +96,7 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
                 disabled={carregando}
                 style={{ height: 38, fontWeight: 700, padding: '0 16px' }}
               >
-                <i className={`la ${carregando ? 'la-spinner la-spin' : 'la-sync'} mr-1`}></i> Atualizar
+                <i className={`la ${carregando ? 'la-spinner la-spin' : 'la-sync'} mr-1`}></i> {t('common.refresh', 'Atualizar')}
               </button>
             </div>
 
@@ -107,7 +109,7 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
                 style={{ height: 38, fontWeight: 700, padding: '0 18px' }}
               >
                 <i className={`la ${exportandoExcel ? 'la-spinner la-spin' : 'la-file-excel'} mr-1`}></i>
-                {exportandoExcel ? 'A gerar...' : 'Exportar Excel Anual (.xlsx)'}
+                {exportandoExcel ? t('common.loading', 'A gerar...') : t('consolidacaoUi.exportExcel', 'Exportar Excel Anual (.xlsx)')}
               </button>
 
               <button
@@ -117,7 +119,7 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
                 disabled={!dados}
                 style={{ height: 38, fontWeight: 700, padding: '0 16px' }}
               >
-                <i className="la la-print mr-1"></i> Imprimir / PDF
+                <i className="la la-print mr-1"></i> {t('confrontoUi.btnPrintPdf', 'Imprimir / PDF')}
               </button>
             </div>
           </div>
@@ -125,11 +127,11 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
       </div>
 
       {carregando && (
-        <div className="card card-default text-center py-50 mb-20" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
+        <div className="card card-default text-center py-50 mb-20" style={{ border: '1px solid #edf0f5', borderRadius: 10, background: '#ffffff' }}>
           <SpinDots />
-          <h5 className="fw-700 color-dark mt-20 mb-5">A consolidar os 12 meses de IVA e Balancete de Fecho...</h5>
+          <h5 className="fw-700 color-dark mt-20 mb-5">{t('consolidacaoUi.loadingTitle', 'A consolidar os 12 meses de IVA e Balancete de Fecho...')}</h5>
           <p className="text-muted mb-0" style={{ fontSize: 13 }}>
-            A apurar o volume de negócios acumulado, reconciliação de deduções e preparação do Modelo 1 do Imposto Industrial.
+            {t('consolidacaoUi.loadingSubtitle', 'A apurar o volume de negócios acumulado, reconciliação de deduções e preparação do Modelo 1 do Imposto Industrial.')}
           </p>
         </div>
       )}
@@ -163,13 +165,13 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
             <div className="col-12 col-sm-6 col-lg-3">
               <div className="confronto-kpi-card h-100">
                 <span className="text-muted fw-600 d-block mb-4" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
-                  VOLUME NEGÓCIOS IVA (12M)
+                  {t('consolidacaoUi.kpiVolumeIva', 'VOLUME NEGÓCIOS IVA (12M)')}
                 </span>
                 <div className="fw-700 color-primary" style={{ fontSize: 20 }}>
                   {formatarKz(dados.totais_iva.volume_negocios)}
                 </div>
                 <span className="text-muted" style={{ fontSize: 11.5 }}>
-                  {dados.meses_declarados_count} de 12 meses declarados
+                  {dados.meses_declarados_count} {t('consolidacaoUi.of12MonthsDeclared', 'de 12 meses declarados')}
                 </span>
               </div>
             </div>
@@ -177,13 +179,13 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
             <div className="col-12 col-sm-6 col-lg-3">
               <div className="confronto-kpi-card h-100">
                 <span className="text-muted fw-600 d-block mb-4" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
-                  PROVEITOS CONTABILIDADE
+                  {t('consolidacaoUi.kpiProveitosContab', 'PROVEITOS CONTABILIDADE')}
                 </span>
                 <div className="fw-700 color-dark" style={{ fontSize: 20 }}>
                   {formatarKz(dados.balancete_fecho.volume_negocios_contab)}
                 </div>
                 <span className="text-muted" style={{ fontSize: 11.5 }}>
-                  Balancete de Fecho (Classe 6)
+                  {t('consolidacaoUi.closingTrialBalanceCl6', 'Balancete de Fecho (Classe 6)')}
                 </span>
               </div>
             </div>
@@ -191,7 +193,7 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
             <div className="col-12 col-sm-6 col-lg-3">
               <div className="confronto-kpi-card h-100">
                 <span className="text-muted fw-600 d-block mb-4" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
-                  DIFERENÇA ANUAL APURADA
+                  {t('consolidacaoUi.kpiDiferencaAnual', 'DIFERENÇA ANUAL APURADA')}
                 </span>
                 <div
                   className={`fw-700 ${dados.confronto_anual.status_volume === 'IGUAIS' ? 'color-success' : 'color-danger'}`}
@@ -200,7 +202,7 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
                   {formatarKz(dados.confronto_anual.diff_volume_negocios)}
                 </div>
                 <span className={dados.confronto_anual.status_volume === 'IGUAIS' ? 'text-success fw-600' : 'text-danger fw-600'} style={{ fontSize: 11.5 }}>
-                  {dados.confronto_anual.status_volume === 'IGUAIS' ? '✓ Coincidência Integral' : '⚠️ Divergência Fiscal'}
+                  {dados.confronto_anual.status_volume === 'IGUAIS' ? `✓ ${t('confrontoUi.statusFullMatch', 'Coincidência Integral')}` : `⚠️ ${t('confrontoUi.statusTaxDivergence', 'Divergência Fiscal')}`}
                 </span>
               </div>
             </div>
@@ -208,13 +210,13 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
             <div className="col-12 col-sm-6 col-lg-3">
               <div className="confronto-kpi-card h-100">
                 <span className="text-muted fw-600 d-block mb-4" style={{ fontSize: 11.5, textTransform: 'uppercase' }}>
-                  ESTIMATIVA IMPOSTO INDUSTRIAL
+                  {t('consolidacaoUi.kpiEstimativaII', 'ESTIMATIVA IMPOSTO INDUSTRIAL')}
                 </span>
                 <div className="fw-700 color-dark" style={{ fontSize: 20 }}>
                   {formatarKz(dados.confronto_anual.estimativa_imposto_industrial)}
                 </div>
                 <span className="text-muted" style={{ fontSize: 11.5 }}>
-                  Taxa 25% | Entrega até {dados.confronto_anual.prazo_modelo1}
+                  {t('taxasUi.headerRate', 'Taxa')} 25% | {t('consolidacaoUi.deliveryUntil', 'Entrega até')} {dados.confronto_anual.prazo_modelo1}
                 </span>
               </div>
             </div>
@@ -238,22 +240,22 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
           )}
 
           {/* 2. QUADRO COMPARATIVO ANUAL */}
-          <div className="card card-default mb-25" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
-            <div className="card-header py-12 px-20 bg-light border-bottom">
+          <div className="card card-default mb-25" style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff' }}>
+            <div className="card-header py-12 px-20 border-bottom" style={{ background: '#ffffff' }}>
               <strong className="color-dark" style={{ fontSize: 14 }}>
-                <i className="la la-balance-scale text-primary mr-5"></i> 1. Quadro Comparativo Anual: Contabilidade vs AGT
+                <i className="la la-balance-scale text-primary mr-5"></i> {t('consolidacaoUi.quadroComparativo', '1. Quadro Comparativo Anual: Contabilidade vs AGT')}
               </strong>
             </div>
-            <div className="card-body p-0">
+            <div className="card-body p-0" style={{ background: '#ffffff' }}>
               <div className="table-responsive">
-                <table className="table table-hover mb-0" style={{ fontSize: 13 }}>
+                <table className="table table-hover mb-0" style={{ fontSize: 13, background: '#ffffff' }}>
                   <thead style={{ backgroundColor: '#ffffff' }}>
-                    <tr>
-                      <th style={{ width: '35%', fontWeight: 700 }}>Rubrica Fiscal / Base</th>
-                      <th style={{ width: '22%', fontWeight: 700 }}>Contabilidade (Balancete de Fecho)</th>
-                      <th style={{ width: '22%', fontWeight: 700 }}>AGT (Soma 12 Modelos 7)</th>
-                      <th style={{ width: '11%', fontWeight: 700, textAlign: 'center' }}>Status</th>
-                      <th style={{ width: '10%', fontWeight: 700, textAlign: 'right' }}>Diferença</th>
+                    <tr style={{ background: '#ffffff' }}>
+                      <th style={{ width: '35%', fontWeight: 700, background: '#ffffff' }}>{t('consolidacaoUi.rubricaFiscal', 'Rubrica Fiscal / Base')}</th>
+                      <th style={{ width: '22%', fontWeight: 700, background: '#ffffff' }}>{t('consolidacaoUi.contabBalanceteFecho', 'Contabilidade (Balancete de Fecho)')}</th>
+                      <th style={{ width: '22%', fontWeight: 700, background: '#ffffff' }}>{t('consolidacaoUi.agtSoma12', 'AGT (Soma 12 Modelos 7)')}</th>
+                      <th style={{ width: '11%', fontWeight: 700, textAlign: 'center', background: '#ffffff' }}>{t('consolidacaoUi.status', 'Status')}</th>
+                      <th style={{ width: '10%', fontWeight: 700, textAlign: 'right', background: '#ffffff' }}>{t('consolidacaoUi.diferenca', 'Diferença')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -324,29 +326,29 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
           </div>
 
           {/* 3. MAPA MENSAL DOS 12 MESES */}
-          <div className="card card-default mb-25" style={{ border: '1px solid #edf0f5', borderRadius: 10 }}>
-            <div className="card-header py-12 px-20 bg-light border-bottom">
+          <div className="card card-default mb-25" style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff' }}>
+            <div className="card-header py-12 px-20 border-bottom" style={{ background: '#ffffff' }}>
               <div className="d-flex justify-content-between align-items-center w-100 flex-wrap" style={{ gap: 8 }}>
                 <strong className="color-dark" style={{ fontSize: 14 }}>
-                  <i className="la la-table text-primary mr-5"></i> 2. Mapa Detalhado Mês a Mês do Exercício {dados.ano} (Modelo 7)
+                  <i className="la la-table text-primary mr-5"></i> {t('consolidacaoUi.detalheMesAMes', '2. Mapa Detalhado Mês a Mês do Exercício')} {dados.ano} (Modelo 7)
                 </strong>
-                <span className="badge badge-light" style={{ fontSize: 12 }}>
-                  Total Declarado: <strong>{formatarKz(dados.totais_iva.volume_negocios)}</strong>
+                <span className="badge" style={{ fontSize: 12, background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe' }}>
+                  {t('consolidacaoUi.totalDeclarado', 'Total Declarado:')} <strong>{formatarKz(dados.totais_iva.volume_negocios)}</strong>
                 </span>
               </div>
             </div>
-            <div className="card-body p-0">
+            <div className="card-body p-0" style={{ background: '#ffffff' }}>
               <div className="table-responsive">
-                <table className="table table-hover mb-0" style={{ fontSize: 12.5 }}>
+                <table className="table table-hover mb-0" style={{ fontSize: 12.5, background: '#ffffff' }}>
                   <thead style={{ backgroundColor: '#ffffff' }}>
-                    <tr>
-                      <th style={{ width: '12%', fontWeight: 700 }}>Mês</th>
-                      <th style={{ width: '12%', fontWeight: 700 }}>Estado</th>
-                      <th style={{ width: '16%', fontWeight: 700 }}>Nº Declaração</th>
-                      <th style={{ width: '16%', fontWeight: 700, textAlign: 'right' }}>Vol. Negócios (Kz)</th>
-                      <th style={{ width: '15%', fontWeight: 700, textAlign: 'right' }}>IVA Liquidado (Kz)</th>
-                      <th style={{ width: '15%', fontWeight: 700, textAlign: 'right' }}>IVA Dedutível (Kz)</th>
-                      <th style={{ width: '14%', fontWeight: 700, textAlign: 'right' }}>IVA a Pagar (Kz)</th>
+                    <tr style={{ background: '#ffffff' }}>
+                      <th style={{ width: '12%', fontWeight: 700, background: '#ffffff' }}>{t('consolidacaoUi.mes', 'Mês')}</th>
+                      <th style={{ width: '12%', fontWeight: 700, background: '#ffffff' }}>{t('consolidacaoUi.status', 'Estado')}</th>
+                      <th style={{ width: '16%', fontWeight: 700, background: '#ffffff' }}>{t('consolidacaoUi.declarationNum', 'Nº Declaração')}</th>
+                      <th style={{ width: '16%', fontWeight: 700, textAlign: 'right', background: '#ffffff' }}>{t('consolidacaoUi.volNegocios', 'Vol. Negócios (Kz)')}</th>
+                      <th style={{ width: '15%', fontWeight: 700, textAlign: 'right', background: '#ffffff' }}>{t('consolidacaoUi.ivaLiquidado', 'IVA Liquidado (Kz)')}</th>
+                      <th style={{ width: '15%', fontWeight: 700, textAlign: 'right', background: '#ffffff' }}>{t('consolidacaoUi.ivaDedutivel', 'IVA Dedutível (Kz)')}</th>
+                      <th style={{ width: '14%', fontWeight: 700, textAlign: 'right', background: '#ffffff' }}>{t('consolidacaoUi.ivaAPagar', 'IVA a Pagar (Kz)')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -359,7 +361,7 @@ const ConsolidacaoAnualView = ({ empresaId, anoPadrao, empresaAtual }) => {
                           </td>
                           <td style={{ verticalAlign: 'middle' }}>
                             <span className={isFalta ? 'status-badge-divergencia' : 'status-badge-conforme'} style={{ fontSize: 11 }}>
-                              {isFalta ? 'Em Falta' : 'Declarado'}
+                              {isFalta ? t('consolidacaoUi.emFalta', 'Em Falta') : t('consolidacaoUi.declarado', 'Declarado')}
                             </span>
                           </td>
                           <td style={{ verticalAlign: 'middle', color: isFalta ? '#94a3b8' : '#0f172a' }}>

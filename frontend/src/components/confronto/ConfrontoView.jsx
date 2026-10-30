@@ -20,7 +20,7 @@ const SpinDots = () => (
 
 const ConfrontoView = () => {
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const idiomaSistema = (i18n?.language || 'pt').substring(0, 2);
   const { empresaId, ano, mes, atualizar } = usePeriodo();
   usePeriodoDaUrl();
@@ -301,10 +301,11 @@ const ConfrontoView = () => {
     }
   };
 
+  const textoPtCanonico = traducoes['pt'] || resultadoRaw;
   const parsedData = useMemo(() => {
-    if (!resultadoRaw) return null;
-    return parseAnaliseIA(resultadoRaw);
-  }, [resultadoRaw]);
+    if (!textoPtCanonico) return null;
+    return parseAnaliseIA(textoPtCanonico);
+  }, [textoPtCanonico]);
 
   const handleLimparNovoConfronto = () => {
     setResultadoRaw(null);
@@ -470,10 +471,10 @@ const ConfrontoView = () => {
             <div>
               <h4 className="fw-800 mb-4" style={{ fontSize: 22, color: '#0f172a' }}>
                 <i className="la la-balance-scale mr-6" style={{ color: '#2563eb' }}></i>{' '}
-                Confronto Contabilidade vs Portal AGT
+                {t('confrontoUi.headerTitle', 'Confronto Contabilidade vs Portal AGT')}
               </h4>
               <p className="text-muted mb-0" style={{ fontSize: 13.5 }}>
-                Cruzamento inteligente em 3 passos: carregue o Balancete e o Modelo 7 para apurar os números e saldos fiscais.
+                {t('confrontoUi.headerSubtitle', 'Cruzamento inteligente em 3 passos: carregue o Balancete e o Modelo 7 para apurar os números e saldos fiscais.')}
               </p>
             </div>
 
@@ -485,7 +486,7 @@ const ConfrontoView = () => {
                 onClick={() => setAbaAtiva('confronto')}
                 style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
               >
-                <i className="la la-bolt mr-4"></i> 1. Confronto com IA
+                <i className="la la-bolt mr-4"></i> {t('confrontoUi.tabAiAudit', '1. Confronto com IA')}
               </button>
               <button
                 type="button"
@@ -493,7 +494,7 @@ const ConfrontoView = () => {
                 onClick={() => setAbaAtiva('consolidacao')}
                 style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
               >
-                <i className="la la-calendar-check mr-4"></i> 2. Consolidação Anual (12 Meses)
+                <i className="la la-calendar-check mr-4"></i> {t('confrontoUi.tabAnnualConsolidation', '2. Consolidação Anual (12 Meses)')}
               </button>
               <button
                 type="button"
@@ -501,7 +502,7 @@ const ConfrontoView = () => {
                 onClick={() => setAbaAtiva('historico')}
                 style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
               >
-                <i className="la la-history mr-4"></i> 3. Histórico ({historico.length})
+                <i className="la la-history mr-4"></i> {t('confrontoUi.tabHistory', '3. Histórico')} ({historico.length})
               </button>
             </div>
           </div>
@@ -603,15 +604,15 @@ const ConfrontoView = () => {
                   <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 14 }}>
                     <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
                       <div className={`step-pill ${!resultadoRaw ? 'active' : ''}`}>
-                        <span>1. Carregar Balancete & Modelo 7</span>
+                        <span>{t('confrontoUi.pillStep1', '1. Carregar Balancete & Modelo 7')}</span>
                       </div>
                       <span style={{ color: '#93c5fd', fontWeight: 700 }}>&rarr;</span>
                       <div className={`step-pill ${executando ? 'active' : ''}`}>
-                        <span>2. Confrontar com IA</span>
+                        <span>{t('confrontoUi.pillStep2', '2. Confrontar com IA')}</span>
                       </div>
                       <span style={{ color: '#93c5fd', fontWeight: 700 }}>&rarr;</span>
                       <div className={`step-pill ${resultadoRaw ? 'active' : ''}`}>
-                        <span>3. Cards Numéricos, Excel & PDF</span>
+                        <span>{t('confrontoUi.pillStep3', '3. Cards Numéricos, Excel & PDF')}</span>
                       </div>
                     </div>
 

@@ -117,7 +117,7 @@ const LoginPage = ({ onLogin }) => {
                           { code: 'zh', label: '中文', title: '中文' },
                           { code: 'en', label: 'EN', title: 'English' },
                         ].map((lang) => {
-                          const rawLang = (i18n.language || 'pt').toLowerCase();
+                          const rawLang = (i18n.language || 'bi').toLowerCase();
                           const activeCode = rawLang === 'bi' || rawLang === 'pt-zh' ? 'bi' : rawLang.substring(0, 2);
                           const isActive = activeCode === lang.code;
                           return (

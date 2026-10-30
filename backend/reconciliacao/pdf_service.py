@@ -2,6 +2,7 @@ import pdfplumber
 import logging
 import traceback
 import re
+import httpx
 from groq import Groq
 from decouple import config
 
@@ -25,7 +26,13 @@ def get_groq_client():
         logger.error("GROQ_API_KEY nao configurada no arquivo .env")
         raise ValueError("GROQ_API_KEY nao configurada no arquivo .env")
     logger.info("Cliente Groq criado.")
-    return Groq(api_key=api_key)
+    # Passa httpx.Client explícito para evitar incompatibilidade entre versoes de httpx >= 0.28 e Groq SDK ('proxies')
+    try:
+        http_client = httpx.Client(timeout=120.0)
+        return Groq(api_key=api_key, http_client=http_client)
+    except Exception as err:
+        logger.warning(f"Fallback ao criar Groq client direto: {err}")
+        return Groq(api_key=api_key)
 
 
 def get_model_name():

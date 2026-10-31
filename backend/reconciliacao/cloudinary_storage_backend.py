@@ -48,7 +48,7 @@ class SmartMediaCloudinaryStorage(MediaCloudinaryStorage):
         }
         return cloudinary.uploader.upload(content, **options)
 
-    def _get_url(self, name):
+    def _get_url(self, name, signed=False):
         name_str = str(name).replace('\\', '/').lstrip('/')
         if name_str.startswith('http://') or name_str.startswith('https://'):
             return name_str
@@ -57,7 +57,8 @@ class SmartMediaCloudinaryStorage(MediaCloudinaryStorage):
             url, _ = cloudinary.utils.cloudinary_url(
                 name_str,
                 resource_type=res_type,
-                secure=True
+                secure=True,
+                sign_url=signed
             )
             return url
         except Exception:
@@ -65,20 +66,24 @@ class SmartMediaCloudinaryStorage(MediaCloudinaryStorage):
             return f"https://res.cloudinary.com/{cloud_name}/{res_type}/upload/{name_str}"
 
     def url(self, name):
-        return self._get_url(name)
+        return self._get_url(name, signed=False)
 
     def _open(self, name, mode='rb'):
-        url = self._get_url(name)
-        response = requests.get(url, timeout=45)
-        if response.status_code == 404:
+        url = self._get_url(name, signed=True)
+        conf = cloudinary.config()
+        auth = (conf.api_key, conf.api_secret) if (conf.api_key and conf.api_secret) else None
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+        response = requests.get(url, auth=auth, headers=headers, timeout=45)
+        if response.status_code == 404 or response.status_code == 401:
             alt_type = 'image' if self._get_resource_type(name) == 'raw' else 'raw'
             try:
                 alt_url, _ = cloudinary.utils.cloudinary_url(
                     str(name).replace('\\', '/').lstrip('/'),
                     resource_type=alt_type,
-                    secure=True
+                    secure=True,
+                    sign_url=True
                 )
-                alt_resp = requests.get(alt_url, timeout=30)
+                alt_resp = requests.get(alt_url, auth=auth, headers=headers, timeout=30)
                 if alt_resp.status_code == 200:
                     file = ContentFile(alt_resp.content)
                     file.name = name
@@ -86,7 +91,7 @@ class SmartMediaCloudinaryStorage(MediaCloudinaryStorage):
                     return file
             except Exception:
                 pass
-            raise IOError(f"Ficheiro não encontrado no Cloudinary: {name} (URL: {url})")
+            raise IOError(f"Ficheiro não acessível no Cloudinary ({response.status_code}): {name} (URL: {url})")
         response.raise_for_status()
         file = ContentFile(response.content)
         file.name = name

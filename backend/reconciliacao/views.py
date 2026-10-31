@@ -660,80 +660,6 @@ def upload_documento_view(request):
         or request.user.groups.filter(name__in=['Super Admin', 'Administrador']).exists()
     )
 
-    # Se a empresa não foi especificada OU a empresa informada já não existe:
-    if empresa is None:
-        # Se utilizador não for admin e tiver apenas 1 empresa vinculada, associa diretamente a ela
-        if not is_admin_user:
-            empresa = empresas_acessiveis(request.user).first()
-            if empresa:
-                empresa_id = empresa.id
-
-        import tempfile
-        import os
-        extensao = ('.' + arquivo.name.rsplit('.', 1)[-1].lower() if '.' in arquivo.name else '')
-        with tempfile.NamedTemporaryFile(suffix=extensao, delete=False) as tmp:
-            for chunk in arquivo.chunks():
-                tmp.write(chunk)
-            tmp_caminho = tmp.name
-        try:
-            conteudo = extracao_service.extrair_conteudo(tmp_caminho, arquivo.name)
-            texto_up = conteudo.get('texto') or ''
-            dados_cad = auto_cadastro_service.extrair_dados_empresa_do_texto(texto_up, arquivo.name)
-            if dados_cad.get('nif') or dados_cad.get('nome'):
-                emp_auto, criada, msg = auto_cadastro_service.obter_ou_cadastrar_empresa_automatica(
-                    dados_cad, user=request.user, auto_criar=is_admin_user
-                )
-                if emp_auto and (is_admin_user or empresas_acessiveis(request.user).filter(pk=emp_auto.id).exists()):
-                    empresa = emp_auto
-                    empresa_id = emp_auto.id
-                    empresa_recem_criada = criada
-                    mensagem_cadastro = msg
-            if ano is None or mes is None:
-                ano_det, mes_det, _ = dossie_service.detectar_periodo_e_nif(texto_up)
-                ano = ano or ano_det
-                mes = mes or mes_det
-        finally:
-            if os.path.exists(tmp_caminho):
-                os.remove(tmp_caminho)
-
-    if not empresa:
-        if not empresa_id or str(empresa_id).strip().lower() in ('auto', '0', 'none', '', 'null', 'undefined'):
-            return Response(
-                {
-                    'error': (
-                        'empresa_id é obrigatório. '
-                        'Não foi possível identificar automaticamente os dados da empresa (NIF/Nome) '
-                        'no documento para efetuar o pré-cadastro.'
-                    )
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        return Response(
-            {
-                'error': (
-                    'Empresa não encontrada ou sem acesso. '
-                    'Não foi possível identificar automaticamente os dados da empresa (NIF/Nome) '
-                    'no documento para efetuar o pré-cadastro.'
-                )
-            },
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-    if ano is None or mes is None or not (2000 <= ano <= 2100) or not (1 <= mes <= 12):
-        return Response(
-            {'error': 'ano (2000-2100) e mes (1-12) são obrigatórios'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    if tipo:
-        nome_doc = request.data.get('nome') or arquivo.name
-        duplicado = _documento_duplicado(empresa, ano, mes, tipo, nome_arquivo=nome_doc)
-        if duplicado is not None:
-            if substituir:
-                duplicado.delete()
-            else:
-                return _resposta_duplicado(duplicado, tipo, ano, mes)
-
     extensao = ('.' + arquivo.name.rsplit('.', 1)[-1].lower()
                 if '.' in arquivo.name else '')
     if extensao not in extracao_service.EXTENSOES_ACEITAS:
@@ -743,55 +669,130 @@ def upload_documento_view(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    documento = DocumentoUpload.objects.create(
-        arquivo=arquivo,
-        empresa=empresa,
-        ano=ano,
-        mes=mes,
-        tipo=tipo or 'OUTRO',
-        estado='PROCESSANDO',
-        nome_arquivo=request.data.get('nome') or arquivo.name,
-    )
+    # 1. Guardar cópia temporária local dos bytes enviados para processamento 100% local e fiável
+    import tempfile
+    import os
+    with tempfile.NamedTemporaryFile(suffix=extensao, delete=False) as tmp_f:
+        for chunk in arquivo.chunks():
+            tmp_f.write(chunk)
+        caminho_local_upload = tmp_f.name
 
-    with obter_caminho_local_documento(documento.arquivo) as caminho_local:
-        resultado = extracao_service.extrair_conteudo(caminho_local, arquivo.name)
-        texto = resultado['texto']
+    try:
+        conteudo = extracao_service.extrair_conteudo(caminho_local_upload, arquivo.name)
+        texto = conteudo.get('texto') or ''
 
-        sugestao = classificador_service.classificar(documento.nome_arquivo, texto)
-        documento.tipo_sugerido = sugestao['tipo']
-        if not tipo:
-            documento.tipo = sugestao['tipo']
-            duplicado = _documento_duplicado(
-                empresa, ano, mes, documento.tipo, nome_arquivo=documento.nome_arquivo, excluir_pk=documento.pk
+        # Se a empresa não foi especificada OU a empresa informada já não existe:
+        if empresa is None:
+            if not is_admin_user:
+                empresa = empresas_acessiveis(request.user).first()
+                if empresa:
+                    empresa_id = empresa.id
+
+            dados_cad = auto_cadastro_service.extrair_dados_empresa_do_texto(texto, arquivo.name)
+            if dados_cad.get('nif') or dados_cad.get('nome'):
+                emp_auto, criada, msg = auto_cadastro_service.obter_ou_cadastrar_empresa_automatica(
+                    dados_cad, user=request.user, auto_criar=is_admin_user
+                )
+                if emp_auto and (is_admin_user or empresas_acessiveis(request.user).filter(pk=emp_auto.id).exists()):
+                    empresa = emp_auto
+                    empresa_id = emp_auto.id
+                    empresa_recem_criada = criada
+                    mensagem_cadastro = msg
+
+        if ano is None or mes is None:
+            ano_det, mes_det, _ = dossie_service.detectar_periodo_e_nif(texto)
+            ano = ano or ano_det
+            mes = mes or mes_det
+
+        if not empresa:
+            if not empresa_id or str(empresa_id).strip().lower() in ('auto', '0', 'none', '', 'null', 'undefined'):
+                return Response(
+                    {
+                        'error': (
+                            'empresa_id é obrigatório. '
+                            'Não foi possível identificar automaticamente os dados da empresa (NIF/Nome) '
+                            'no documento para efetuar o pré-cadastro.'
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            return Response(
+                {
+                    'error': (
+                        'Empresa não encontrada ou sem acesso. '
+                        'Não foi possível identificar automaticamente os dados da empresa (NIF/Nome) '
+                        'no documento para efetuar o pré-cadastro.'
+                    )
+                },
+                status=status.HTTP_404_NOT_FOUND
             )
-            if duplicado is not None:
-                if substituir:
-                    duplicado.delete()
-                else:
-                    tipo_efetivo = documento.tipo
-                    arquivo_salvo = documento.arquivo
-                    documento.delete()
-                    arquivo_salvo.delete(save=False)
-                    return _resposta_duplicado(duplicado, tipo_efetivo, ano, mes)
 
-        if resultado['erro'] or (texto or '').startswith('Erro ao extrair texto'):
-            documento.estado = 'ERRO'
+        if ano is None or mes is None or not (2000 <= ano <= 2100) or not (1 <= mes <= 12):
+            return Response(
+                {'error': 'ano (2000-2100) e mes (1-12) são obrigatórios'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        nome_doc = request.data.get('nome') or arquivo.name
+        sugestao = classificador_service.classificar(nome_doc, texto)
+        tipo_final = tipo or sugestao['tipo']
+
+        if conteudo.get('erro') or (texto or '').startswith('Erro ao extrair texto'):
+            estado_doc = 'ERRO'
         elif not (texto or '').strip():
-            documento.estado = 'ILEGIVEL'
+            estado_doc = 'ILEGIVEL'
         else:
-            documento.estado = 'VALIDADO'
+            estado_doc = 'VALIDADO'
 
-        # Processamento especial de Dossiê Mensal Completo (Envelope Fiscal multi-documentos)
-        is_dossie = (tipo == 'DOSSIE_MENSAL') or (
-            extensao == '.pdf' and dossie_service.is_dossie_mensal(caminho_local)
+        # Validação estrita de conteúdo para BALANCETE e MODELO7 apenas em documentos validados
+        if estado_doc == 'VALIDADO' and tipo_final in ('BALANCETE', 'MODELO7'):
+            valido, motivo_erro = validacao_documental.validar_documento_para_tipo(
+                tipo_final, texto, nome_doc
+            )
+            if not valido:
+                logger.warning(f"Upload rejeitado por validação estrita ({tipo_final}): {motivo_erro}")
+                return Response(
+                    {'error': motivo_erro},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Verificação de duplicados
+        duplicado = _documento_duplicado(empresa, ano, mes, tipo_final, nome_arquivo=nome_doc)
+        if duplicado is not None:
+            if substituir:
+                duplicado.delete()
+            else:
+                return _resposta_duplicado(duplicado, tipo_final, ano, mes)
+
+        # Rebobinar ficheiro antes de persistir no storage
+        if hasattr(arquivo, 'seek'):
+            try:
+                arquivo.seek(0)
+            except Exception:
+                pass
+
+        documento = DocumentoUpload.objects.create(
+            arquivo=arquivo,
+            empresa=empresa,
+            ano=ano,
+            mes=mes,
+            tipo=tipo_final,
+            tipo_sugerido=sugestao['tipo'],
+            estado=estado_doc,
+            nome_arquivo=nome_doc,
+            texto_extraido=texto,
+        )
+
+        # Processamento especial de Dossiê Mensal Completo
+        is_dossie = (tipo_final == 'DOSSIE_MENSAL') or (
+            extensao == '.pdf' and dossie_service.is_dossie_mensal(caminho_local_upload)
         )
         if is_dossie and documento.estado == 'VALIDADO':
             documento.tipo = 'DOSSIE_MENSAL'
             documento.tipo_sugerido = 'DOSSIE_MENSAL'
-            documento.texto_extraido = texto
             documento.save()
             res_dossie = dossie_service.desmembrar_e_processar_dossie(
-                caminho_local, empresa, ano, mes
+                caminho_local_upload, empresa, ano, mes
             )
             return Response({
                 'success': True,
@@ -805,7 +806,7 @@ def upload_documento_view(request):
                     'tipo': 'DOSSIE_MENSAL',
                     'tipo_sugerido': 'DOSSIE_MENSAL',
                     'classificado_automaticamente': not bool(tipo),
-                    'formato': resultado['formato'],
+                    'formato': conteudo['formato'],
                     'estado': 'VALIDADO',
                     'empresa': empresa.id,
                     'empresa_nome': empresa.nome,
@@ -819,20 +820,12 @@ def upload_documento_view(request):
                 'analise_ia_id': res_dossie.get('analise_ia_id'),
             })
 
-    # Validação estrita de conteúdo para BALANCETE e MODELO7 em documentos validados
-    if documento.estado == 'VALIDADO' and documento.tipo in ('BALANCETE', 'MODELO7'):
-        valido, motivo_erro = validacao_documental.validar_documento_para_tipo(
-            documento.tipo, texto, documento.nome_arquivo
-        )
-        if not valido:
-            arquivo_salvo = documento.arquivo
-            documento.delete()
-            arquivo_salvo.delete(save=False)
-            logger.warning(f"Upload rejeitado por validação estrita ({documento.tipo}): {motivo_erro}")
-            return Response(
-                {'error': motivo_erro},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    finally:
+        if os.path.exists(caminho_local_upload):
+            try:
+                os.remove(caminho_local_upload)
+            except Exception:
+                pass
 
     documento.texto_extraido = texto
     documento.save()
@@ -877,7 +870,7 @@ def upload_documento_view(request):
             'tipo': documento.tipo,
             'tipo_sugerido': documento.tipo_sugerido,
             'classificado_automaticamente': not bool(tipo),
-            'formato': resultado['formato'],
+            'formato': conteudo.get('formato', 'pdf'),
             'estado': documento.estado,
             'empresa': empresa.id,
             'empresa_nome': empresa.nome,

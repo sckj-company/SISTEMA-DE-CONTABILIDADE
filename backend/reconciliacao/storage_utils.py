@@ -29,8 +29,8 @@ def obter_caminho_local_documento(arquivo_field):
     except (NotImplementedError, AttributeError, ValueError, Exception):
         pass
 
-    # 2. Se o arquivo tiver um TemporaryUploadedFile aberto em disco
-    underlying = getattr(arquivo_field, 'file', None)
+    # 2. Se o arquivo tiver um TemporaryUploadedFile aberto em disco (usa _file para não disparar storage.open)
+    underlying = getattr(arquivo_field, '_file', None)
     if underlying:
         temp_local = getattr(underlying, 'temporary_file_path', None)
         if temp_local and callable(temp_local):

@@ -249,6 +249,7 @@ const Documentos = () => {
     const formData = new FormData();
     formData.append('arquivo', selectedFile);
     formData.append('tipo', uploadTipo || 'OUTRO');
+    formData.append('substituir', 'true');
     formData.append('empresa_id', empresaId || 'auto');
     formData.append('ano', ano);
     formData.append('mes', mes);

@@ -2,8 +2,8 @@ import os
 import requests
 import cloudinary
 import cloudinary.uploader
+import cloudinary.utils
 from django.core.files.base import ContentFile
-from django.core.files.uploadedfile import UploadedFile
 from django.utils.deconstruct import deconstructible
 from cloudinary_storage.storage import MediaCloudinaryStorage
 
@@ -18,7 +18,8 @@ class SmartMediaCloudinaryStorage(MediaCloudinaryStorage):
     - Documentos e Ficheiros Contabilísticos (PDFs, Balancetes Excel, CSV, XML): resource_type='raw'
     - Vídeos: resource_type='video'
     
-    Garante links HTTPS permanentes e seguros (secure=True) que persistem
+    Garante links HTTPS permanentes e seguros (secure=True) com suporte a
+    nomes com acentos, espaços e caracteres especiais, persistindo ficheiros
     mesmo após novos commits, deploys e reinicializações de contentores.
     """
     IMAGE_EXTENSIONS = {
@@ -38,28 +39,30 @@ class SmartMediaCloudinaryStorage(MediaCloudinaryStorage):
 
     def _upload(self, name, content):
         res_type = self._get_resource_type(name)
+        clean_name = str(name).replace('\\', '/').lstrip('/')
         options = {
-            'use_filename': True,
-            'unique_filename': True,
+            'public_id': clean_name,
+            'overwrite': True,
             'resource_type': res_type,
             'tags': self.TAG,
         }
-        folder = os.path.dirname(name).replace('\\', '/')
-        if folder:
-            options['folder'] = folder
         return cloudinary.uploader.upload(content, **options)
 
     def _get_url(self, name):
-        name_str = str(name).replace('\\', '/')
+        name_str = str(name).replace('\\', '/').lstrip('/')
         if name_str.startswith('http://') or name_str.startswith('https://'):
             return name_str
-        name_prefixed = self._prepend_prefix(name_str)
         res_type = self._get_resource_type(name_str)
-        cloudinary_resource = cloudinary.CloudinaryResource(
-            name_prefixed,
-            default_resource_type=res_type
-        )
-        return cloudinary_resource.build_url(secure=True)
+        try:
+            url, _ = cloudinary.utils.cloudinary_url(
+                name_str,
+                resource_type=res_type,
+                secure=True
+            )
+            return url
+        except Exception:
+            cloud_name = getattr(cloudinary.config(), 'cloud_name', '')
+            return f"https://res.cloudinary.com/{cloud_name}/{res_type}/upload/{name_str}"
 
     def url(self, name):
         return self._get_url(name)
@@ -68,7 +71,22 @@ class SmartMediaCloudinaryStorage(MediaCloudinaryStorage):
         url = self._get_url(name)
         response = requests.get(url, timeout=45)
         if response.status_code == 404:
-            raise IOError(f"Ficheiro não encontrado no Cloudinary: {name}")
+            alt_type = 'image' if self._get_resource_type(name) == 'raw' else 'raw'
+            try:
+                alt_url, _ = cloudinary.utils.cloudinary_url(
+                    str(name).replace('\\', '/').lstrip('/'),
+                    resource_type=alt_type,
+                    secure=True
+                )
+                alt_resp = requests.get(alt_url, timeout=30)
+                if alt_resp.status_code == 200:
+                    file = ContentFile(alt_resp.content)
+                    file.name = name
+                    file.mode = mode
+                    return file
+            except Exception:
+                pass
+            raise IOError(f"Ficheiro não encontrado no Cloudinary: {name} (URL: {url})")
         response.raise_for_status()
         file = ContentFile(response.content)
         file.name = name

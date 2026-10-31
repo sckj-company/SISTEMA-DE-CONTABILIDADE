@@ -706,10 +706,25 @@ const ConfrontoView = () => {
                         accept=".pdf,.xlsx,.csv"
                         style={{ display: 'none' }}
                         onChange={(e) => {
-                          if (e.target.files[0]) {
-                            setFicheiroContab(e.target.files[0]);
+                          if (e.target.files && e.target.files[0]) {
+                            const f = e.target.files[0];
+                            const nameLow = (f.name || '').toLowerCase();
+                            if (
+                              nameLow.includes('modelo') ||
+                              nameLow.includes('comprovativo') ||
+                              nameLow.includes('liquidacao') ||
+                              nameLow.includes('liquidação')
+                            ) {
+                              toast.warning(
+                                t(
+                                  'confrontoUi.warnDropModelo7InBox1',
+                                  'Atenção: O ficheiro parece ser a Declaração Modelo 7 / Comprovativo da AGT. A Caixa 1 é destinada ao Balancete de Verificação (PGC). Coloque-o na Caixa 2.'
+                                )
+                              );
+                            }
+                            setFicheiroContab(f);
                             setDocContabId('');
-                            toast.info(`Balancete selecionado: ${e.target.files[0].name}`);
+                            toast.info(`Balancete selecionado: ${f.name}`);
                           }
                         }}
                       />
@@ -831,10 +846,20 @@ const ConfrontoView = () => {
                         accept=".pdf,.xml,.xlsx"
                         style={{ display: 'none' }}
                         onChange={(e) => {
-                          if (e.target.files[0]) {
-                            setFicheiroAgt(e.target.files[0]);
+                          if (e.target.files && e.target.files[0]) {
+                            const f = e.target.files[0];
+                            const nameLow = (f.name || '').toLowerCase();
+                            if (nameLow.includes('balancete')) {
+                              toast.warning(
+                                t(
+                                  'confrontoUi.warnDropBalanceteInBox2',
+                                  'Atenção: O ficheiro parece ser um Balancete de Verificação (PGC). A Caixa 2 é destinada à Declaração Modelo 7 da AGT. Coloque-o na Caixa 1.'
+                                )
+                              );
+                            }
+                            setFicheiroAgt(f);
                             setDocAgtId('');
-                            toast.info(`Declaração AGT selecionada: ${e.target.files[0].name}`);
+                            toast.info(`Declaração AGT selecionada: ${f.name}`);
                           }
                         }}
                       />

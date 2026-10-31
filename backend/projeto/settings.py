@@ -110,17 +110,18 @@ USAR_CLOUDINARY = bool(
 
 STATICFILES_STORAGE_BACKEND = 'whitenoise.storage.CompressedManifestStaticFilesStorage' if not DEBUG else 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': CLOUDINARY_CLOUD_NAME or 'sckj-contabilidade',
+    'API_KEY': CLOUDINARY_API_KEY or '',
+    'API_SECRET': CLOUDINARY_API_SECRET or '',
+    'SECURE': True,
+}
+
 if USAR_CLOUDINARY:
     INSTALLED_APPS += [
         'cloudinary_storage',
         'cloudinary',
     ]
-    CLOUDINARY_STORAGE = {
-        'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
-        'API_KEY': CLOUDINARY_API_KEY,
-        'API_SECRET': CLOUDINARY_API_SECRET,
-        'SECURE': True,
-    }
     import cloudinary
     if CLOUDINARY_URL:
         cloudinary.config(cloudinary_url=CLOUDINARY_URL, secure=True)
@@ -139,7 +140,6 @@ if USAR_CLOUDINARY:
             "BACKEND": STATICFILES_STORAGE_BACKEND,
         },
     }
-    MEDIA_URL = f'https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/' if CLOUDINARY_CLOUD_NAME else '/media/'
 else:
     STORAGES = {
         "default": {
@@ -149,8 +149,9 @@ else:
             "BACKEND": STATICFILES_STORAGE_BACKEND,
         },
     }
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True

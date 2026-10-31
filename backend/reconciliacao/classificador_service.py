@@ -15,8 +15,11 @@ PALAVRAS_CHAVE = {
         'conta contabil', 'rubrica', 'sintetica', 'sintetico',
     ],
     'MODELO7': [
-        'modelo 7', 'modelo7', 'declaracao recapitulativa',
-        'iva a entregar', 'iva a favor', 'liquidacao do iva', 'autoliquidacao',
+        'modelo 7', 'modelo7', 'declaracao modelo 7', 'comprovativo de entrega',
+        'comprovativo de liquidacao', 'liquidacao de iva', 'liquidacao do iva',
+        'declaracao recapitulativa', 'iva a entregar', 'iva a favor',
+        'autoliquidacao', 'declaracao periodica', 'regime do iva',
+        'imposto sobre o valor acrescentado',
     ],
     'FACTURA_VENDA': [
         'factura', 'fatura', 'cliente', 'venda', 'prestacao de servicos',
@@ -73,7 +76,8 @@ MAX_OCORRENCIAS_TEXTO = 10
 def _normalizar(texto):
     texto = unicodedata.normalize('NFKD', texto or '')
     texto = ''.join(c for c in texto if not unicodedata.combining(c))
-    return texto.lower()
+    texto = re.sub(r'[\W_]+', ' ', texto)
+    return texto.lower().strip()
 
 
 def contar_ocorrencias(palavra, texto_normalizado):

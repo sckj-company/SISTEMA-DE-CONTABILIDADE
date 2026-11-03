@@ -46,6 +46,25 @@ export function formatKz(num) {
 }
 
 /**
+ * Limpa completamente qualquer texto acessório ou colado (ex: "a pagar", "/ 0,00 Kz a recuperar")
+ * e formata apenas o número financeiro estrito com a sigla Kz.
+ */
+export function formatarValorKzLimpo(val) {
+  if (!val || val === '—' || val === '-') return '0,00 Kz';
+  if (typeof val === 'number') return formatKz(val);
+  const s = String(val).trim();
+  if (s.includes('/')) {
+    const partes = s.split('/');
+    const v1 = parseValorKz(partes[0]);
+    const v2 = parseValorKz(partes[1]);
+    if (v1 > 0) return formatKz(v1);
+    if (v2 > 0) return formatKz(v2);
+    return formatKz(v1);
+  }
+  return formatKz(parseValorKz(s));
+}
+
+/**
  * Valida se um título de divergência corresponde a uma rubrica ou conta real
  */
 export function isTituloDiferencaValido(str) {
@@ -448,14 +467,13 @@ export function parseAnaliseIA(texto) {
     !i.campo.toLowerCase().includes('conta 34')
   );
 
-  const itemBaseCompras = itensConfronto.find((i) =>
-    (i.campo.toLowerCase().includes('compras') ||
-     i.campo.toLowerCase().includes('existências') ||
-     i.campo.toLowerCase().includes('incidência do iva dedutível')) &&
-    !i.campo.toLowerCase().includes('iva dedutível') &&
-    !i.campo.toLowerCase().includes('iva suportado') &&
-    !i.campo.toLowerCase().includes('conta 34')
-  );
+  const itemBaseCompras = itensConfronto.find((i) => {
+    const c = i.campo.toLowerCase();
+    const isBase = c.includes('incidência') || c.includes('base') || c.includes('compras') || c.includes('fse') || c.includes('existências') || c.includes('serviços');
+    const isConta34 = c.includes('conta 34') || c.includes('campo 32') || c.includes('34.5.1') || c.includes('34.5.2');
+    const isVendas = c.includes('vendas') || c.includes('liquidado') || c.includes('volume de negócios');
+    return isBase && !isConta34 && !isVendas;
+  });
 
   const itemExcessoAnterior = itensConfronto.find((i) =>
     i.campo.toLowerCase().includes('excesso a reportar') ||
@@ -538,7 +556,16 @@ export function parseAnaliseIA(texto) {
   // Helper para limpar sufixos como (a pagar) ou (a recuperar) dos valores exibidos
   const limparSufixo = (val) => {
     if (!val) return '0,00 Kz';
-    return String(val).replace(/\s*\([^\)]*\)/g, '').trim();
+    let s = String(val).replace(/\s*\([^\)]*\)/g, '').trim();
+    if (s.includes('/')) {
+      const partes = s.split('/');
+      const p1 = partes[0].trim();
+      const p2 = partes[1].trim();
+      if (parseValorKz(p1) > 0) s = p1;
+      else if (parseValorKz(p2) > 0) s = p2;
+      else s = p1;
+    }
+    return s.trim();
   };
 
   // Valores matemáticos e apurados oficiais
@@ -550,17 +577,17 @@ export function parseAnaliseIA(texto) {
     : '0,00 Kz';
 
   const valorAtivoPagarContab = (itemPagar && limparSufixo(itemPagar.contabilidade) !== '0,00 Kz' && limparSufixo(itemPagar.contabilidade) !== '—')
-    ? limparSufixo(itemPagar.contabilidade)
+    ? formatarValorKzLimpo(itemPagar.contabilidade)
     : valorApuradoPagar;
   const valorAtivoPagarAgt = (itemPagar && limparSufixo(itemPagar.agt) !== '0,00 Kz' && limparSufixo(itemPagar.agt) !== '—')
-    ? limparSufixo(itemPagar.agt)
+    ? formatarValorKzLimpo(itemPagar.agt)
     : valorApuradoPagar;
 
   const valorAtivoRecuperarContab = (itemRecuperar && limparSufixo(itemRecuperar.contabilidade) !== '0,00 Kz' && limparSufixo(itemRecuperar.contabilidade) !== '—')
-    ? limparSufixo(itemRecuperar.contabilidade)
+    ? formatarValorKzLimpo(itemRecuperar.contabilidade)
     : valorApuradoRecuperar;
   const valorAtivoRecuperarAgt = (itemRecuperar && limparSufixo(itemRecuperar.agt) !== '0,00 Kz' && limparSufixo(itemRecuperar.agt) !== '—')
-    ? limparSufixo(itemRecuperar.agt)
+    ? formatarValorKzLimpo(itemRecuperar.agt)
     : valorApuradoRecuperar;
 
   const statusPagar = (parseValorKz(valorAtivoPagarContab) === parseValorKz(valorAtivoPagarAgt) || itemPagar?.status === 'IGUAIS')
@@ -613,9 +640,9 @@ export function parseAnaliseIA(texto) {
   ];
 
   // Extrações específicas do QUADRO OFICIAL DE APURAMENTO DO IVA no texto
-  const matchIncidVendasContab = texto.match(/Incidência\s*\/\s*Vendas[^\n:]*\(Conta\s*61\):\s*([^\n\-\>]+)/i);
+  const matchIncidVendasContab = texto.match(/Incidência\s*\/\s*Vendas[^\n:]*\(Conta\s*(?:6[12]|61\/62)[^\)]*\):\s*([^\n\-\>]+)/i);
   const matchIncidVendasAgt = texto.match(/Incidência\s*\/\s*Vendas[^\n:]*\(Quadro\s*09[^\)]*\):\s*([^\n\-\>]+)/i);
-  const matchIncidComprasContab = texto.match(/Incidência\s*\/\s*Compras[^\n:]*\(Conta\s*21[^\)]*\):\s*([^\n\-\>]+)/i);
+  const matchIncidComprasContab = texto.match(/Incidência\s*\/\s*Compras[^\n:]*\(Conta\s*(?:21|752|21\/752)[^\)]*\):\s*([^\n\-\>]+)/i);
   const matchIncidComprasAgt = texto.match(/Incidência\s*\/\s*Compras[^\n:]*\(Quadro\s*09[^\)]*\):\s*([^\n\-\>]+)/i);
 
   const matchCalculoContab = texto.match(/Cálculo do Apuramento:\s*([^\n]+)/i);
@@ -656,7 +683,7 @@ export function parseAnaliseIA(texto) {
   };
 
   const saldoContabApurado = matchSaldoBalancete
-    ? matchSaldoBalancete[1].trim()
+    ? formatarValorKzLimpo(matchSaldoBalancete[1].trim())
     : (tipoApuramento === 'RECUPERAR' ? valorAtivoRecuperarContab : valorAtivoPagarContab);
 
   const apuramentoContabilidade = {
@@ -664,22 +691,22 @@ export function parseAnaliseIA(texto) {
     conta: tipoApuramento === 'RECUPERAR' ? 'Conta 34.5.7.1' : (tipoApuramento === 'REEMBOLSO' ? 'Conta 34.5.8.1' : 'Conta 34.5.6.1'),
     rubrica: tipoApuramento === 'RECUPERAR' ? 'IVA a Recuperar (Crédito Fiscal)' : (tipoApuramento === 'REEMBOLSO' ? 'IVA Reembolsos Pedidos' : 'IVA a Pagar ao Estado'),
     calculo: matchCalculoContab ? matchCalculoContab[1].trim() : `${itemLiquidado?.contabilidade || '0,00 Kz'} − ${itemDedutivel?.contabilidade || '0,00 Kz'}`,
-    saldo: saldoContabApurado,
+    saldo: formatarValorKzLimpo(saldoContabApurado),
   };
 
   const saldoAgtPeriodo = matchSaldoAgtPeriodo
-    ? matchSaldoAgtPeriodo[1].trim()
+    ? formatarValorKzLimpo(matchSaldoAgtPeriodo[1].trim())
     : (tipoApuramento === 'RECUPERAR' ? valorAtivoRecuperarAgt : valorAtivoPagarAgt);
 
   const valExcessoAnterior = matchExcessoAnteriorTxt
-    ? matchExcessoAnteriorTxt[1].trim()
-    : (itemExcessoAnterior?.agt && itemExcessoAnterior.agt !== '—' && parseValorKz(itemExcessoAnterior.agt) > 0 ? itemExcessoAnterior.agt : null);
+    ? formatarValorKzLimpo(matchExcessoAnteriorTxt[1].trim())
+    : (itemExcessoAnterior?.agt && itemExcessoAnterior.agt !== '—' && parseValorKz(itemExcessoAnterior.agt) > 0 ? formatarValorKzLimpo(itemExcessoAnterior.agt) : null);
 
   const valPosicaoFinal = matchPosicaoFinalTxt
-    ? matchPosicaoFinalTxt[1].trim()
+    ? formatarValorKzLimpo(matchPosicaoFinalTxt[1].trim())
     : (valExcessoAnterior && parseValorKz(valExcessoAnterior) > 0
         ? formatKz(parseValorKz(saldoAgtPeriodo) + parseValorKz(valExcessoAnterior))
-        : saldoAgtPeriodo);
+        : formatarValorKzLimpo(saldoAgtPeriodo));
 
   const apuramentoAgt = {
     titulo: 'Declaração AGT (Modelo 7)',

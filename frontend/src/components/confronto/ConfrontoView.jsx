@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { usePeriodo, usePeriodoDaUrl } from '../../context/PeriodoContext';
 import { empresaService, analiseService, authHeaders, API_BASE } from '../../services/api';
-import { parseAnaliseIA, parseValorKz, formatKz } from '../../utils/analiseIaParser';
+import { parseAnaliseIA, parseValorKz, formatKz, formatarValorKzLimpo } from '../../utils/analiseIaParser';
 import ConsolidacaoAnualView from './ConsolidacaoAnualView';
 
 const SpinDots = () => (
@@ -1237,12 +1237,12 @@ const ConfrontoView = () => {
                                   Incidência (Base de Vendas)
                                 </span>
                                 <span className="badge" style={{ fontSize: '10px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '4px 8px' }}>
-                                  Conta 61 · Campo 1/1.2
+                                  Conta 61/62 · Campo 1/1.2
                                 </span>
                               </div>
                               <div style={{ marginBottom: '10px' }}>
                                 <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
-                                  Contabilidade (Balancete Conta 61):
+                                  Contabilidade (Balancete Conta 61/62):
                                 </span>
                                 <div style={{ fontSize: '18.5px', fontWeight: 800, color: '#0f172a' }}>
                                   {parsedData.apuramentoIva?.incidenciaVendas?.contabilidade || '0,00 Kz'}
@@ -1323,7 +1323,7 @@ const ConfrontoView = () => {
                               </div>
                               <div style={{ marginBottom: '10px' }}>
                                 <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
-                                  Contabilidade (Balancete Conta 21):
+                                  Contabilidade (Balancete Conta 21/752 FSE):
                                 </span>
                                 <div style={{ fontSize: '18.5px', fontWeight: 800, color: '#0f172a' }}>
                                   {parsedData.apuramentoIva?.incidenciaCompras?.contabilidade || '0,00 Kz'}
@@ -1428,7 +1428,7 @@ const ConfrontoView = () => {
                                 </span>
                               </div>
                               <div style={{ fontSize: '23px', fontWeight: 800, color: corApuramentoPrincipal, letterSpacing: '-0.3px' }}>
-                                {parsedData.apuramentoIva?.apuramentoContabilidade?.saldo || parsedData.apuramentoIva?.resultadoPrincipal?.contabilidade || '0,00 Kz'}
+                                {formatarValorKzLimpo(parsedData.apuramentoIva?.apuramentoContabilidade?.saldo || parsedData.apuramentoIva?.resultadoPrincipal?.contabilidade || '0,00 Kz')}
                               </div>
                               <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginTop: '2px' }}>
                                 {parsedData.apuramentoIva?.isRecuperar ? 'Crédito Fiscal do Período' : parsedData.apuramentoIva?.isReembolso ? 'Reembolso Pedido' : 'IVA a Pagar do Período'}
@@ -1446,7 +1446,7 @@ const ConfrontoView = () => {
                                 </span>
                               </div>
                               <div style={{ fontSize: '23px', fontWeight: 800, color: corApuramentoPrincipal, letterSpacing: '-0.3px' }}>
-                                {parsedData.apuramentoIva?.apuramentoAgt?.saldoPeriodo || parsedData.apuramentoIva?.resultadoPrincipal?.agt || '0,00 Kz'}
+                                {formatarValorKzLimpo(parsedData.apuramentoIva?.apuramentoAgt?.saldoPeriodo || parsedData.apuramentoIva?.resultadoPrincipal?.agt || '0,00 Kz')}
                               </div>
                               {parsedData.apuramentoIva?.apuramentoAgt?.excessoAnterior && (
                                 <div style={{ fontSize: '11.5px', color: '#334155', marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed #e2e8f0' }}>
@@ -1637,7 +1637,7 @@ const ConfrontoView = () => {
                                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>34.5.6.1 · IVA a Pagar:</span>
                                 <strong style={{ fontSize: '15.5px', color: parsedData.apuramentoIva?.tipoApuramento === 'PAGAR' ? '#dc2626' : '#64748b' }}>
                                   {parsedData.apuramentoIva?.tipoApuramento === 'PAGAR'
-                                    ? (parsedData.apuramentoIva?.pagar?.agt || '0,00 Kz')
+                                    ? formatarValorKzLimpo(parsedData.apuramentoIva?.pagar?.agt || '0,00 Kz')
                                     : '0,00 Kz'}
                                 </strong>
                               </div>
@@ -1645,7 +1645,7 @@ const ConfrontoView = () => {
                                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>34.5.7.1 · IVA a Recuperar:</span>
                                 <strong style={{ fontSize: '15.5px', color: parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR' ? '#15803d' : '#64748b' }}>
                                   {parsedData.apuramentoIva?.tipoApuramento === 'RECUPERAR'
-                                    ? (parsedData.apuramentoIva?.recuperar?.agt || '0,00 Kz')
+                                    ? formatarValorKzLimpo(parsedData.apuramentoIva?.recuperar?.agt || '0,00 Kz')
                                     : '0,00 Kz'}
                                 </strong>
                               </div>
@@ -1653,7 +1653,7 @@ const ConfrontoView = () => {
                                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>34.5.8.1 · Reembolsos:</span>
                                 <strong style={{ fontSize: '15.5px', color: parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO' ? '#2563eb' : '#64748b' }}>
                                   {parsedData.apuramentoIva?.tipoApuramento === 'REEMBOLSO'
-                                    ? (parsedData.apuramentoIva?.reembolso?.agt || '0,00 Kz')
+                                    ? formatarValorKzLimpo(parsedData.apuramentoIva?.reembolso?.agt || '0,00 Kz')
                                     : '0,00 Kz'}
                                 </strong>
                               </div>
@@ -1665,19 +1665,25 @@ const ConfrontoView = () => {
                                   ? 'Crédito Fiscal Acumulado p/ Mês Seguinte (C.39):'
                                   : parsedData.apuramentoIva?.isReembolso
                                   ? 'Reembolso Solicitado à AGT (C.40):'
-                                  : 'Valor Líquido a Pagar via DAR (C.37):'}
+                                  : 'IVA a Pagar via DAR (C.37):'}
                               </span>
                               <div style={{ fontSize: '25px', fontWeight: 800, color: corApuramentoPrincipal, letterSpacing: '-0.3px' }}>
-                                {parsedData.apuramentoIva?.apuramentoAgt?.posicaoFinal ||
+                                {formatarValorKzLimpo(
+                                  parsedData.apuramentoIva?.apuramentoAgt?.posicaoFinal ||
                                   parsedData.apuramentoIva?.resultadoPrincipal?.agt ||
-                                  '0,00 Kz'}
+                                  '0,00 Kz'
+                                )}
                               </div>
                               <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginTop: '4px' }}>
-                                DAR a Pagar neste mês:{' '}
+                                IVA a Pagar neste mês:{' '}
                                 <strong style={{ color: '#0f172a' }}>
                                   {parsedData.apuramentoIva?.isRecuperar || parsedData.apuramentoIva?.isReembolso
                                     ? '0,00 Kz'
-                                    : (parsedData.apuramentoIva?.apuramentoAgt?.posicaoFinal || parsedData.apuramentoIva?.pagar?.agt || '0,00 Kz')}
+                                    : formatarValorKzLimpo(
+                                        parsedData.apuramentoIva?.apuramentoAgt?.posicaoFinal ||
+                                        parsedData.apuramentoIva?.pagar?.agt ||
+                                        '0,00 Kz'
+                                      )}
                                 </strong>
                               </span>
                             </div>

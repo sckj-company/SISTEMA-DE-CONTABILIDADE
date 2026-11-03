@@ -444,10 +444,9 @@ def extrair_dados_balancete(txt):
             if vals and vals[0] > res['iva_custo']:
                 res['iva_custo'] = vals[0]
 
-    if res['compras'] == Decimal('0') and res['fse'] > Decimal('0'):
-        res['compras'] = res['fse']
-    elif res['compras'] == Decimal('0') and res['iva_suportado'] > Decimal('0'):
-        res['compras'] = (res['iva_suportado'] / Decimal('0.14')).quantize(Decimal('0.01'))
+    # Manter Conta 21 (Compras/Existências) e Conta 752 (FSE) estritamente separadas sem unificar ou somar
+    # res['compras'] reflete unicamente Conta 21 (Existências)
+    # res['fse'] reflete unicamente Conta 752 (Fornecimentos e Serviços de Terceiros)
 
     # Regra Fundamental do Código do IVA (CIVA - Lei n.º 7/19, Art. 19.º e Seguintes):
     # O Apuramento do IVA é obrigatoriamente a diferença entre IVA Liquidado e IVA Dedutível.
@@ -515,6 +514,8 @@ def extrair_dados_modelo7(txt):
         'base_tributavel': base,
         'base_vendas': base_vendas,
         'base_compras': base_compras,
+        'base_existencias': c.get('18', Decimal('0.00')),
+        'base_servicos': c.get('22', Decimal('0.00')),
         'iva_liquidado': liq,
         'iva_dedutivel': ded,
         'credito_periodo': credito_periodo,
@@ -542,9 +543,15 @@ def gerar_analise_heuristica(texto_contabilidade, texto_agt, idioma='pt'):
     dif_liq = abs(b['iva_liquidado'] - m7['iva_liquidado'])
     st_liq = 'IGUAIS' if dif_liq <= Decimal('0.05') else 'DIFERENÇA'
 
-    # 3. Compras e Serviços (Incidência do IVA Dedutível)
-    dif_compras = abs(b['compras'] - m7['base_compras'])
-    st_compras = 'IGUAIS' if dif_compras <= Decimal('1.00') else 'DIFERENÇA'
+    # 3. Compras e Existências (Conta 21 vs Campo 18) — Separado
+    base_exist = m7.get('base_existencias', Decimal('0.00'))
+    dif_exist = abs(b['compras'] - base_exist)
+    st_exist = 'IGUAIS' if dif_exist <= Decimal('1.00') else 'DIFERENÇA'
+
+    # 3.1 Fornecimentos e Serviços de Terceiros - FSE (Conta 752 vs Campo 22) — Separado sem somar
+    base_fse = m7.get('base_servicos', Decimal('0.00'))
+    dif_fse = abs(b['fse'] - base_fse)
+    st_fse = 'IGUAIS' if dif_fse <= Decimal('1.00') else 'DIFERENÇA'
 
     # 4. IVA Dedutível (Compras ou Despesas)
     dif_ded = abs(b['iva_suportado'] - m7['iva_dedutivel'])
@@ -581,7 +588,8 @@ def gerar_analise_heuristica(texto_contabilidade, texto_agt, idioma='pt'):
     linhas_tabela = [
         ('Volume de Negócios / Vendas (Incidência do IVA Liquidado)', fmt_kz(b['vendas']), fmt_kz(m7['base_vendas']), st_base, fmt_kz(dif_base)),
         ('IVA Liquidado (Vendas ou Serviços — Conta 34.5.3 vs Campo 33)', fmt_kz(b['iva_liquidado']), fmt_kz(m7['iva_liquidado']), st_liq, fmt_kz(dif_liq)),
-        ('Compras e Serviços (Incidência do IVA Dedutível)', fmt_kz(b['compras']), fmt_kz(m7['base_compras']), st_compras, fmt_kz(dif_compras)),
+        ('Compras de Existências (Conta 21 vs Campo 18)', fmt_kz(b['compras']), fmt_kz(base_exist), st_exist, fmt_kz(dif_exist)),
+        ('Fornecimentos e Serviços - FSE (Conta 752 vs Campo 22)', fmt_kz(b['fse']), fmt_kz(base_fse), st_fse, fmt_kz(dif_fse)),
         ('IVA Dedutível (Compras ou Despesas — Conta 34.5.1/34.5.2 vs Campo 32)', fmt_kz(b['iva_suportado']), fmt_kz(m7['iva_dedutivel']), st_ded, fmt_kz(dif_ded)),
     ]
 
@@ -647,14 +655,18 @@ Demonstração do cálculo legal obrigatório em ambos os documentos:
 FÓRMULA LEGAL OBRIGATÓRIA: Apuramento do Período = IVA Liquidado (Vendas) − IVA Dedutível (Compras)
 
 1. APURAMENTO SEGUNDO A CONTABILIDADE (BALANCETE PGC):
-   - Incidência / Vendas (Conta 61): {fmt_kz(b['vendas'])} -> IVA Liquidado (Conta 34.5.3): {fmt_kz(b['iva_liquidado'])}
-   - Incidência / Compras (Conta 21): {fmt_kz(b['compras'])} -> IVA Dedutível (Conta 34.5.1/34.5.2): {fmt_kz(b['iva_suportado'])}
+   - Incidência / Vendas (Conta 61/62): {fmt_kz(b['vendas'])} -> IVA Liquidado (Conta 34.5.3): {fmt_kz(b['iva_liquidado'])}
+   - Incidência / Compras de Existências (Conta 21): {fmt_kz(b['compras'])}
+   - Incidência / Fornecimentos e Serviços - FSE (Conta 752): {fmt_kz(b['fse'])}
+   - IVA Dedutível (Conta 34.5.1/34.5.2): {fmt_kz(b['iva_suportado'])}
    - Cálculo do Apuramento: {fmt_kz(b['iva_liquidado'])} − {fmt_kz(b['iva_suportado'])}
    - Saldo Apurado no Balancete: {fmt_kz(val_b_apurado)} ({'IVA a Recuperar - Conta 34.5.7.1' if is_recuperar else 'IVA a Pagar - Conta 34.5.6.1'})
 
 2. APURAMENTO SEGUNDO A DECLARAÇÃO DA AGT (MODELO 7):
    - Incidência / Vendas (Quadro 09 - Campos 1 e 1.2): {fmt_kz(m7['base_vendas'])} -> IVA Liquidado (Campo 33): {fmt_kz(m7['iva_liquidado'])}
-   - Incidência / Compras (Quadro 09 - Campo 22): {fmt_kz(m7['base_compras'])} -> IVA Dedutível (Campo 32): {fmt_kz(m7['iva_dedutivel'])}
+   - Incidência / Compras de Existências (Quadro 09 - Campo 18): {fmt_kz(base_exist)}
+   - Incidência / Serviços Adquiridos - FSE (Quadro 09 - Campo 22): {fmt_kz(base_fse)}
+   - IVA Dedutível (Campo 32): {fmt_kz(m7['iva_dedutivel'])}
    - Cálculo do Período: {fmt_kz(m7['iva_liquidado'])} − {fmt_kz(m7['iva_dedutivel'])}
    - Saldo do Período (Campo 34/35): {fmt_kz(val_m7_periodo)} ({'Crédito do Período - Campo 34' if is_recuperar else 'Dívida do Período - Campo 35'})
    - (+) Excesso a Reportar do Período Anterior (Campo 36): {fmt_kz(m7.get('excesso_anterior', Decimal('0')))}
@@ -673,13 +685,21 @@ Três Resultados Oficiais do PGC Angolano (Contas 34.5):
 """
 
     analises_difs = []
-    if st_compras == 'DIFERENÇA':
+    if st_exist == 'DIFERENÇA':
         analises_difs.append(
-            f"- **Compras e Serviços (Incidência do IVA Dedutível — Conta 21 vs Campo 22)**\n"
-            f"  - **O que está no Balancete:** {fmt_kz(b['compras'])} em compras/existências (Conta 21)\n"
-            f"  - **O que foi declarado no Modelo 7:** {fmt_kz(m7['base_compras'])} no Quadro 09 (Campo 22)\n"
-            f"  - **Causa provável:** Faturas de compras de existências ou despesas registadas na contabilidade que não foram refletidas no Campo 22 do Modelo 7 ou aquisições com isenção.\n"
-            f"  - **Risco fiscal:** MÉDIO a ALTO. Incoerência entre o custo das mercadorias vendidas/inventários e as declarações fiscais perante a AGT."
+            f"- **Compras de Existências (Conta 21 vs Campo 18)**\n"
+            f"  - **O que está no Balancete:** {fmt_kz(b['compras'])} em mercadorias/existências (Conta 21)\n"
+            f"  - **O que foi declarado no Modelo 7:** {fmt_kz(base_exist)} no Campo 18\n"
+            f"  - **Causa provável:** Divergência entre compras de existências faturadas e as declaradas no inventário do Modelo 7.\n"
+            f"  - **Risco fiscal:** MÉDIO. Incoerência nos custos de existências perante a AGT."
+        )
+    if st_fse == 'DIFERENÇA':
+        analises_difs.append(
+            f"- **Fornecimentos e Serviços de Terceiros - FSE (Conta 752 vs Campo 22)**\n"
+            f"  - **O que está no Balancete:** {fmt_kz(b['fse'])} em despesas operacionais/FSE (Conta 752)\n"
+            f"  - **O que foi declarado no Modelo 7:** {fmt_kz(base_fse)} no Campo 22 (Serviços)\n"
+            f"  - **Causa provável:** Despesas com fornecedores e serviços registadas na contabilidade que não foram refletidas no Campo 22 do Modelo 7.\n"
+            f"  - **Risco fiscal:** ALTO. A AGT pode cruzar as declarações de fornecedores e questionar a omissão de despesas e suporte de IVA."
         )
     if st_caixa == 'DIFERENÇA':
         analises_difs.append(
@@ -769,8 +789,9 @@ def analisar_documentos(texto_contabilidade, texto_agt, idioma='pt'):
     # 2. Resumo de apoio para que a IA nunca alucine valores em falta ou inverta rubricas
     sumario_extracao = f"""=== VALORES DETERMINÍSTICOS EXTRAÍDOS DOS DOCUMENTOS (FONTES DE VERDADE) ===
 • Contabilidade (Balancete de Verificação PGC):
-  - Volume de Negócios / Faturação (Conta 61): {fmt_kz(b['vendas'])}
-  - Compras e Existências (Conta 21/752): {fmt_kz(b['compras'])}
+  - Volume de Negócios / Faturação (Conta 61/62): {fmt_kz(b['vendas'])}
+  - Compras e Existências (Conta 21): {fmt_kz(b['compras'])}
+  - Fornecimentos e Serviços de Terceiros - FSE (Conta 752): {fmt_kz(b['fse'])}
   - IVA Liquidado (Vendas ou Serviços - Conta 34.5.3): {fmt_kz(b['iva_liquidado'])}
   - IVA Dedutível / Suportado (Compras ou Despesas - Conta 34.5.1/34.5.2): {fmt_kz(b['iva_suportado'])}
   - IVA a Recuperar (Conta 34.5.7.1): {fmt_kz(b['iva_recuperar'])}
@@ -781,7 +802,8 @@ def analisar_documentos(texto_contabilidade, texto_agt, idioma='pt'):
 
 • Declaração Modelo 7 da AGT:
   - Base de Vendas / Faturação (Quadro 09 - Campos 1 e 1.2): {fmt_kz(m7['base_vendas'])}
-  - Base de Compras (Quadro 09 - Campo 22): {fmt_kz(m7['base_compras'])}
+  - Compras de Existências (Quadro 09 - Campo 18): {fmt_kz(m7.get('base_existencias', Decimal('0.00')))}
+  - Serviços Adquiridos - FSE (Quadro 09 - Campo 22): {fmt_kz(m7.get('base_servicos', Decimal('0.00')))}
   - Base Tributável Total Declarada (Quadro 09 - Campo 31): {fmt_kz(m7['base_tributavel'])}
   - IVA Liquidado (Quadro 09 - Campo 33 / Campo 21): {fmt_kz(m7['iva_liquidado'])}
   - IVA Dedutível (Quadro 09 - Campo 32 / Campo 22): {fmt_kz(m7['iva_dedutivel'])}

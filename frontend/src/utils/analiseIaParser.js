@@ -682,6 +682,54 @@ export function parseAnaliseIA(texto) {
     diferenca: difIncidCompras,
   };
 
+  // 1. Incidência Conta 21 (Compras / Existências — Quadro 09 Campo 18)
+  const itemConta21 = itensConfronto.find((i) => {
+    const c = i.campo.toLowerCase();
+    return (c.includes('21') || c.includes('existências') || c.includes('inventários')) &&
+      !c.includes('34') && !c.includes('iva');
+  });
+
+  // 2. Incidência Conta 752 (Fornecimentos e Serviços de Terceiros FSE — Quadro 09 Campo 22)
+  const itemFse752 = itensConfronto.find((i) => {
+    const c = i.campo.toLowerCase();
+    return (c.includes('752') || c.includes('fse') || (c.includes('serviços') && !c.includes('vendas') && !c.includes('prestações') && !c.includes('prestação'))) &&
+      !c.includes('34') && !c.includes('iva');
+  });
+
+  const matchConta21Contab = texto.match(/Incidência\s*\/\s*Compras\s*de\s*Existências[^\n:]*\(Conta\s*21[^\)]*\):\s*([^\n\-\>]+)/i) ||
+                             texto.match(/Incidência\s*\/\s*Compras[^\n:]*\(Conta\s*21[^\)]*\):\s*([^\n\-\>]+)/i);
+  const matchConta21Agt = texto.match(/Incidência\s*\/\s*Compras\s*de\s*Existências[^\n:]*\(Quadro\s*09\s*-\s*Campo\s*18[^\)]*\):\s*([^\n\-\>]+)/i) ||
+                          texto.match(/Compras\s*de\s*Existências[^\n:]*\(Quadro\s*09\s*-\s*Campo\s*18[^\)]*\):\s*([^\n\-\>]+)/i);
+
+  const matchFse752Contab = texto.match(/(?:Incidência\s*\/\s*)?(?:Fornecimentos\s*e\s*Serviços|FSE)[^\n:]*\(Conta\s*752[^\)]*\):\s*([^\n\-\>]+)/i);
+  const matchFse752Agt = texto.match(/(?:Incidência\s*\/\s*)?(?:Fornecimentos\s*e\s*Serviços|FSE|Serviços\s*Adquiridos)[^\n:]*\(Quadro\s*09\s*-\s*Campo\s*22[^\)]*\):\s*([^\n\-\>]+)/i);
+
+  const valConta21Contab = matchConta21Contab ? formatarValorKzLimpo(matchConta21Contab[1]) : (itemConta21 ? formatarValorKzLimpo(itemConta21.contabilidade) : '0,00 Kz');
+  const valConta21Agt = matchConta21Agt ? formatarValorKzLimpo(matchConta21Agt[1]) : (itemConta21 ? formatarValorKzLimpo(itemConta21.agt) : '0,00 Kz');
+  const difConta21Num = Math.abs(parseValorKz(valConta21Contab) - parseValorKz(valConta21Agt));
+  const stConta21 = (difConta21Num <= 0.05 || itemConta21?.status === 'IGUAIS') ? 'IGUAIS' : 'DIFERENÇA';
+  const difConta21 = stConta21 === 'IGUAIS' ? '0,00 Kz' : formatKz(difConta21Num);
+
+  const incidenciaConta21 = {
+    contabilidade: valConta21Contab,
+    agt: valConta21Agt,
+    status: stConta21,
+    diferenca: difConta21,
+  };
+
+  const valFseContab = matchFse752Contab ? formatarValorKzLimpo(matchFse752Contab[1]) : (itemFse752 ? formatarValorKzLimpo(itemFse752.contabilidade) : (itemBaseCompras ? formatarValorKzLimpo(itemBaseCompras.contabilidade) : '0,00 Kz'));
+  const valFseAgt = matchFse752Agt ? formatarValorKzLimpo(matchFse752Agt[1]) : (itemFse752 ? formatarValorKzLimpo(itemFse752.agt) : (itemBaseCompras ? formatarValorKzLimpo(itemBaseCompras.agt) : '0,00 Kz'));
+  const difFseNum = Math.abs(parseValorKz(valFseContab) - parseValorKz(valFseAgt));
+  const stFse = (difFseNum <= 0.05 || itemFse752?.status === 'IGUAIS') ? 'IGUAIS' : 'DIFERENÇA';
+  const difFse = stFse === 'IGUAIS' ? '0,00 Kz' : formatKz(difFseNum);
+
+  const incidenciaFse752 = {
+    contabilidade: valFseContab,
+    agt: valFseAgt,
+    status: stFse,
+    diferenca: difFse,
+  };
+
   const saldoContabApurado = matchSaldoBalancete
     ? formatarValorKzLimpo(matchSaldoBalancete[1].trim())
     : (tipoApuramento === 'RECUPERAR' ? valorAtivoRecuperarContab : valorAtivoPagarContab);
@@ -742,6 +790,8 @@ export function parseAnaliseIA(texto) {
           : 'Conta 34.5.6.1 · Campo 37',
         incidenciaVendas,
         incidenciaCompras,
+        incidenciaConta21,
+        incidenciaFse752,
         liquidado: {
           contabilidade: itemLiquidado?.contabilidade || '0,00 Kz',
           agt: itemLiquidado?.agt || '0,00 Kz',

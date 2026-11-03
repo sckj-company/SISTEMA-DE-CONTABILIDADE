@@ -1023,9 +1023,13 @@ const ConfrontoView = () => {
               ? '0,00 Kz'
               : (parsedData.apuramentoIva?.incidenciaVendas?.diferenca || '0,00 Kz');
 
-            const desvioComprasTexto = parsedData.apuramentoIva?.incidenciaCompras?.status === 'IGUAIS'
+            const desvioConta21Texto = parsedData.apuramentoIva?.incidenciaConta21?.status === 'IGUAIS'
               ? '0,00 Kz'
-              : (parsedData.apuramentoIva?.incidenciaCompras?.diferenca || '0,00 Kz');
+              : (parsedData.apuramentoIva?.incidenciaConta21?.diferenca || '0,00 Kz');
+
+            const desvioFseTexto = parsedData.apuramentoIva?.incidenciaFse752?.status === 'IGUAIS'
+              ? '0,00 Kz'
+              : (parsedData.apuramentoIva?.incidenciaFse752?.diferenca || '0,00 Kz');
 
             const desvioApuramentoTexto = parsedData.apuramentoIva?.confrontoPeriodo?.status === 'IGUAIS'
               ? '0,00 Kz'
@@ -1309,38 +1313,72 @@ const ConfrontoView = () => {
                             (COMPRAS OU DESPESAS)
                           </span>
                         </div>
-                        <div className="confronto-big-card" style={{ borderTop: '4px solid #2563eb', padding: '26px 24px' }}>
+                        <div className="confronto-big-card" style={{ borderTop: '4px solid #2563eb', padding: '24px 20px' }}>
                           <div>
-                            {/* SUB-BLOCO A: INCIDÊNCIA DE COMPRAS */}
-                            <div className="confronto-subbox" style={{ marginBottom: '20px' }}>
-                              <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 6, marginBottom: '12px' }}>
-                                <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                                  Incidência (Compras e FSE)
+                            {/* SUB-BLOCO A1: CONTA 21 (EXISTÊNCIAS / COMPRAS — EM CIMA) */}
+                            <div className="confronto-subbox" style={{ marginBottom: '14px' }}>
+                              <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 6, marginBottom: '8px' }}>
+                                <span style={{ fontSize: '11px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                                  Compras / Existências
                                 </span>
-                                <span className="badge" style={{ fontSize: '10px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '4px 8px' }}>
-                                  Conta 21/752 · C.22
+                                <span className="badge" style={{ fontSize: '9.5px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '3px 7px' }}>
+                                  Conta 21 · Campo 18
                                 </span>
                               </div>
-                              <div style={{ marginBottom: '10px' }}>
-                                <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
-                                  Contabilidade (Balancete Conta 21/752 FSE):
+                              <div style={{ marginBottom: '6px' }}>
+                                <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '1px' }}>
+                                  Contabilidade (Balancete Conta 21):
                                 </span>
-                                <div style={{ fontSize: '18.5px', fontWeight: 800, color: '#0f172a' }}>
-                                  {parsedData.apuramentoIva?.incidenciaCompras?.contabilidade || '0,00 Kz'}
+                                <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                                  {parsedData.apuramentoIva?.incidenciaConta21?.contabilidade || '0,00 Kz'}
                                 </div>
                               </div>
-                              <div style={{ marginBottom: '12px' }}>
-                                <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                              <div style={{ marginBottom: '8px' }}>
+                                <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '1px' }}>
+                                  Modelo 7 (Quadro 09 - Campo 18):
+                                </span>
+                                <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                                  {parsedData.apuramentoIva?.incidenciaConta21?.agt || '0,00 Kz'}
+                                </div>
+                              </div>
+                              <div style={{ paddingTop: '8px', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Diferença na Conta 21:</span>
+                                <span style={{ fontSize: '12px', fontWeight: 800, color: parsedData.apuramentoIva?.incidenciaConta21?.status === 'IGUAIS' ? '#15803d' : '#dc2626' }}>
+                                  {parsedData.apuramentoIva?.incidenciaConta21?.status === 'IGUAIS' ? '✓ 0,00 Kz' : parsedData.apuramentoIva?.incidenciaConta21?.diferenca}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* SUB-BLOCO A2: CONTA 752 (FSE - FORNECIMENTOS E SERVIÇOS — EM BAIXO, SEM SOMAR) */}
+                            <div className="confronto-subbox" style={{ marginBottom: '18px' }}>
+                              <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 6, marginBottom: '8px' }}>
+                                <span style={{ fontSize: '11px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                                  Despesas e Serviços (FSE)
+                                </span>
+                                <span className="badge" style={{ fontSize: '9.5px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '3px 7px' }}>
+                                  Conta 752 · Campo 22
+                                </span>
+                              </div>
+                              <div style={{ marginBottom: '6px' }}>
+                                <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '1px' }}>
+                                  Contabilidade (Balancete Conta 752 FSE):
+                                </span>
+                                <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                                  {parsedData.apuramentoIva?.incidenciaFse752?.contabilidade || '0,00 Kz'}
+                                </div>
+                              </div>
+                              <div style={{ marginBottom: '8px' }}>
+                                <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '1px' }}>
                                   Modelo 7 (Quadro 09 - Campo 22):
                                 </span>
-                                <div style={{ fontSize: '18.5px', fontWeight: 800, color: '#0f172a' }}>
-                                  {parsedData.apuramentoIva?.incidenciaCompras?.agt || '0,00 Kz'}
+                                <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                                  {parsedData.apuramentoIva?.incidenciaFse752?.agt || '0,00 Kz'}
                                 </div>
                               </div>
-                              <div style={{ paddingTop: '10px', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>Diferença nas Compras:</span>
-                                <span style={{ fontSize: '12.5px', fontWeight: 800, color: parsedData.apuramentoIva?.incidenciaCompras?.status === 'IGUAIS' ? '#15803d' : '#dc2626' }}>
-                                  {parsedData.apuramentoIva?.incidenciaCompras?.status === 'IGUAIS' ? '✓ 0,00 Kz' : desvioComprasTexto}
+                              <div style={{ paddingTop: '8px', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Diferença no FSE (Conta 752):</span>
+                                <span style={{ fontSize: '12px', fontWeight: 800, color: parsedData.apuramentoIva?.incidenciaFse752?.status === 'IGUAIS' ? '#15803d' : '#dc2626' }}>
+                                  {parsedData.apuramentoIva?.incidenciaFse752?.status === 'IGUAIS' ? '✓ 0,00 Kz' : parsedData.apuramentoIva?.incidenciaFse752?.diferenca}
                                 </span>
                               </div>
                             </div>
@@ -1497,7 +1535,7 @@ const ConfrontoView = () => {
                           </strong>
                         </div>
                         <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 4 }}>
-                          Síntese quantitativa de conformidade, desvios financeiros em Kwanzas e saldos das contas 34.5
+                          Síntese quantitativa de conformidade, divergências financeiras apuradas em Kwanzas e saldos das contas 34.5
                         </div>
                       </div>
                       <span
@@ -1567,47 +1605,53 @@ const ConfrontoView = () => {
                         </div>
                       </div>
 
-                      {/* CARTÃO NUMÉRICO 5: (DESVIOS FINANCEIROS EM KWANZAS) */}
+                      {/* CARTÃO NUMÉRICO 5: (DIVERGÊNCIAS APURADAS - KZ) */}
                       <div className="col-12 col-lg-4 d-flex flex-column">
                         <div style={{ textAlign: 'center', marginBottom: '14px' }}>
                           <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
-                            (DESVIOS EM KWANZAS)
+                            (DIVERGÊNCIAS APURADAS - KZ)
                           </span>
                         </div>
-                        <div className="confronto-big-card" style={{ borderTop: '4px solid #2563eb', padding: '26px 24px' }}>
+                        <div className="confronto-big-card" style={{ borderTop: '4px solid #2563eb', padding: '24px 22px' }}>
                           <div>
-                            <div className="confronto-subbox" style={{ marginBottom: '20px' }}>
-                              <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', display: 'block', marginBottom: '10px' }}>
+                            <div className="confronto-subbox" style={{ marginBottom: '16px' }}>
+                              <span style={{ fontSize: '11px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
                                 Diferenças nas Bases Tributáveis
                               </span>
-                              <div className="d-flex justify-content-between align-items-center mb-8">
-                                <span style={{ fontSize: '12px', color: '#64748b' }}>Base Vendas (Conta 61):</span>
-                                <strong style={{ fontSize: '15.5px', color: desvioVendasTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
+                              <div className="d-flex justify-content-between align-items-center mb-6">
+                                <span style={{ fontSize: '11.5px', color: '#64748b' }}>Base Vendas (Conta 61/62):</span>
+                                <strong style={{ fontSize: '14.5px', color: desvioVendasTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
                                   {desvioVendasTexto}
                                 </strong>
                               </div>
+                              <div className="d-flex justify-content-between align-items-center mb-6">
+                                <span style={{ fontSize: '11.5px', color: '#64748b' }}>Base Compras (Conta 21):</span>
+                                <strong style={{ fontSize: '14.5px', color: desvioConta21Texto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
+                                  {desvioConta21Texto}
+                                </strong>
+                              </div>
                               <div className="d-flex justify-content-between align-items-center">
-                                <span style={{ fontSize: '12px', color: '#64748b' }}>Base Compras (Conta 21):</span>
-                                <strong style={{ fontSize: '15.5px', color: desvioComprasTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
-                                  {desvioComprasTexto}
+                                <span style={{ fontSize: '11.5px', color: '#64748b' }}>Base FSE (Conta 752):</span>
+                                <strong style={{ fontSize: '14.5px', color: desvioFseTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
+                                  {desvioFseTexto}
                                 </strong>
                               </div>
                             </div>
 
                             <div style={{ padding: '0 4px' }}>
-                              <div style={{ marginBottom: '14px' }}>
-                                <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '3px' }}>
-                                  Desvio no IVA Liquidado (C.33):
+                              <div style={{ marginBottom: '12px' }}>
+                                <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                                  Divergência no IVA Liquidado (C.33):
                                 </span>
-                                <div style={{ fontSize: '21px', fontWeight: 800, color: desvioLiqTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
+                                <div style={{ fontSize: '20px', fontWeight: 800, color: desvioLiqTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
                                   {desvioLiqTexto}
                                 </div>
                               </div>
                               <div>
-                                <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '3px' }}>
-                                  Desvio no IVA Dedutível (C.32):
+                                <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginBottom: '2px' }}>
+                                  Divergência no IVA Dedutível (C.32):
                                 </span>
-                                <div style={{ fontSize: '21px', fontWeight: 800, color: desvioDedTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
+                                <div style={{ fontSize: '20px', fontWeight: 800, color: desvioDedTexto === '0,00 Kz' ? '#15803d' : '#dc2626' }}>
                                   {desvioDedTexto}
                                 </div>
                               </div>
@@ -1615,7 +1659,7 @@ const ConfrontoView = () => {
                           </div>
 
                           <div style={{ paddingTop: '14px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '12.5px', color: '#475569', fontWeight: 700 }}>Desvio no Apuramento:</span>
+                            <span style={{ fontSize: '12px', color: '#475569', fontWeight: 700 }}>Divergência no Apuramento:</span>
                             <span className={desvioApuramentoTexto === '0,00 Kz' ? 'status-badge-conforme' : 'status-badge-divergencia'}>
                               {desvioApuramentoTexto === '0,00 Kz' ? '✓ 0,00 Kz' : desvioApuramentoTexto}
                             </span>

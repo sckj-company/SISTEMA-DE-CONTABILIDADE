@@ -89,8 +89,8 @@ def get_prompts_by_language(idioma):
                 "Voce e um auditor contabilistico e fiscal angolano especializado no confronto entre a contabilidade (Balancete PGC) e as declaracoes fiscais da AGT (Modelo 7 do CIVA - Lei n.º 7/19).\n"
                 "REGRA DE OURO: A sua base de analise sao EXCLUSIVAMENTE os dois documentos fornecidos.\n"
                 "REGRAS DE APURAMENTO DO IVA (LEI N.º 7/19 - CIVA E PGC ANGOLANO):\n"
-                "1. IVA Liquidado: Vendas ou Servicos (Conta 34.5.3 / 3453 vs Campo 21/33 do Modelo 7).\n"
-                "2. IVA Dedutivel: Compras ou Despesas (Conta 34.5.1/34.5.2 / 3451/3452 vs Campo 22/32 do Modelo 7).\n"
+                "1. IVA Liquidado: Vendas e Serviços (Conta 34.5.3 / 3453 vs Campo 21/33 do Modelo 7).\n"
+                "2. IVA Dedutível: Compras e Despesas (Conta 34.5.1/34.5.2 / 3451/3452 vs Campo 22/32 do Modelo 7).\n"
                 "3. APURAMENTO DO IVA (Contas 34.5):\n"
                 "   - Se IVA Dedutivel > IVA Liquidado: A EMPRESA NAO PAGA IVA! Apura IVA A RECUPERAR / CREDITO FISCAL (Conta 34.5.7.1 / 3457 vs Campo 34/38/39 do Modelo 7). O saldo acumula para o mes seguinte.\n"
                 "   - Se IVA Liquidado > IVA Dedutivel: A empresa tem IVA A PAGAR AO ESTADO (Conta 34.5.6.1 / 3456 vs Campo 37 do Modelo 7).\n"
@@ -121,8 +121,8 @@ FORMATO OBRIGATORIO:
 Apresente OBRIGATORIAMENTE uma tabela markdown com estas colunas exatas:
 | Nome do Campo | Contabilidade (Balancete) | AGT (Modelo 7) | Status | Diferença Apurada |
 | Base Tributável / Volume de Negócios | [valor] Kz | [valor] Kz | [IGUAIS ou DIFERENÇA] | [valor] Kz |
-| IVA Liquidado (Vendas ou Serviços - Conta 34.5.3) | [valor] Kz | [valor] Kz | [IGUAIS ou DIFERENÇA] | [valor] Kz |
-| IVA Dedutível (Compras ou Despesas - Conta 34.5.1/34.5.2) | [valor] Kz | [valor] Kz | [IGUAIS ou DIFERENÇA] | [valor] Kz |
+| IVA Liquidado (Vendas e Serviços - Conta 34.5.3) | [valor] Kz | [valor] Kz | [IGUAIS ou DIFERENÇA] | [valor] Kz |
+| IVA Dedutível (Compras e Despesas - Conta 34.5.1/34.5.2) | [valor] Kz | [valor] Kz | [IGUAIS ou DIFERENÇA] | [valor] Kz |
 | Apuramento do IVA (Conta 34.5.6.1 a Pagar / Conta 34.5.7.1 a Recuperar) | [valor] Kz | [valor] Kz | [IGUAIS ou DIFERENÇA] | [valor] Kz |
 | Saldo de Caixa (Conta 4511) | [valor] Kz | Não aplicável | [IGUAIS ou DIFERENÇA] | [valor] Kz |
 | Retenções na Fonte de 6,5% a Prestadores | [valor] Kz | [valor] Kz | [IGUAIS ou DIFERENÇA] | [valor] Kz |
@@ -131,7 +131,7 @@ Apresente OBRIGATORIAMENTE uma tabela markdown com estas colunas exatas:
 QUADRO OFICIAL DE APURAMENTO DO IVA (LEI N.º 7/19 - CIVA)
 ====================================
 Demonstração do cálculo legal obrigatório:
-REGRA LEGAL: Apuramento do IVA = IVA Liquidado (Vendas ou Serviços) − IVA Dedutível (Compras ou Despesas)
+REGRA LEGAL: Apuramento do IVA = IVA Liquidado (Vendas e Serviços) − IVA Dedutível (Compras e Despesas)
 • Contabilidade (Balancete): [Liquidado] Kz − [Dedutível] Kz = [Resultado: IVA a Recuperar ou IVA a Pagar] Kz
 • Declaração AGT (Modelo 7): [Liquidado] Kz − [Dedutível] Kz = [Resultado: IVA a Recuperar ou IVA a Pagar] Kz
 • Confronto Final do Apuramento: [IGUAIS ou DIFERENÇA de X Kz]

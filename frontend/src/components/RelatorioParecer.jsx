@@ -192,7 +192,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
             <div className="col-12 col-md-4">
               <div style={{ textAlign: 'center', marginBottom: '12px' }}>
                 <span style={{ fontSize: '13px', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                  (VENDAS OU SERVIÇOS)
+                  (VENDAS E SERVIÇOS)
                 </span>
               </div>
               <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 16px', background: '#ffffff' }}>
@@ -221,7 +221,7 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
             <div className="col-12 col-md-4">
               <div style={{ textAlign: 'center', marginBottom: '12px' }}>
                 <span style={{ fontSize: '13px', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                  (COMPRAS OU DESPESAS)
+                  (COMPRAS E DESPESAS)
                 </span>
               </div>
               <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 16px', background: '#ffffff' }}>

@@ -1225,11 +1225,11 @@ const ConfrontoView = () => {
 
                   <div style={{ background: '#ffffff', padding: '28px 26px' }}>
                     <div className="row" style={{ rowGap: 26 }}>
-                      {/* CARTÃO GRANDE 1: (VENDAS OU SERVIÇOS) */}
+                      {/* CARTÃO GRANDE 1: (VENDAS E SERVIÇOS) */}
                       <div className="col-12 col-lg-4 d-flex flex-column">
                         <div style={{ textAlign: 'center', marginBottom: '14px' }}>
                           <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
-                            (VENDAS OU SERVIÇOS)
+                            (VENDAS E SERVIÇOS)
                           </span>
                         </div>
                         <div className="confronto-big-card" style={{ borderTop: '4px solid #2563eb', padding: '26px 24px' }}>
@@ -1306,11 +1306,11 @@ const ConfrontoView = () => {
                         </div>
                       </div>
 
-                      {/* CARTÃO GRANDE 2: (COMPRAS OU DESPESAS) */}
+                      {/* CARTÃO GRANDE 2: (COMPRAS E DESPESAS) */}
                       <div className="col-12 col-lg-4 d-flex flex-column">
                         <div style={{ textAlign: 'center', marginBottom: '14px' }}>
                           <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
-                            (COMPRAS OU DESPESAS)
+                            (COMPRAS E DESPESAS)
                           </span>
                         </div>
                         <div className="confronto-big-card" style={{ borderTop: '4px solid #2563eb', padding: '24px 20px' }}>

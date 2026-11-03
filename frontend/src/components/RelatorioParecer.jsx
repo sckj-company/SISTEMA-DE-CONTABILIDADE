@@ -225,14 +225,20 @@ const RelatorioParecer = ({ dados, empresaAtual, ano, mes }) => {
                 </span>
               </div>
               <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px 16px', background: '#ffffff' }}>
-                {/* Incidência Compras */}
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', marginBottom: '10px' }}>
+                {/* Incidência Compras e Despesas */}
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px', marginBottom: '10px' }}>
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span className="fw-700 text-uppercase" style={{ fontSize: 10, color: '#334155' }}>Incidência (Compras e FSE)</span>
-                    <span className="badge" style={{ fontSize: 9, background: '#ffffff', color: '#64748b', border: '1px solid #cbd5e1' }}>Conta 21 vs C.22</span>
+                    <span className="fw-700 text-uppercase" style={{ fontSize: 9.5, color: '#334155' }}>Incidência (Compras e Despesas)</span>
+                    <span className="badge" style={{ fontSize: 8.5, background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe' }}>C.21/752</span>
                   </div>
-                  <span className="text-muted d-block" style={{ fontSize: 10.5 }}>Contab: <strong>{analiseIAEstruturada.apuramentoIva.incidenciaCompras?.contabilidade || '—'}</strong></span>
-                  <span className="text-muted d-block" style={{ fontSize: 10.5 }}>Modelo 7: <strong>{analiseIAEstruturada.apuramentoIva.incidenciaCompras?.agt || '—'}</strong></span>
+                  <div style={{ fontSize: 10, marginBottom: '2px' }}>
+                    <span className="text-muted">Conta 21 (C.18): </span>
+                    <strong>{analiseIAEstruturada.apuramentoIva.incidenciaConta21?.contabilidade || analiseIAEstruturada.apuramentoIva.incidenciaCompras?.contabilidade || '0,00 Kz'}</strong>
+                  </div>
+                  <div style={{ fontSize: 10 }}>
+                    <span className="text-muted">Conta 752 (C.22): </span>
+                    <strong>{analiseIAEstruturada.apuramentoIva.incidenciaFse752?.contabilidade || '0,00 Kz'}</strong>
+                  </div>
                 </div>
 
                 <span className="d-block fw-700" style={{ fontSize: 11, color: '#0f172a', marginBottom: '6px' }}>

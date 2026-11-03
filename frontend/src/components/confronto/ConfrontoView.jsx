@@ -1313,73 +1313,61 @@ const ConfrontoView = () => {
                             (COMPRAS E DESPESAS)
                           </span>
                         </div>
-                        <div className="confronto-big-card" style={{ borderTop: '4px solid #2563eb', padding: '24px 20px' }}>
+                        <div className="confronto-big-card" style={{ borderTop: '4px solid #2563eb', padding: '26px 24px' }}>
                           <div>
-                            {/* SUB-BLOCO A1: CONTA 21 (EXISTÊNCIAS / COMPRAS — EM CIMA) */}
-                            <div className="confronto-subbox" style={{ marginBottom: '14px' }}>
-                              <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 6, marginBottom: '8px' }}>
-                                <span style={{ fontSize: '11px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                                  Compras / Existências
+                            {/* SUB-BLOCO A: INCIDÊNCIA DE COMPRAS E DESPESAS (CONTA 21 EM CIMA, 752 EM BAIXO) */}
+                            <div className="confronto-subbox" style={{ marginBottom: '20px' }}>
+                              <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 6, marginBottom: '10px' }}>
+                                <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                                  Incidência (Compras e Despesas)
                                 </span>
-                                <span className="badge" style={{ fontSize: '9.5px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '3px 7px' }}>
-                                  Conta 21 · Campo 18
-                                </span>
-                              </div>
-                              <div style={{ marginBottom: '6px' }}>
-                                <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '1px' }}>
-                                  Contabilidade (Balancete Conta 21):
-                                </span>
-                                <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
-                                  {parsedData.apuramentoIva?.incidenciaConta21?.contabilidade || '0,00 Kz'}
-                                </div>
-                              </div>
-                              <div style={{ marginBottom: '8px' }}>
-                                <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '1px' }}>
-                                  Modelo 7 (Quadro 09 - Campo 18):
-                                </span>
-                                <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
-                                  {parsedData.apuramentoIva?.incidenciaConta21?.agt || '0,00 Kz'}
-                                </div>
-                              </div>
-                              <div style={{ paddingTop: '8px', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Diferença na Conta 21:</span>
-                                <span style={{ fontSize: '12px', fontWeight: 800, color: parsedData.apuramentoIva?.incidenciaConta21?.status === 'IGUAIS' ? '#15803d' : '#dc2626' }}>
-                                  {parsedData.apuramentoIva?.incidenciaConta21?.status === 'IGUAIS' ? '✓ 0,00 Kz' : parsedData.apuramentoIva?.incidenciaConta21?.diferenca}
+                                <span className="badge" style={{ fontSize: '10px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '3px 7px' }}>
+                                  C.21/752 · C.18/22
                                 </span>
                               </div>
-                            </div>
 
-                            {/* SUB-BLOCO A2: CONTA 752 (FSE - FORNECIMENTOS E SERVIÇOS — EM BAIXO, SEM SOMAR) */}
-                            <div className="confronto-subbox" style={{ marginBottom: '18px' }}>
-                              <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 6, marginBottom: '8px' }}>
-                                <span style={{ fontSize: '11px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                                  Despesas e Serviços (FSE)
-                                </span>
-                                <span className="badge" style={{ fontSize: '9.5px', background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 700, padding: '3px 7px' }}>
-                                  Conta 752 · Campo 22
-                                </span>
-                              </div>
-                              <div style={{ marginBottom: '6px' }}>
-                                <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '1px' }}>
-                                  Contabilidade (Balancete Conta 752 FSE):
-                                </span>
-                                <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
-                                  {parsedData.apuramentoIva?.incidenciaFse752?.contabilidade || '0,00 Kz'}
+                              {/* LINHA 1: CONTA 21 (EXISTÊNCIAS / COMPRAS — EM CIMA) */}
+                              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 11px', marginBottom: '8px' }}>
+                                <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '4px' }}>
+                                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#1e293b' }}>
+                                    Compras / Existências (Conta 21 · Campo 18)
+                                  </span>
+                                  <span style={{ fontSize: '11px', fontWeight: 800, color: parsedData.apuramentoIva?.incidenciaConta21?.status === 'IGUAIS' ? '#15803d' : '#dc2626' }}>
+                                    {parsedData.apuramentoIva?.incidenciaConta21?.status === 'IGUAIS' ? '✓ 0,00 Kz' : parsedData.apuramentoIva?.incidenciaConta21?.diferenca}
+                                  </span>
+                                </div>
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <div>
+                                    <span style={{ fontSize: '10px', color: '#64748b', display: 'block' }}>Contabilidade (C.21):</span>
+                                    <strong style={{ fontSize: '14px', color: '#0f172a' }}>{parsedData.apuramentoIva?.incidenciaConta21?.contabilidade || '0,00 Kz'}</strong>
+                                  </div>
+                                  <div style={{ textAlign: 'right' }}>
+                                    <span style={{ fontSize: '10px', color: '#64748b', display: 'block' }}>Modelo 7 (C.18):</span>
+                                    <strong style={{ fontSize: '14px', color: '#0f172a' }}>{parsedData.apuramentoIva?.incidenciaConta21?.agt || '0,00 Kz'}</strong>
+                                  </div>
                                 </div>
                               </div>
-                              <div style={{ marginBottom: '8px' }}>
-                                <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '1px' }}>
-                                  Modelo 7 (Quadro 09 - Campo 22):
-                                </span>
-                                <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
-                                  {parsedData.apuramentoIva?.incidenciaFse752?.agt || '0,00 Kz'}
+
+                              {/* LINHA 2: CONTA 752 (FSE / SERVIÇOS — EM BAIXO, SEM SOMAR) */}
+                              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 11px' }}>
+                                <div className="d-flex justify-content-between align-items-center" style={{ marginBottom: '4px' }}>
+                                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#1e293b' }}>
+                                    Despesas e Serviços (FSE 752 · Campo 22)
+                                  </span>
+                                  <span style={{ fontSize: '11px', fontWeight: 800, color: parsedData.apuramentoIva?.incidenciaFse752?.status === 'IGUAIS' ? '#15803d' : '#dc2626' }}>
+                                    {parsedData.apuramentoIva?.incidenciaFse752?.status === 'IGUAIS' ? '✓ 0,00 Kz' : parsedData.apuramentoIva?.incidenciaFse752?.diferenca}
+                                  </span>
                                 </div>
-                              </div>
-                              <div style={{ paddingTop: '8px', borderTop: '1px dashed #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Diferença no FSE (Conta 752):</span>
-                                <span style={{ fontSize: '12px', fontWeight: 800, color: parsedData.apuramentoIva?.incidenciaFse752?.status === 'IGUAIS' ? '#15803d' : '#dc2626' }}>
-                                  {parsedData.apuramentoIva?.incidenciaFse752?.status === 'IGUAIS' ? '✓ 0,00 Kz' : parsedData.apuramentoIva?.incidenciaFse752?.diferenca}
-                                </span>
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <div>
+                                    <span style={{ fontSize: '10px', color: '#64748b', display: 'block' }}>Contabilidade (C.752):</span>
+                                    <strong style={{ fontSize: '14px', color: '#0f172a' }}>{parsedData.apuramentoIva?.incidenciaFse752?.contabilidade || '0,00 Kz'}</strong>
+                                  </div>
+                                  <div style={{ textAlign: 'right' }}>
+                                    <span style={{ fontSize: '10px', color: '#64748b', display: 'block' }}>Modelo 7 (C.22):</span>
+                                    <strong style={{ fontSize: '14px', color: '#0f172a' }}>{parsedData.apuramentoIva?.incidenciaFse752?.agt || '0,00 Kz'}</strong>
+                                  </div>
+                                </div>
                               </div>
                             </div>
 
@@ -1498,6 +1486,18 @@ const ConfrontoView = () => {
                                   </div>
                                 </div>
                               )}
+                            </div>
+
+                            {/* RESUMO EXECUTIVO DO APURAMENTO (DAR / CRÉDITO) */}
+                            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px', marginTop: '12px' }}>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>
+                                  {parsedData.apuramentoIva?.isRecuperar ? 'Crédito Fiscal a Reportar:' : 'Obrigação a Liquidar (DAR):'}
+                                </span>
+                                <strong style={{ fontSize: '13.5px', color: corApuramentoPrincipal, fontWeight: 800 }}>
+                                  {formatarValorKzLimpo(parsedData.apuramentoIva?.apuramentoAgt?.saldoPeriodo || parsedData.apuramentoIva?.resultadoPrincipal?.agt || '0,00 Kz')}
+                                </strong>
+                              </div>
                             </div>
                           </div>
 

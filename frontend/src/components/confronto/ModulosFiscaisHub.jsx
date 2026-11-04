@@ -252,42 +252,42 @@ const ModulosFiscaisHub = ({
 
       {/* CABEÇALHO DO HUB DE AUDITORIA */}
       <div
-        className="d-flex justify-content-between align-items-center mb-12 flex-wrap"
-        style={{ gap: 10 }}
+        className="d-flex justify-content-between align-items-center mb-16 flex-wrap"
+        style={{ gap: 12 }}
       >
         <div>
           <span
             style={{
-              fontSize: '11px',
+              fontSize: '12px',
               fontWeight: 800,
               color: '#2563eb',
               textTransform: 'uppercase',
-              letterSpacing: '0.8px'
+              letterSpacing: '0.6px'
             }}
           >
             SISTEMA INTEGRADO DE AUDITORIA FISCAL & CONTABILÍSTICA (ANGOLA)
           </span>
-          <h5 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: '2px 0 0 0' }}>
+          <h4 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '4px 0 0 0' }}>
             Módulos de Tributação Obrigatória (Selecione para ver o Roteiro & Documentos)
-          </h5>
+          </h4>
         </div>
         <span
           className="badge"
           style={{
-            fontSize: '11px',
+            fontSize: '12px',
             background: '#ffffff',
-            color: '#334155',
+            color: '#1e293b',
             border: '1px solid #cbd5e1',
-            padding: '4px 10px',
+            padding: '6px 12px',
             fontWeight: 700
           }}
         >
-          {ano && mes ? `Período: ${String(mes).padStart(2, '0')}/${ano}` : 'Período Ativo'}
+          {ano && mes ? `Período Fiscal: ${String(mes).padStart(2, '0')}/${ano}` : 'Período Ativo'}
         </span>
       </div>
 
       {/* LISTA VERTICAL DE MÓDULOS (UM EM BAIXO DO OUTRO) */}
-      <div className="d-flex flex-column" style={{ gap: 10 }}>
+      <div className="d-flex flex-column" style={{ gap: 12 }}>
         {MODULOS_CONFIG.map((mod, idx) => {
           const isAtivo = moduloAtivo === mod.id;
           const isExpandido = moduloExpandido === mod.id;
@@ -298,10 +298,10 @@ const ModulosFiscaisHub = ({
               key={mod.id}
               style={{
                 background: '#ffffff',
-                border: isAtivo ? '1.5px solid #2563eb' : '1px solid #e2e8f0',
-                borderRadius: '10px',
+                border: isAtivo ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
+                borderRadius: '12px',
                 overflow: 'hidden',
-                boxShadow: isAtivo ? '0 3px 12px rgba(37, 99, 235, 0.06)' : 'none',
+                boxShadow: isAtivo ? '0 4px 16px rgba(37, 99, 235, 0.08)' : '0 1px 3px rgba(0,0,0,0.03)',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -309,66 +309,67 @@ const ModulosFiscaisHub = ({
               <div
                 onClick={() => handleToggleModulo(mod.id)}
                 style={{
-                  padding: '12px 18px',
+                  padding: '14px 18px',
                   cursor: 'pointer',
                   background: isAtivo ? '#ffffff' : '#ffffff',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   flexWrap: 'wrap',
-                  gap: 10
+                  gap: 12
                 }}
               >
-                <div className="d-flex align-items-center" style={{ gap: 12 }}>
+                <div className="d-flex align-items-center" style={{ gap: 14 }}>
                   <div
                     style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
+                      width: 38,
+                      height: 38,
+                      borderRadius: 10,
                       background: isOperacional ? '#eff6ff' : '#f8fafc',
-                      color: isOperacional ? '#2563eb' : '#64748b',
-                      border: `1px solid ${isOperacional ? '#bfdbfe' : '#e2e8f0'}`,
+                      color: isOperacional ? '#2563eb' : '#475569',
+                      border: `1.5px solid ${isOperacional ? '#bfdbfe' : '#e2e8f0'}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: 800,
-                      fontSize: '12px'
+                      fontSize: '14px',
+                      flexShrink: 0
                     }}
                   >
                     {idx + 1}
                   </div>
                   <div>
                     <div className="d-flex align-items-center flex-wrap" style={{ gap: 8 }}>
-                      <strong style={{ fontSize: '13.5px', color: '#0f172a' }}>
+                      <strong style={{ fontSize: '16px', color: '#0f172a' }}>
                         {mod.nome}
                       </strong>
                       <span
                         className="badge"
                         style={{
-                          fontSize: '10px',
+                          fontSize: '13.5px',
                           background: '#ffffff',
-                          color: '#475569',
+                          color: '#334155',
                           border: '1px solid #cbd5e1',
                           fontWeight: 700,
-                          padding: '2px 7px'
+                          padding: '3px 8px'
                         }}
                       >
                         {mod.sigla}
                       </span>
                     </div>
-                    <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginTop: '1px' }}>
+                    <span style={{ fontSize: '13.5px', color: '#475569', display: 'block', marginTop: '3px' }}>
                       {mod.descricao}
                     </span>
                   </div>
                 </div>
 
-                <div className="d-flex align-items-center" style={{ gap: 10 }}>
+                <div className="d-flex align-items-center" style={{ gap: 12 }}>
                   <span
                     className="badge"
                     style={{
-                      fontSize: '10.5px',
+                      fontSize: '13.5px',
                       fontWeight: 800,
-                      padding: '4px 10px',
+                      padding: '5px 12px',
                       background: isOperacional ? '#dcfce7' : '#fef9c3',
                       color: isOperacional ? '#15803d' : '#854d0e',
                       border: `1px solid ${isOperacional ? '#86efac' : '#fde047'}`
@@ -378,15 +379,15 @@ const ModulosFiscaisHub = ({
                   </span>
                   <button
                     type="button"
-                    className="btn btn-xs"
+                    className="btn btn-sm"
                     style={{
                       background: isAtivo ? '#2563eb' : '#ffffff',
                       color: isAtivo ? '#ffffff' : '#2563eb',
-                      border: '1px solid #2563eb',
+                      border: '1.5px solid #2563eb',
                       fontWeight: 700,
-                      fontSize: '11px',
-                      padding: '4px 10px',
-                      borderRadius: 6
+                      fontSize: '13.5px',
+                      padding: '5px 14px',
+                      borderRadius: 8
                     }}
                   >
                     {isExpandido ? '▲ Recolher' : '▼ Ver Roteiro & Docs'}
@@ -400,35 +401,35 @@ const ModulosFiscaisHub = ({
                   style={{
                     borderTop: '1px solid #e2e8f0',
                     background: '#ffffff',
-                    padding: '16px 20px'
+                    padding: '18px 22px'
                   }}
                 >
-                  <div className="row" style={{ rowGap: 16 }}>
+                  <div className="row" style={{ rowGap: 18 }}>
                     {/* COLUNA 1: DOCUMENTOS OBRIGATÓRIOS DO IMPOSTO */}
                     <div className="col-12 col-md-6">
                       <div
                         style={{
                           background: '#ffffff',
                           border: '1px solid #e2e8f0',
-                          borderRadius: 8,
-                          padding: '12px 14px',
+                          borderRadius: 10,
+                          padding: '14px 16px',
                           height: '100%'
                         }}
                       >
                         <div
-                          className="d-flex justify-content-between align-items-center mb-8 pb-6"
+                          className="d-flex justify-content-between align-items-center mb-10 pb-8"
                           style={{ borderBottom: '1px solid #f1f5f9' }}
                         >
-                          <strong style={{ fontSize: '12px', color: '#1e293b', textTransform: 'uppercase' }}>
-                            <i className="la la-folder-open mr-4" style={{ color: '#2563eb' }}></i>
+                          <strong style={{ fontSize: '13.5px', color: '#0f172a', textTransform: 'uppercase' }}>
+                            <i className="la la-folder-open mr-5" style={{ color: '#2563eb' }}></i>
                             Documentos Obrigatórios do Módulo
                           </strong>
-                          <span style={{ fontSize: '10.5px', color: '#64748b' }}>
+                          <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
                             {mod.documentos.length} Ficheiros
                           </span>
                         </div>
 
-                        <div className="d-flex flex-column" style={{ gap: 8 }}>
+                        <div className="d-flex flex-column" style={{ gap: 10 }}>
                           {mod.documentos.map((doc, dIdx) => {
                             const carregado = docCarregado(doc.tipo);
                             const emEnvio = enviandoTipo === doc.tipo;
@@ -439,19 +440,19 @@ const ModulosFiscaisHub = ({
                                 style={{
                                   background: '#f8fafc',
                                   border: '1px solid #e2e8f0',
-                                  borderRadius: 6,
-                                  padding: '8px 10px',
+                                  borderRadius: 8,
+                                  padding: '10px 12px',
                                   display: 'flex',
                                   justifyContent: 'space-between',
                                   alignItems: 'center',
-                                  gap: 8
+                                  gap: 10
                                 }}
                               >
                                 <div style={{ minWidth: 0, flex: 1 }}>
-                                  <div className="d-flex align-items-center" style={{ gap: 6 }}>
+                                  <div className="d-flex align-items-center flex-wrap" style={{ gap: 6 }}>
                                     <span
                                       style={{
-                                        fontSize: '11px',
+                                        fontSize: '13.5px',
                                         fontWeight: 700,
                                         color: '#0f172a'
                                       }}
@@ -459,12 +460,12 @@ const ModulosFiscaisHub = ({
                                       {doc.nome}
                                     </span>
                                     {doc.obrigatorio && (
-                                      <span style={{ fontSize: '9px', color: '#dc2626', fontWeight: 800 }}>
+                                      <span style={{ fontSize: '12px', color: '#dc2626', fontWeight: 800 }}>
                                         *Obrigatório
                                       </span>
                                     )}
                                   </div>
-                                  <span style={{ fontSize: '10px', color: '#64748b', display: 'block' }}>
+                                  <span style={{ fontSize: '12px', color: '#475569', display: 'block', marginTop: '2px' }}>
                                     {carregado ? `✓ Ficheiro no arquivo: ${carregado.nome_arquivo || carregado.arquivo_url || 'Disponível'}` : '⚠️ Documento em falta no período'}
                                   </span>
                                 </div>
@@ -474,11 +475,12 @@ const ModulosFiscaisHub = ({
                                     <span
                                       className="badge"
                                       style={{
-                                        fontSize: '9.5px',
+                                        fontSize: '13.5px',
                                         background: '#ffffff',
                                         color: '#2563eb',
                                         border: '1px solid #bfdbfe',
-                                        padding: '3px 8px'
+                                        padding: '4px 10px',
+                                        fontWeight: 700
                                       }}
                                     >
                                       Usar Caixa Abaixo
@@ -486,16 +488,16 @@ const ModulosFiscaisHub = ({
                                   ) : (
                                     <button
                                       type="button"
-                                      className="btn btn-xs"
+                                      className="btn btn-sm"
                                       disabled={emEnvio}
                                       onClick={() => handleDispararUpload(doc.tipo)}
                                       style={{
-                                        fontSize: '10.5px',
+                                        fontSize: '12px',
                                         fontWeight: 700,
-                                        padding: '4px 10px',
+                                        padding: '5px 12px',
                                         background: carregado ? '#ffffff' : '#2563eb',
                                         color: carregado ? '#2563eb' : '#ffffff',
-                                        border: '1px solid #2563eb',
+                                        border: '1.5px solid #2563eb',
                                         borderRadius: 6
                                       }}
                                     >
@@ -522,47 +524,48 @@ const ModulosFiscaisHub = ({
                         style={{
                           background: '#ffffff',
                           border: '1px solid #e2e8f0',
-                          borderRadius: 8,
-                          padding: '12px 14px',
+                          borderRadius: 10,
+                          padding: '14px 16px',
                           height: '100%'
                         }}
                       >
                         <div
-                          className="d-flex justify-content-between align-items-center mb-8 pb-6"
+                          className="d-flex justify-content-between align-items-center mb-10 pb-8"
                           style={{ borderBottom: '1px solid #f1f5f9' }}
                         >
-                          <strong style={{ fontSize: '12px', color: '#1e293b', textTransform: 'uppercase' }}>
-                            <i className="la la-clipboard-check mr-4" style={{ color: '#2563eb' }}></i>
+                          <strong style={{ fontSize: '13.5px', color: '#0f172a', textTransform: 'uppercase' }}>
+                            <i className="la la-clipboard-check mr-5" style={{ color: '#2563eb' }}></i>
                             O Que o Auditor Tem de Fazer para Consultoria
                           </strong>
                           <span
                             className="badge"
                             style={{
-                              fontSize: '9.5px',
+                              fontSize: '13.5px',
                               background: '#eff6ff',
                               color: '#2563eb',
-                              border: '1px solid #bfdbfe'
+                              border: '1px solid #bfdbfe',
+                              fontWeight: 700
                             }}
                           >
                             Legislação Angolana
                           </span>
                         </div>
 
-                        <div className="d-flex flex-column" style={{ gap: 8 }}>
+                        <div className="d-flex flex-column" style={{ gap: 10 }}>
                           {mod.roteiroConsultoria.map((passo, pIdx) => (
                             <div
                               key={pIdx}
                               style={{
                                 background: '#f8fafc',
                                 border: '1px solid #e2e8f0',
-                                borderRadius: 6,
-                                padding: '8px 11px'
+                                borderRadius: 8,
+                                padding: '10px 13px'
                               }}
                             >
-                              <strong style={{ fontSize: '11px', color: '#0f172a', display: 'block', marginBottom: '2px' }}>
+                              <strong style={{ fontSize: '13.5px', color: '#0f172a', display: 'block', marginBottom: '3px' }}>
                                 {pIdx + 1}. {passo.titulo}
                               </strong>
-                              <span style={{ fontSize: '10.5px', color: '#475569', lineHeight: 1.4, display: 'block' }}>
+                              <span style={{ fontSize: '13.5px', color: '#334155', lineHeight: 1.5, display: 'block' }}>
                                 {passo.detalhe}
                               </span>
                             </div>
@@ -575,12 +578,12 @@ const ModulosFiscaisHub = ({
                   {mod.id === 'IVA' && (
                     <div
                       style={{
-                        marginTop: 14,
-                        padding: '10px 14px',
+                        marginTop: 16,
+                        padding: '12px 16px',
                         background: '#eff6ff',
                         border: '1px solid #bfdbfe',
                         borderRadius: 8,
-                        fontSize: '11.5px',
+                        fontSize: '13.5px',
                         color: '#1e40af',
                         display: 'flex',
                         alignItems: 'center',
@@ -592,7 +595,7 @@ const ModulosFiscaisHub = ({
                       <div>
                         <strong>Módulo do IVA Ativo:</strong> Carregue o Balancete (Caixa 1) e o Modelo 7 (Caixa 2) abaixo para efetuar o cruzamento inteligente com IA.
                       </div>
-                      <span className="badge" style={{ background: '#2563eb', color: '#ffffff', fontWeight: 700, fontSize: '10.5px', padding: '4px 10px' }}>
+                      <span className="badge" style={{ background: '#2563eb', color: '#ffffff', fontWeight: 700, fontSize: '13.5px', padding: '5px 12px' }}>
                         Área de Confronto Abaixo ↓
                       </span>
                     </div>

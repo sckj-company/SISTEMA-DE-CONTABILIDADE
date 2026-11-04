@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { usePeriodo, usePeriodoDaUrl } from '../../context/PeriodoContext';
 import { empresaService, analiseService, authHeaders, API_BASE } from '../../services/api';
 import { parseAnaliseIA, parseValorKz, formatKz, formatarValorKzLimpo } from '../../utils/analiseIaParser';
 import ConsolidacaoAnualView from './ConsolidacaoAnualView';
+import ModulosFiscaisHub from './ModulosFiscaisHub';
 
 const SpinDots = () => (
   <div className="spin-dots-wrapper">
@@ -19,14 +19,10 @@ const SpinDots = () => (
 );
 
 const ConfrontoView = () => {
-  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const idiomaSistema = (i18n?.language || 'pt').substring(0, 2);
   const { empresaId, ano, mes, atualizar } = usePeriodo();
   usePeriodoDaUrl();
-
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const isAdmin = Boolean(currentUser.is_admin || currentUser.is_superuser || currentUser.is_staff);
 
   const [empresas, setEmpresas] = useState([]);
   const [documentos, setDocumentos] = useState([]);
@@ -61,6 +57,7 @@ const ConfrontoView = () => {
   const [historico, setHistorico] = useState([]);
   const [carregandoHistorico, setCarregandoHistorico] = useState(false);
   const [abaAtiva, setAbaAtiva] = useState('confronto'); // 'confronto' | 'consolidacao' | 'historico'
+  const [moduloFiscalAtivo, setModuloFiscalAtivo] = useState('IVA');
 
   // Carregar Empresas
   const carregarEmpresas = useCallback(async () => {
@@ -465,26 +462,26 @@ const ConfrontoView = () => {
       </style>
 
       {/* CABEÇALHO DA PÁGINA COM NAVEGAÇÃO LIMPA */}
-      <div className="row mb-20 no-print pt-10">
+      <div className="row mb-15 no-print pt-5">
         <div className="col-12">
-          <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 16 }}>
+          <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
             <div>
-              <h4 className="fw-800 mb-4" style={{ fontSize: 22, color: '#0f172a' }}>
+              <h4 className="fw-800 mb-2" style={{ fontSize: 16.5, color: '#0f172a' }}>
                 <i className="la la-balance-scale mr-6" style={{ color: '#2563eb' }}></i>{' '}
                 {t('confrontoUi.headerTitle', 'Confronto Contabilidade vs Portal AGT')}
               </h4>
-              <p className="text-muted mb-0" style={{ fontSize: 13.5 }}>
+              <p className="text-muted mb-0" style={{ fontSize: 12 }}>
                 {t('confrontoUi.headerSubtitle', 'Cruzamento inteligente em 3 passos: carregue o Balancete e o Modelo 7 para apurar os números e saldos fiscais.')}
               </p>
             </div>
 
             {/* SELEÇÃO DE ABAS (BOTÕES AZUIS SEPARADOS, NUNCA COLADOS) */}
-            <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
+            <div className="d-flex align-items-center flex-wrap" style={{ gap: 8 }}>
               <button
                 type="button"
                 className={`btn btn-sm ${abaAtiva === 'confronto' ? 'btn-primary' : 'btn-outline-primary'}`}
                 onClick={() => setAbaAtiva('confronto')}
-                style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
+                style={{ fontWeight: 700, fontSize: 11.5, padding: '5px 12px' }}
               >
                 <i className="la la-bolt mr-4"></i> {t('confrontoUi.tabAiAudit', '1. Confronto com IA')}
               </button>
@@ -492,7 +489,7 @@ const ConfrontoView = () => {
                 type="button"
                 className={`btn btn-sm ${abaAtiva === 'consolidacao' ? 'btn-primary' : 'btn-outline-primary'}`}
                 onClick={() => setAbaAtiva('consolidacao')}
-                style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
+                style={{ fontWeight: 700, fontSize: 11.5, padding: '5px 12px' }}
               >
                 <i className="la la-calendar-check mr-4"></i> {t('confrontoUi.tabAnnualConsolidation', '2. Consolidação Anual (12 Meses)')}
               </button>
@@ -500,7 +497,7 @@ const ConfrontoView = () => {
                 type="button"
                 className={`btn btn-sm ${abaAtiva === 'historico' ? 'btn-primary' : 'btn-outline-primary'}`}
                 onClick={() => setAbaAtiva('historico')}
-                style={{ fontWeight: 700, fontSize: 13, padding: '8px 16px' }}
+                style={{ fontWeight: 700, fontSize: 11.5, padding: '5px 12px' }}
               >
                 <i className="la la-history mr-4"></i> {t('confrontoUi.tabHistory', '3. Histórico')} ({historico.length})
               </button>
@@ -596,385 +593,320 @@ const ConfrontoView = () => {
       ) : (
         /* ABA PRINCIPAL: OS 3 PASSOS DO CONFRONTO */
         <>
-          {/* GUIA VISUAL DOS 3 PASSOS */}
-          <div className="row mb-25 no-print">
-            <div className="col-12">
-              <div className="card card-default" style={{ border: '1px solid #e2e8f0', borderRadius: 12, background: '#ffffff' }}>
-                <div className="card-body py-15 px-20 bg-white">
-                  <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 14 }}>
-                    <div className="d-flex align-items-center flex-wrap" style={{ gap: 10 }}>
-                      <div className={`step-pill ${!resultadoRaw ? 'active' : ''}`}>
-                        <span>{t('confrontoUi.pillStep1', '1. Carregar Balancete & Modelo 7')}</span>
-                      </div>
-                      <span style={{ color: '#93c5fd', fontWeight: 700 }}>&rarr;</span>
-                      <div className={`step-pill ${executando ? 'active' : ''}`}>
-                        <span>{t('confrontoUi.pillStep2', '2. Confrontar com IA')}</span>
-                      </div>
-                      <span style={{ color: '#93c5fd', fontWeight: 700 }}>&rarr;</span>
-                      <div className={`step-pill ${resultadoRaw ? 'active' : ''}`}>
-                        <span>{t('confrontoUi.pillStep3', '3. Cards Numéricos, Excel & PDF')}</span>
-                      </div>
-                    </div>
+          {/* HUB DOS MÓDULOS FISCAIS DE ANGOLA (IVA, IRT, II, RETENÇÕES, INSS, SELO) */}
+          <ModulosFiscaisHub
+            moduloAtivo={moduloFiscalAtivo}
+            onSelecionarModulo={setModuloFiscalAtivo}
+            empresaId={empresaId}
+            ano={ano}
+            mes={mes}
+            documentos={documentos}
+            onUploadSucesso={() => carregarDocumentos()}
+          />
 
-                    {/* SELETOR DE EMPRESA ATIVA */}
-                    <div className="d-flex align-items-center" style={{ gap: 10 }}>
-                      <span className="text-muted fw-600" style={{ fontSize: 12 }}>{t('confrontoUi.companyLabel', 'EMPRESA:')}</span>
-                      {isAdmin ? (
-                        <>
-                          <select
-                            className="form-control form-control-sm"
-                            value={empresaId}
-                            onChange={(e) => atualizar({ empresaId: e.target.value })}
-                            style={{ height: 36, fontSize: 12.5, fontWeight: 700, minWidth: 200 }}
-                          >
-                            {empresas.length === 0 ? (
-                              <option value="">{t('confrontoUi.noCompaniesRegistered', 'Sem empresas cadastradas (+)')}</option>
-                            ) : (
-                              empresas.map((emp) => (
-                                <option key={emp.id} value={String(emp.id)}>
-                                  {emp.nome} ({emp.nif})
-                                </option>
-                              ))
-                            )}
-                          </select>
-                          <button
-                            type="button"
-                            className="btn btn-xs btn-outline-primary d-flex align-items-center justify-content-center"
-                            onClick={() => navigate('/admin-gestao?aba=empresas&novaEmpresa=1')}
-                            style={{ height: 36, width: 36, borderRadius: 8, padding: 0 }}
-                            title={t('confrontoUi.registerNewCompany', 'Cadastrar Nova Empresa')}
-                          >
-                            <i className="la la-plus" style={{ fontSize: 16 }}></i>
-                          </button>
-                        </>
-                      ) : (
-                        <div
-                          className="px-12 py-6 bg-white rounded fw-700 color-dark text-truncate d-flex align-items-center"
-                          style={{ height: 36, fontSize: 12.5, maxWidth: 300, border: '1px solid #bfdbfe' }}
-                          title={empresas.find((e) => String(e.id) === String(empresaId))?.nome || t('confrontoUi.myCompanyFallback', 'Minha Empresa')}
+          {/* ÁREA ESPECÍFICA DO MÓDULO DO IVA (SÓ EXIBIDA QUANDO IVA ESTÁ ATIVO) */}
+          {moduloFiscalAtivo === 'IVA' && (
+            <div className="row mb-20 no-print" style={{ rowGap: 16 }}>
+              {/* CAIXA 1: BALANCETE DA CONTABILIDADE */}
+              <div className="col-12 col-lg-6">
+                <div className="card card-default h-100" style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff' }}>
+                  <div className="card-header py-10 px-16 bg-white border-bottom">
+                    <div className="d-flex justify-content-between align-items-center flex-wrap w-100" style={{ gap: 8 }}>
+                      <strong className="color-dark" style={{ fontSize: 13 }}>
+                        <i className="la la-book mr-5" style={{ color: '#2563eb' }}></i> {t('confrontoUi.box1Header', '1. Balancete de Verificação (PGC)')}
+                      </strong>
+                      <div className="d-flex align-items-center flex-wrap" style={{ gap: 6 }}>
+                        <button
+                          type="button"
+                          className={`btn btn-xs ${origemContab === 'upload' ? 'btn-primary' : 'btn-outline-primary'}`}
+                          onClick={() => setOrigemContab('upload')}
+                          style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px' }}
                         >
-                          <i className="la la-building mr-1" style={{ color: '#2563eb' }}></i>
-                          <span className="text-truncate">
-                            {empresas.find((e) => String(e.id) === String(empresaId))?.nome || t('confrontoUi.myCompanyFallback', 'Minha Empresa')}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* PASSO 1: CAIXAS DE CARREGAMENTO DOS 2 FICHEIROS (MESMA ESTÉTICA BRANCA + AZUL) */}
-          <div className="row mb-25 no-print" style={{ rowGap: 20 }}>
-            {/* CAIXA 1: BALANCETE DA CONTABILIDADE */}
-            <div className="col-12 col-lg-6">
-              <div className="card card-default h-100" style={{ border: '1px solid #e2e8f0', borderRadius: 14, background: '#ffffff' }}>
-                <div className="card-header py-14 px-20 bg-white border-bottom">
-                  <div className="d-flex justify-content-between align-items-center flex-wrap w-100" style={{ gap: 10 }}>
-                    <strong className="color-dark" style={{ fontSize: 14 }}>
-                      <i className="la la-book mr-5" style={{ color: '#2563eb' }}></i> {t('confrontoUi.box1Header', '1. Balancete de Verificação (PGC)')}
-                    </strong>
-                    <div className="d-flex align-items-center flex-wrap" style={{ gap: 8 }}>
-                      <button
-                        type="button"
-                        className={`btn btn-xs ${origemContab === 'upload' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => setOrigemContab('upload')}
-                        style={{ fontSize: 11.5, fontWeight: 600, padding: '5px 12px' }}
-                      >
-                        {t('confrontoUi.loadFileBtn', 'Carregar Ficheiro')}
-                      </button>
-                      <button
-                        type="button"
-                        className={`btn btn-xs ${origemContab === 'arquivo' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => setOrigemContab('arquivo')}
-                        style={{ fontSize: 11.5, fontWeight: 600, padding: '5px 12px' }}
-                      >
-                        {t('confrontoUi.fromArchiveBtn', { count: balancetesDisponiveis.length, defaultValue: `Do Arquivo (${balancetesDisponiveis.length})` })}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="card-body p-20 bg-white d-flex flex-column justify-content-center">
-                  {origemContab === 'upload' ? (
-                    <div>
-                      <input
-                        type="file"
-                        ref={fileInputContabRef}
-                        accept=".pdf,.xlsx,.csv"
-                        style={{ display: 'none' }}
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            const f = e.target.files[0];
-                            const nameLow = (f.name || '').toLowerCase();
-                            if (
-                              nameLow.includes('modelo') ||
-                              nameLow.includes('comprovativo') ||
-                              nameLow.includes('liquidacao') ||
-                              nameLow.includes('liquidação')
-                            ) {
-                              toast.warning(
-                                t(
-                                  'confrontoUi.warnDropModelo7InBox1',
-                                  'Atenção: O ficheiro parece ser a Declaração Modelo 7 / Comprovativo da AGT. A Caixa 1 é destinada ao Balancete de Verificação (PGC). Coloque-o na Caixa 2.'
-                                )
-                              );
-                            }
-                            setFicheiroContab(f);
-                            setDocContabId('');
-                            toast.info(`Balancete selecionado: ${f.name}`);
-                          }
-                        }}
-                      />
-                      <div
-                        className={`upload-drop-card ${ficheiroContab ? 'has-file' : ''}`}
-                        onClick={() => fileInputContabRef.current?.click()}
-                      >
-                        {ficheiroContab ? (
-                          <div>
-                            <div className="upload-icon-circle">
-                              <i className="la la-check"></i>
-                            </div>
-                            <strong className="d-block text-dark" style={{ fontSize: 14.5 }}>
-                              {ficheiroContab.name}
-                            </strong>
-                            <span
-                              className="badge mt-6"
-                              style={{ fontSize: 11.5, background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '5px 12px' }}
-                            >
-                              {formatFileSize(ficheiroContab.size)} &nbsp;·&nbsp; {t('confrontoUi.readyToCompare', 'Pronto para confrontar')}
-                            </span>
-                            <div className="mt-12">
-                              <button
-                                type="button"
-                                className="btn btn-outline-primary btn-xs"
-                                style={{ padding: '5px 14px', fontSize: 12 }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setFicheiroContab(null);
-                                  if (fileInputContabRef.current) fileInputContabRef.current.value = '';
-                                }}
-                              >
-                                <i className="la la-sync mr-1"></i> {t('confrontoUi.changeFile', 'Trocar Ficheiro')}
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div>
-                            <div className="upload-icon-circle">
-                              <i className="la la-cloud-upload-alt"></i>
-                            </div>
-                            <strong className="d-block color-dark" style={{ fontSize: 14.5 }}>
-                              {t('confrontoUi.box1DropTitle', 'Clique aqui para selecionar o Balancete')}
-                            </strong>
-                            <span className="text-muted d-block mt-6" style={{ fontSize: 12.5 }}>
-                              {t('confrontoUi.box1DropDesc', 'Suporta ficheiros em PDF ou folha de cálculo Excel (.xlsx)')}
-                            </span>
-                          </div>
-                        )}
+                          {t('confrontoUi.loadFileBtn', 'Carregar Ficheiro')}
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn btn-xs ${origemContab === 'arquivo' ? 'btn-primary' : 'btn-outline-primary'}`}
+                          onClick={() => setOrigemContab('arquivo')}
+                          style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px' }}
+                        >
+                          {t('confrontoUi.fromArchiveBtn', { count: balancetesDisponiveis.length, defaultValue: `Do Arquivo (${balancetesDisponiveis.length})` })}
+                        </button>
                       </div>
                     </div>
-                  ) : (
-                    <div>
-                      <label className="fw-600 text-muted mb-6" style={{ fontSize: 12 }}>
-                        {t('confrontoUi.selectArchivedBalanceteLabel', 'SELECIONE O BALANCETE JÁ ARQUIVADO DA EMPRESA:')}
-                      </label>
-                      <select
-                        className="form-control form-control-default"
-                        value={docContabId}
-                        onChange={(e) => {
-                          setDocContabId(e.target.value);
-                          setFicheiroContab(null);
-                        }}
-                        style={{ height: 42, fontSize: 13, fontWeight: docContabId ? 600 : 400 }}
-                      >
-                        <option value="">{t('confrontoUi.chooseArchivedBalancetePrompt', '-- Escolha o Balancete arquivado --')}</option>
-                        {balancetesDisponiveis.map((doc) => (
-                          <option key={doc.id} value={String(doc.id)}>
-                            {doc.nome_arquivo} ({doc.mes}/{doc.ano})
-                          </option>
-                        ))}
-                      </select>
-                      {balancetesDisponiveis.length === 0 && (
-                        <div className="mt-8" style={{ fontSize: 12, color: '#2563eb' }}>
-                          {t('confrontoUi.noArchivedBalancete', 'Nenhum balancete guardado no arquivo para esta empresa. Use a opção "Carregar Ficheiro".')}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+                  </div>
 
-            {/* CAIXA 2: DECLARAÇÃO MODELO 7 (PORTAL AGT) */}
-            <div className="col-12 col-lg-6">
-              <div className="card card-default h-100" style={{ border: '1px solid #e2e8f0', borderRadius: 14, background: '#ffffff' }}>
-                <div className="card-header py-14 px-20 bg-white border-bottom">
-                  <div className="d-flex justify-content-between align-items-center flex-wrap w-100" style={{ gap: 10 }}>
-                    <strong className="color-dark" style={{ fontSize: 14 }}>
-                      <i className="la la-landmark mr-5" style={{ color: '#2563eb' }}></i> {t('confrontoUi.box2Header', '2. Declaração Modelo 7 da AGT (IVA)')}
-                    </strong>
-                    <div className="d-flex align-items-center flex-wrap" style={{ gap: 8 }}>
-                      <button
-                        type="button"
-                        className={`btn btn-xs ${origemAgt === 'upload' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => setOrigemAgt('upload')}
-                        style={{ fontSize: 11.5, fontWeight: 600, padding: '5px 12px' }}
-                      >
-                        {t('confrontoUi.loadFileBtn', 'Carregar Ficheiro')}
-                      </button>
-                      <button
-                        type="button"
-                        className={`btn btn-xs ${origemAgt === 'arquivo' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => setOrigemAgt('arquivo')}
-                        style={{ fontSize: 11.5, fontWeight: 600, padding: '5px 12px' }}
-                      >
-                        {t('confrontoUi.fromArchiveBtn', { count: docsAgtDisponiveis.length, defaultValue: `Do Arquivo (${docsAgtDisponiveis.length})` })}
-                      </button>
-                    </div>
+                  <div className="card-body p-16 bg-white d-flex flex-column justify-content-center">
+                    {origemContab === 'upload' ? (
+                      <div>
+                        <input
+                          type="file"
+                          ref={fileInputContabRef}
+                          accept=".pdf,.xlsx,.csv"
+                          style={{ display: 'none' }}
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              const f = e.target.files[0];
+                              const nameLow = (f.name || '').toLowerCase();
+                              if (
+                                nameLow.includes('modelo') ||
+                                nameLow.includes('comprovativo') ||
+                                nameLow.includes('liquidacao') ||
+                                nameLow.includes('liquidação')
+                              ) {
+                                toast.warning(
+                                  t(
+                                    'confrontoUi.warnDropModelo7InBox1',
+                                    'Atenção: O ficheiro parece ser a Declaração Modelo 7 / Comprovativo da AGT. A Caixa 1 é destinada ao Balancete de Verificação (PGC). Coloque-o na Caixa 2.'
+                                  )
+                                );
+                              }
+                              setFicheiroContab(f);
+                              setDocContabId('');
+                              toast.info();
+                            }
+                          }}
+                        />
+                        <div
+                          className={`upload-drop-card ${ficheiroContab ? 'has-file' : ''}`}
+                          style={{ padding: '16px 14px' }}
+                          onClick={() => fileInputContabRef.current?.click()}
+                        >
+                          {ficheiroContab ? (
+                            <div>
+                              <div className="upload-icon-circle" style={{ width: 34, height: 34, fontSize: 16, marginBottom: 6 }}>
+                                <i className="la la-check"></i>
+                              </div>
+                              <strong className="d-block text-dark" style={{ fontSize: 13 }}>
+                                {ficheiroContab.name}
+                              </strong>
+                              <span
+                                className="badge mt-6"
+                                style={{ fontSize: 10.5, background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '3px 10px' }}
+                              >
+                                {formatFileSize(ficheiroContab.size)} &nbsp;·&nbsp; {t('confrontoUi.readyToCompare', 'Pronto para confrontar')}
+                              </span>
+                              <div className="mt-8">
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-primary btn-xs"
+                                  style={{ padding: '4px 10px', fontSize: 11 }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setFicheiroContab(null);
+                                    if (fileInputContabRef.current) fileInputContabRef.current.value = '';
+                                  }}
+                                >
+                                  <i className="la la-sync mr-1"></i> {t('confrontoUi.changeFile', 'Trocar Ficheiro')}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="upload-icon-circle" style={{ width: 34, height: 34, fontSize: 16, marginBottom: 6 }}>
+                                <i className="la la-cloud-upload-alt"></i>
+                              </div>
+                              <strong className="d-block color-dark" style={{ fontSize: 13 }}>
+                                {t('confrontoUi.box1DropTitle', 'Clique aqui para selecionar o Balancete')}
+                              </strong>
+                              <span className="text-muted d-block mt-4" style={{ fontSize: 11 }}>
+                                {t('confrontoUi.box1DropDesc', 'Suporta ficheiros em PDF ou folha de cálculo Excel (.xlsx)')}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="fw-600 text-muted mb-6" style={{ fontSize: 11.5 }}>
+                          {t('confrontoUi.selectArchivedBalanceteLabel', 'SELECIONE O BALANCETE JÁ ARQUIVADO DA EMPRESA:')}
+                        </label>
+                        <select
+                          className="form-control form-control-default"
+                          value={docContabId}
+                          onChange={(e) => {
+                            setDocContabId(e.target.value);
+                            setFicheiroContab(null);
+                          }}
+                          style={{ height: 38, fontSize: 12, fontWeight: docContabId ? 600 : 400 }}
+                        >
+                          <option value="">{t('confrontoUi.chooseArchivedBalancetePrompt', '-- Escolha o Balancete arquivado --')}</option>
+                          {balancetesDisponiveis.map((doc) => (
+                            <option key={doc.id} value={String(doc.id)}>
+                              {doc.nome_arquivo} ({doc.mes}/{doc.ano})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                   </div>
                 </div>
+              </div>
 
-                <div className="card-body p-20 bg-white d-flex flex-column justify-content-center">
-                  {origemAgt === 'upload' ? (
-                    <div>
-                      <input
-                        type="file"
-                        ref={fileInputAgtRef}
-                        accept=".pdf,.xml,.xlsx"
-                        style={{ display: 'none' }}
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            const f = e.target.files[0];
-                            const nameLow = (f.name || '').toLowerCase();
-                            if (nameLow.includes('balancete')) {
-                              toast.warning(
-                                t(
-                                  'confrontoUi.warnDropBalanceteInBox2',
-                                  'Atenção: O ficheiro parece ser um Balancete de Verificação (PGC). A Caixa 2 é destinada à Declaração Modelo 7 da AGT. Coloque-o na Caixa 1.'
-                                )
-                              );
-                            }
-                            setFicheiroAgt(f);
-                            setDocAgtId('');
-                            toast.info(`Declaração AGT selecionada: ${f.name}`);
-                          }
-                        }}
-                      />
-                      <div
-                        className={`upload-drop-card ${ficheiroAgt ? 'has-file' : ''}`}
-                        onClick={() => fileInputAgtRef.current?.click()}
-                      >
-                        {ficheiroAgt ? (
-                          <div>
-                            <div className="upload-icon-circle">
-                              <i className="la la-check"></i>
-                            </div>
-                            <strong className="d-block text-dark" style={{ fontSize: 14.5 }}>
-                              {ficheiroAgt.name}
-                            </strong>
-                            <span
-                              className="badge mt-6"
-                              style={{ fontSize: 11.5, background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '5px 12px' }}
-                            >
-                              {formatFileSize(ficheiroAgt.size)} &nbsp;·&nbsp; {t('confrontoUi.readyToCompare', 'Pronto para confrontar')}
-                            </span>
-                            <div className="mt-12">
-                              <button
-                                type="button"
-                                className="btn btn-outline-primary btn-xs"
-                                style={{ padding: '5px 14px', fontSize: 12 }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setFicheiroAgt(null);
-                                  if (fileInputAgtRef.current) fileInputAgtRef.current.value = '';
-                                }}
-                              >
-                                <i className="la la-sync mr-1"></i> {t('confrontoUi.changeFile', 'Trocar Ficheiro')}
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div>
-                            <div className="upload-icon-circle">
-                              <i className="la la-cloud-upload-alt"></i>
-                            </div>
-                            <strong className="d-block color-dark" style={{ fontSize: 14.5 }}>
-                              {t('confrontoUi.box2DropTitle', 'Clique aqui para selecionar a Declaração Modelo 7')}
-                            </strong>
-                            <span className="text-muted d-block mt-6" style={{ fontSize: 12.5 }}>
-                              {t('confrontoUi.box2DropDesc', 'Suporta o PDF do Comprovativo de Entrega gerado no Portal da AGT')}
-                            </span>
-                          </div>
-                        )}
+              {/* CAIXA 2: DECLARAÇÃO MODELO 7 DA AGT */}
+              <div className="col-12 col-lg-6">
+                <div className="card card-default h-100" style={{ border: '1px solid #e2e8f0', borderRadius: 10, background: '#ffffff' }}>
+                  <div className="card-header py-10 px-16 bg-white border-bottom">
+                    <div className="d-flex justify-content-between align-items-center flex-wrap w-100" style={{ gap: 8 }}>
+                      <strong className="color-dark" style={{ fontSize: 13 }}>
+                        <i className="la la-landmark mr-5" style={{ color: '#2563eb' }}></i> {t('confrontoUi.box2Header', '2. Declaração Modelo 7 da AGT (IVA)')}
+                      </strong>
+                      <div className="d-flex align-items-center flex-wrap" style={{ gap: 6 }}>
+                        <button
+                          type="button"
+                          className={`btn btn-xs ${origemAgt === 'upload' ? 'btn-primary' : 'btn-outline-primary'}`}
+                          onClick={() => setOrigemAgt('upload')}
+                          style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px' }}
+                        >
+                          {t('confrontoUi.loadFileBtn', 'Carregar Ficheiro')}
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn btn-xs ${origemAgt === 'arquivo' ? 'btn-primary' : 'btn-outline-primary'}`}
+                          onClick={() => setOrigemAgt('arquivo')}
+                          style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px' }}
+                        >
+                          {t('confrontoUi.fromArchiveBtn', { count: docsAgtDisponiveis.length, defaultValue: `Do Arquivo (${docsAgtDisponiveis.length})` })}
+                        </button>
                       </div>
                     </div>
-                  ) : (
-                    <div>
-                      <label className="fw-600 text-muted mb-6" style={{ fontSize: 12 }}>
-                        {t('confrontoUi.selectArchivedModelo7Label', 'SELECIONE O MODELO 7 JÁ ARQUIVADO DA EMPRESA:')}
-                      </label>
-                      <select
-                        className="form-control form-control-default"
-                        value={docAgtId}
-                        onChange={(e) => {
-                          setDocAgtId(e.target.value);
-                          setFicheiroAgt(null);
-                        }}
-                        style={{ height: 42, fontSize: 13, fontWeight: docAgtId ? 600 : 400 }}
-                      >
-                        <option value="">{t('confrontoUi.chooseArchivedModelo7Prompt', '-- Escolha o Modelo 7 arquivado --')}</option>
-                        {docsAgtDisponiveis.map((doc) => (
-                          <option key={doc.id} value={String(doc.id)}>
-                            {doc.nome_arquivo} ({doc.mes}/{doc.ano})
-                          </option>
-                        ))}
-                      </select>
-                      {docsAgtDisponiveis.length === 0 && (
-                        <div className="mt-8" style={{ fontSize: 12, color: '#2563eb' }}>
-                          {t('confrontoUi.noArchivedModelo7', 'Nenhuma declaração guardada no arquivo para esta empresa. Use a opção "Carregar Ficheiro".')}
+                  </div>
+
+                  <div className="card-body p-16 bg-white d-flex flex-column justify-content-center">
+                    {origemAgt === 'upload' ? (
+                      <div>
+                        <input
+                          type="file"
+                          ref={fileInputAgtRef}
+                          accept=".pdf"
+                          style={{ display: 'none' }}
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              const f = e.target.files[0];
+                              const nameLow = (f.name || '').toLowerCase();
+                              if (nameLow.includes('balancete') || nameLow.includes('razao') || nameLow.includes('razão')) {
+                                toast.warning(
+                                  t(
+                                    'confrontoUi.warnDropBalanceteInBox2',
+                                    'Atenção: O ficheiro parece ser o Balancete da Contabilidade. A Caixa 2 é destinada à Declaração Modelo 7 / Comprovativo da AGT. Coloque-o na Caixa 1.'
+                                  )
+                                );
+                              }
+                              setFicheiroAgt(f);
+                              setDocAgtId('');
+                              toast.info();
+                            }
+                          }}
+                        />
+                        <div
+                          className={`upload-drop-card ${ficheiroAgt ? 'has-file' : ''}`}
+                          style={{ padding: '16px 14px' }}
+                          onClick={() => fileInputAgtRef.current?.click()}
+                        >
+                          {ficheiroAgt ? (
+                            <div>
+                              <div className="upload-icon-circle" style={{ width: 34, height: 34, fontSize: 16, marginBottom: 6 }}>
+                                <i className="la la-check"></i>
+                              </div>
+                              <strong className="d-block text-dark" style={{ fontSize: 13 }}>
+                                {ficheiroAgt.name}
+                              </strong>
+                              <span
+                                className="badge mt-6"
+                                style={{ fontSize: 10.5, background: '#ffffff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '3px 10px' }}
+                              >
+                                {formatFileSize(ficheiroAgt.size)} &nbsp;·&nbsp; {t('confrontoUi.readyToCompare', 'Pronto para confrontar')}
+                              </span>
+                              <div className="mt-8">
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-primary btn-xs"
+                                  style={{ padding: '4px 10px', fontSize: 11 }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setFicheiroAgt(null);
+                                    if (fileInputAgtRef.current) fileInputAgtRef.current.value = '';
+                                  }}
+                                >
+                                  <i className="la la-sync mr-1"></i> {t('confrontoUi.changeFile', 'Trocar Ficheiro')}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="upload-icon-circle" style={{ width: 34, height: 34, fontSize: 16, marginBottom: 6 }}>
+                                <i className="la la-cloud-upload-alt"></i>
+                              </div>
+                              <strong className="d-block color-dark" style={{ fontSize: 13 }}>
+                                {t('confrontoUi.box2DropTitle', 'Clique aqui para selecionar a Declaração Modelo 7')}
+                              </strong>
+                              <span className="text-muted d-block mt-4" style={{ fontSize: 11 }}>
+                                {t('confrontoUi.box2DropDesc', 'Suporta o PDF do Comprovativo de Entrega gerado no Portal da AGT')}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="fw-600 text-muted mb-6" style={{ fontSize: 11.5 }}>
+                          {t('confrontoUi.selectArchivedModelo7Label', 'SELECIONE O MODELO 7 JÁ ARQUIVADO DA EMPRESA:')}
+                        </label>
+                        <select
+                          className="form-control form-control-default"
+                          value={docAgtId}
+                          onChange={(e) => {
+                            setDocAgtId(e.target.value);
+                            setFicheiroAgt(null);
+                          }}
+                          style={{ height: 38, fontSize: 12, fontWeight: docAgtId ? 600 : 400 }}
+                        >
+                          <option value="">{t('confrontoUi.chooseArchivedModelo7Prompt', '-- Escolha o Modelo 7 arquivado --')}</option>
+                          {docsAgtDisponiveis.map((doc) => (
+                            <option key={doc.id} value={String(doc.id)}>
+                              {doc.nome_arquivo} ({doc.mes}/{doc.ano})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* PASSO 2: BOTÃO CENTRAL DE EXECUÇÃO (AZUL INSTITUCIONAL) */}
-            <div className="col-12 mt-10 text-center">
-              <button
-                type="button"
-                className="btn btn-primary btn-lg"
-                onClick={handleExecutarConfronto}
-                disabled={executando || !prontoParaConfrontar}
-                style={{
-                  fontSize: 15,
-                  fontWeight: 800,
-                  padding: '14px 36px',
-                  borderRadius: 10,
-                  letterSpacing: '0.3px',
-                }}
-              >
-                {executando ? (
-                  <>
-                    <i className="la la-spinner la-spin mr-8"></i> {etapaTexto || t('confrontoUi.step2Processing', 'A processar confronto com IA...')}
-                  </>
-                ) : (
-                  <>
-                    <i className="la la-bolt mr-8"></i> {t('confrontoUi.step2ExecuteBtn', 'Passo 2: Executar Confronto Automático com Inteligência Artificial')}
-                  </>
+              {/* BOTÃO DE EXECUÇÃO DO CONFRONTO DO IVA */}
+              <div className="col-12 mt-6 text-center">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleExecutarConfronto}
+                  disabled={executando || !prontoParaConfrontar}
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    padding: '10px 28px',
+                    borderRadius: 8,
+                    letterSpacing: '0.2px',
+                  }}
+                >
+                  {executando ? (
+                    <>
+                      <i className="la la-spinner la-spin mr-8"></i> {etapaTexto || t('confrontoUi.step2Processing', 'A processar confronto com IA...')}
+                    </>
+                  ) : (
+                    <>
+                      <i className="la la-bolt mr-8"></i> {t('confrontoUi.step2ExecuteBtn', 'Executar Confronto do IVA com Inteligência Artificial')}
+                    </>
+                  )}
+                </button>
+                {!prontoParaConfrontar && (
+                  <div className="text-muted mt-8" style={{ fontSize: 11.5 }}>
+                    <i className="la la-info-circle mr-1" style={{ color: '#2563eb' }}></i> {t('confrontoUi.step2DisabledHelp', 'Carregue o Balancete (Caixa 1) e o Modelo 7 da AGT (Caixa 2) acima para habilitar o confronto.')}
+                  </div>
                 )}
-              </button>
-              {!prontoParaConfrontar && (
-                <div className="text-muted mt-10" style={{ fontSize: 12.5 }}>
-                  <i className="la la-info-circle mr-1" style={{ color: '#2563eb' }}></i> {t('confrontoUi.step2DisabledHelp', 'Carregue o Balancete (Caixa 1) e o Modelo 7 da AGT (Caixa 2) acima para habilitar o confronto.')}
-                </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* ESTADO DE PROCESSAMENTO */}
           {executando && (
